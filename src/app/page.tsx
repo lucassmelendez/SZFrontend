@@ -37,7 +37,7 @@ export default function Home() {
       <section 
         className="w-full bg-cover bg-center text-white"
         style={{
-          backgroundImage: 'url("https://foxhara.cl/wp-content/uploads/2024/09/Promo-2-1.jpg")',
+          backgroundImage: 'url("/Images/banner.jpg")',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
           width: '100vw',
@@ -45,7 +45,7 @@ export default function Home() {
         }}
       >
         <div 
-          className="absolute inset-0 bg-black bg-opacity-50"
+          className="absolute inset-0 bg-black bg-opacity-40"
           style={{ backdropFilter: 'brightness(0.7)' }}
         ></div>
         <div className="container mx-auto px-6 py-24 relative z-10 flex flex-col md:flex-row items-center">
