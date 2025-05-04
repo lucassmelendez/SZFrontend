@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Acerca de */}
           <div>
             <h3 className="text-xl font-semibold mb-4">SpinZone</h3>
-            <p className="text-gray-300 mb-4">
+            <p className="text-gray-300 dark:text-gray-300 mb-4">
               Tu tienda especializada en artículos de tenis de mesa. Ofrecemos productos de alta calidad para jugadores de todos los niveles.
             </p>
             <div className="flex space-x-4">
