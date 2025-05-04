@@ -25,9 +25,9 @@ export default function ProductCard({ producto }: ProductCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* Imagen del producto (placeholder) */}
-      <div className="bg-gray-200 dark:bg-gray-700 aspect-square flex items-center justify-center">
+      <div className="bg-gray-200 aspect-square flex items-center justify-center">
         <img
           src={`https://picsum.photos/seed/${producto.id_producto}/300/300`}
           alt={producto.nombre}
@@ -36,21 +36,21 @@ export default function ProductCard({ producto }: ProductCardProps) {
       </div>
       
       <div className="p-4">
-        <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white line-clamp-2">
+        <h3 className="text-lg font-semibold mb-2 text-gray-800 line-clamp-2">
           {producto.nombre}
         </h3>
         
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-2 line-clamp-2">{producto.descripcion}</p>
+        <p className="text-gray-600 text-sm mb-2 line-clamp-2">{producto.descripcion}</p>
         
         <div className="flex justify-between items-center mb-2">
-          <span className="text-xl font-bold text-blue-700 dark:text-blue-400">${producto.precio.toFixed(2)}</span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">Stock: {producto.stock}</span>
+          <span className="text-xl font-bold text-blue-700">${producto.precio.toFixed(2)}</span>
+          <span className="text-sm text-gray-500">Stock: {producto.stock}</span>
         </div>
         
         <div className="flex justify-between items-center">
           <Link 
             href={`/productos/${producto.id_producto}`}
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
+            className="text-blue-600 hover:text-blue-800 text-sm"
           >
             Ver detalles
           </Link>
@@ -60,10 +60,10 @@ export default function ProductCard({ producto }: ProductCardProps) {
             disabled={isAdding || producto.stock <= 0}
             className={`flex items-center space-x-1 px-3 py-1 rounded-full text-white ${
               producto.stock <= 0
-                ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                ? 'bg-gray-400 cursor-not-allowed'
                 : isAdding
-                ? 'bg-green-500 dark:bg-green-600'
-                : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600'
+                ? 'bg-green-500'
+                : 'bg-blue-600 hover:bg-blue-700'
             } transition-colors duration-300`}
           >
             <FaShoppingCart />
