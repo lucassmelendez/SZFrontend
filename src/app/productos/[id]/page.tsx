@@ -7,13 +7,11 @@ import { useCarrito } from '@/lib/useCarrito';
 import Loading from '@/components/ui/Loading';
 import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
 
-interface ProductoDetailPageProps {
-  params: {
-    id: string;
-  };
+interface PageParams {
+  id: string;
 }
 
-export default function ProductoDetailPage({ params }: ProductoDetailPageProps) {
+export default function ProductoDetailPage({ params }: { params: PageParams }) {
   const router = useRouter();
   const { agregarProducto } = useCarrito();
   const [producto, setProducto] = useState<Producto | null>(null);
