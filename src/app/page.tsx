@@ -6,7 +6,6 @@ import { productoApi, Producto } from '@/lib/api';
 import Loading from '@/components/ui/Loading';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { FaArrowRight, FaTable, FaShoppingBag, FaShieldAlt } from 'react-icons/fa';
-import Image from 'next/image';
 
 export default function Home() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -36,28 +35,20 @@ export default function Home() {
     <div>
       {/* Hero section */}
       <section 
-        className="w-full text-white relative"
+        className="w-full bg-cover bg-center text-white"
         style={{
+          backgroundImage: 'url("/Images/banner.jpg")',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
           width: '100vw',
-          height: '500px',
-          overflow: 'hidden'
+          position: 'relative'
         }}
       >
-        <div className="absolute inset-0 w-full h-full">
-          <Image 
-            src="/Images/banner.jpg" 
-            alt="Jugador de tenis de mesa" 
-            fill
-            style={{ objectFit: 'cover' }}
-            priority
-          />
-        </div>
         <div 
-          className="absolute inset-0 bg-black bg-opacity-30"
+          className="absolute inset-0 bg-black bg-opacity-40"
+          style={{ backdropFilter: 'brightness(0.7)' }}
         ></div>
-        <div className="container mx-auto px-6 py-24 relative z-10 flex flex-col md:flex-row items-center h-full">
+        <div className="container mx-auto px-6 py-24 relative z-10 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Descubre el mejor equipamiento para tenis de mesa
