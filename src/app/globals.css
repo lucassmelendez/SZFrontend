@@ -17,6 +17,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Transición suave para todos los elementos */
+* {
+  transition-property: color, background-color, border-color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
 html {
   transition: color 0.3s ease, background-color 0.3s ease;
 }

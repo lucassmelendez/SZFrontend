@@ -12,57 +12,73 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
-  const [mounted, setMounted] = useState(false);
+  // Comenzar sin definir el tema inicial
+  const [theme, setTheme] = useState<Theme | null>(null);
 
-  // Este efecto solo se ejecuta una vez al montar el componente
+  // Inicializar el tema solo en el cliente
   useEffect(() => {
-    // Verificar si hay un tema guardado en localStorage
+    // Determinar el tema inicial
+    let initialTheme: Theme;
+    
+    // Comprobar si hay un tema guardado
     try {
-      const storedTheme = localStorage.getItem('theme') as Theme | null;
-      
-      if (storedTheme) {
-        setTheme(storedTheme);
+      const savedTheme = localStorage.getItem('theme') as Theme | null;
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        initialTheme = savedTheme;
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        initialTheme = 'dark';
       } else {
-        // Si no hay tema guardado, usar la preferencia del sistema
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setTheme(prefersDark ? 'dark' : 'light');
+        initialTheme = 'light';
       }
-    } catch (error) {
-      console.error('Error accediendo a localStorage:', error);
+    } catch (e) {
+      console.error('Error al leer el tema:', e);
+      initialTheme = 'light';
     }
     
-    setMounted(true);
-  }, []);
-
-  // Este efecto se ejecuta cada vez que cambia el tema
-  useEffect(() => {
-    if (!mounted) return;
+    // Aplicar el tema inmediatamente
+    applyTheme(initialTheme);
     
+    // Actualizar el estado
+    setTheme(initialTheme);
+  }, []);
+  
+  // Función para aplicar el tema al documento
+  const applyTheme = (newTheme: Theme) => {
     try {
-      // Aplicar la clase 'dark' al elemento html cuando el tema es oscuro
-      if (theme === 'dark') {
+      if (newTheme === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
       }
       
-      // Guardar en localStorage
-      localStorage.setItem('theme', theme);
+      // Guardar el tema en localStorage
+      localStorage.setItem('theme', newTheme);
       
-      console.log('Tema cambiado a:', theme); // Para depuración
-    } catch (error) {
-      console.error('Error guardando el tema:', error);
+      console.log('Tema aplicado:', newTheme); // Depuración
+    } catch (e) {
+      console.error('Error al aplicar el tema:', e);
     }
-  }, [theme, mounted]);
-
-  const toggleTheme = () => {
-    setTheme(prevTheme => {
-      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
-      console.log('Cambiando tema de', prevTheme, 'a', newTheme); // Para depuración
-      return newTheme;
-    });
   };
+
+  // Función para cambiar entre temas
+  const toggleTheme = () => {
+    if (!theme) return; // Protección para la inicialización
+    
+    const newTheme: Theme = theme === 'light' ? 'dark' : 'light';
+    
+    console.log('Cambiando tema de', theme, 'a', newTheme); // Depuración
+    
+    // Aplicar el tema
+    applyTheme(newTheme);
+    
+    // Actualizar el estado
+    setTheme(newTheme);
+  };
+
+  // No renderizar nada hasta que se haya determinado el tema inicial
+  if (theme === null) {
+    return <>{children}</>;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

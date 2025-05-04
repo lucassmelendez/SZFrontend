@@ -25,18 +25,24 @@ export default function RootLayout({
           {`
           (function() {
             try {
+              // Obtener tema guardado o configuración del sistema
               const savedTheme = localStorage.getItem('theme');
+              
+              // Aplicar tema oscuro si está guardado como 'dark' o si no hay tema guardado y el sistema prefiere oscuro
               if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
               } else {
                 document.documentElement.classList.remove('dark');
               }
             } catch (e) {
+              // En caso de error, no hacer nada (se usará el tema predeterminado)
               console.error('Error aplicando tema inicial:', e);
             }
           })();
           `}
         </Script>
+        {/* Script de prueba de tema */}
+        <Script id="theme-test" src="/test-theme.js" strategy="afterInteractive" />
       </head>
       <body className={inter.className}>
         <ThemeProvider>

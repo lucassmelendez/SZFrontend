@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun } from 'react-icons/fa';
@@ -13,6 +13,14 @@ export default function Header() {
   const pathname = usePathname();
   const { cantidadTotal } = useCarrito();
   const { theme, toggleTheme } = useTheme();
+  
+  // Estado para seguir si ya estamos montados en el cliente
+  const [mounted, setMounted] = useState(false);
+  
+  // Establecer mounted a true después del primer render
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -23,6 +31,16 @@ export default function Header() {
     if (searchQuery.trim()) {
       window.location.href = `/productos/buscar?q=${encodeURIComponent(searchQuery)}`;
     }
+  };
+
+  // Manejar el cambio de tema con un log para depuración
+  const handleToggleTheme = () => {
+    console.log("Botón de tema presionado, tema actual:", theme);
+    toggleTheme();
+    // Verificar después de un momento si el cambio se aplicó
+    setTimeout(() => {
+      console.log("Tema después del cambio:", document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    }, 100);
   };
 
   return (
@@ -73,13 +91,25 @@ export default function Header() {
                 <FaSearch />
               </button>
             </form>
-            <button
-              onClick={toggleTheme}
-              className="text-white hover:text-blue-200"
-              aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-            >
-              {theme === 'dark' ? <FaSun size={24} /> : <FaMoon size={24} />}
-            </button>
+            {mounted && (
+              <button
+                onClick={handleToggleTheme}
+                className="text-white hover:text-blue-200 flex items-center"
+                aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              >
+                {theme === 'dark' ? (
+                  <>
+                    <FaSun size={24} />
+                    <span className="ml-1 hidden lg:inline">Modo Claro</span>
+                  </>
+                ) : (
+                  <>
+                    <FaMoon size={24} />
+                    <span className="ml-1 hidden lg:inline">Modo Oscuro</span>
+                  </>
+                )}
+              </button>
+            )}
             <Link href="/carrito" className="relative hover:text-blue-200">
               <FaShoppingCart size={24} />
               {cantidadTotal > 0 && (
@@ -111,17 +141,19 @@ export default function Header() {
               >
                 Productos
               </Link>
-              <button
-                onClick={() => {
-                  toggleTheme();
-                  toggleMenu();
-                }}
-                className="flex items-center space-x-2 hover:text-blue-200"
-                aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-              >
-                {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
-                <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-              </button>
+              {mounted && (
+                <button
+                  onClick={() => {
+                    handleToggleTheme();
+                    toggleMenu();
+                  }}
+                  className="flex items-center space-x-2 hover:text-blue-200"
+                  aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                >
+                  {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
+                  <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
+                </button>
+              )}
               <Link
                 href="/carrito"
                 className="flex items-center space-x-2 hover:text-blue-200"
