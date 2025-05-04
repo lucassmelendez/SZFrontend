@@ -35,6 +35,8 @@ export default function Header() {
 
   // Manejar el cambio de tema con un log para depuración
   const handleToggleTheme = () => {
+    if (typeof window === 'undefined') return; // Protección para SSR
+
     console.log("Botón de tema presionado, tema actual:", theme);
     toggleTheme();
     // Verificar después de un momento si el cambio se aplicó
@@ -42,6 +44,41 @@ export default function Header() {
       console.log("Tema después del cambio:", document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     }, 100);
   };
+
+  // No renderizar los elementos que dependen del tema hasta que esté montado
+  const renderThemeToggle = mounted ? (
+    <button
+      onClick={handleToggleTheme}
+      className="text-white hover:text-blue-200 flex items-center"
+      aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+    >
+      {theme === 'dark' ? (
+        <>
+          <FaSun size={24} />
+          <span className="ml-1 hidden lg:inline">Modo Claro</span>
+        </>
+      ) : (
+        <>
+          <FaMoon size={24} />
+          <span className="ml-1 hidden lg:inline">Modo Oscuro</span>
+        </>
+      )}
+    </button>
+  ) : null;
+
+  const renderMobileThemeToggle = mounted ? (
+    <button
+      onClick={() => {
+        handleToggleTheme();
+        toggleMenu();
+      }}
+      className="flex items-center space-x-2 hover:text-blue-200"
+      aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+    >
+      {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
+      <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
+    </button>
+  ) : null;
 
   return (
     <header className="bg-blue-700 dark:bg-blue-900 text-white shadow-md">
@@ -91,25 +128,7 @@ export default function Header() {
                 <FaSearch />
               </button>
             </form>
-            {mounted && (
-              <button
-                onClick={handleToggleTheme}
-                className="text-white hover:text-blue-200 flex items-center"
-                aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-              >
-                {theme === 'dark' ? (
-                  <>
-                    <FaSun size={24} />
-                    <span className="ml-1 hidden lg:inline">Modo Claro</span>
-                  </>
-                ) : (
-                  <>
-                    <FaMoon size={24} />
-                    <span className="ml-1 hidden lg:inline">Modo Oscuro</span>
-                  </>
-                )}
-              </button>
-            )}
+            {renderThemeToggle}
             <Link href="/carrito" className="relative hover:text-blue-200">
               <FaShoppingCart size={24} />
               {cantidadTotal > 0 && (
@@ -141,19 +160,7 @@ export default function Header() {
               >
                 Productos
               </Link>
-              {mounted && (
-                <button
-                  onClick={() => {
-                    handleToggleTheme();
-                    toggleMenu();
-                  }}
-                  className="flex items-center space-x-2 hover:text-blue-200"
-                  aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-                >
-                  {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
-                  <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-                </button>
-              )}
+              {renderMobileThemeToggle}
               <Link
                 href="/carrito"
                 className="flex items-center space-x-2 hover:text-blue-200"
