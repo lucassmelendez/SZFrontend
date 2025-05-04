@@ -13,13 +13,17 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light');
+  const [mounted, setMounted] = useState(false);
 
+  // Solo ejecutar en el cliente después de la hidratación inicial
   useEffect(() => {
+    setMounted(true);
+    
     // Verificar si hay tema guardado en localStorage
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     
     // Si hay un tema guardado, usarlo
-    if (savedTheme) {
+    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       setTheme(savedTheme);
     } else {
       // Si no hay tema guardado, detectar preferencia del sistema
@@ -29,7 +33,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Actualizar la clase del documento cuando cambie el tema
+    if (!mounted) return;
+    
+    // Aplicar la clase dark directamente al elemento html
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -38,11 +44,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     // Guardar preferencia en localStorage
     localStorage.setItem('theme', theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
+      console.log('Cambiando tema a:', newTheme); // Para depuración
+      return newTheme;
+    });
   };
+
+  // No renderizar hasta que estemos en el cliente para evitar errores de hidratación
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

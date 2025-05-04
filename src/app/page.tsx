@@ -34,7 +34,7 @@ export default function Home() {
   return (
     <div className="space-y-12">
       {/* Hero section */}
-      <section className="bg-blue-700 text-white rounded-lg overflow-hidden">
+      <section className="bg-blue-700 dark:bg-blue-900 text-white rounded-lg overflow-hidden transition-colors duration-200">
         <div className="container mx-auto px-6 py-16 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -46,7 +46,7 @@ export default function Home() {
             </p>
             <Link
               href="/productos"
-              className="inline-flex items-center bg-white text-blue-700 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors"
+              className="inline-flex items-center bg-white text-blue-700 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 dark:bg-blue-100 dark:hover:bg-white transition-colors"
             >
               Ver Catálogo <FaArrowRight className="ml-2" />
             </Link>
@@ -65,7 +65,7 @@ export default function Home() {
 
       {/* Categorías */}
       <section>
-        <h2 className="text-3xl font-bold text-center mb-8">Categorías Destacadas</h2>
+        <h2 className="text-3xl font-bold text-center mb-8 dark:text-white">Categorías Destacadas</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
@@ -90,12 +90,12 @@ export default function Home() {
             <Link
               key={index}
               href={category.link}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
             >
-              <div className="text-blue-600 mb-4">{category.icon}</div>
-              <h3 className="text-xl font-semibold mb-2">{category.title}</h3>
-              <p className="text-gray-600 mb-4">{category.description}</p>
-              <span className="text-blue-600 font-medium inline-flex items-center">
+              <div className="text-blue-600 dark:text-blue-400 mb-4">{category.icon}</div>
+              <h3 className="text-xl font-semibold mb-2 dark:text-white">{category.title}</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">{category.description}</p>
+              <span className="text-blue-600 dark:text-blue-400 font-medium inline-flex items-center">
                 Ver productos <FaArrowRight className="ml-1" size={14} />
               </span>
             </Link>
@@ -105,14 +105,14 @@ export default function Home() {
 
       {/* Productos destacados */}
       {error ? (
-        <div className="text-center text-red-600">{error}</div>
+        <div className="text-center text-red-600 dark:text-red-400">{error}</div>
       ) : (
         <section>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold">Productos Destacados</h2>
+            <h2 className="text-3xl font-bold dark:text-white">Productos Destacados</h2>
             <Link
               href="/productos"
-              className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center"
+              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium inline-flex items-center"
             >
               Ver todos <FaArrowRight className="ml-1" size={14} />
             </Link>
@@ -122,9 +122,9 @@ export default function Home() {
       )}
 
       {/* Banner promocional */}
-      <section className="bg-gray-100 rounded-lg p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">¿Eres nuevo en el tenis de mesa?</h2>
-        <p className="text-gray-700 max-w-2xl mx-auto mb-6">
+      <section className="bg-gray-100 dark:bg-gray-800 rounded-lg p-8 text-center transition-colors duration-200">
+        <h2 className="text-2xl font-bold mb-4 dark:text-white">¿Eres nuevo en el tenis de mesa?</h2>
+        <p className="text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-6">
           Descubre nuestros kits para principiantes y lleva tu juego al siguiente nivel con equipamiento de calidad a precios accesibles.
         </p>
         <Link
