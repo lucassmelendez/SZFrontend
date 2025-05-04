@@ -6,6 +6,7 @@ const nextConfig = {
   },
   images: {
     domains: ['picsum.photos', 'images.unsplash.com'],
+    unoptimized: true
   },
   async rewrites() {
     return [

@@ -6,7 +6,6 @@ import { productoApi, Producto } from '@/lib/api';
 import Loading from '@/components/ui/Loading';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { FaArrowRight, FaTable, FaShoppingBag, FaShieldAlt } from 'react-icons/fa';
-import Image from 'next/image';
 
 export default function Home() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -35,25 +34,19 @@ export default function Home() {
   return (
     <div>
       {/* Hero section */}
-      <section 
+      <div 
         className="w-full text-white relative"
         style={{
+          backgroundImage: `url('/Images/banner.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
           width: '100vw',
           height: '500px',
-          overflow: 'hidden'
         }}
       >
-        <div className="absolute inset-0 w-full h-full">
-          <Image 
-            src="/Images/banner.jpg" 
-            alt="Jugador de tenis de mesa" 
-            fill
-            style={{ objectFit: 'cover' }}
-            priority
-          />
-        </div>
         <div 
           className="absolute inset-0 bg-black bg-opacity-30"
         ></div>
@@ -74,7 +67,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </section>
+      </div>
 
       <div className="container mx-auto px-4 py-12 space-y-12">
         {/* Categorías */}
