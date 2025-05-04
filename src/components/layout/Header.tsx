@@ -12,7 +12,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
   const { cantidadTotal } = useCarrito();
-  const { theme, toggleTheme, isClient } = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -74,16 +74,14 @@ export default function Header() {
               </button>
             </form>
             
-            {/* Botón de tema - solo se muestra si estamos en el cliente */}
-            {isClient && (
-              <button 
-                onClick={toggleTheme} 
-                className="text-white hover:text-blue-200 p-1 rounded-full focus:outline-none"
-                aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-              >
-                {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
-              </button>
-            )}
+            {/* Botón de tema */}
+            <button 
+              onClick={toggleTheme} 
+              className="text-white hover:text-blue-200 p-1 rounded-full focus:outline-none"
+              aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            >
+              {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
+            </button>
             
             <Link href="/carrito" className="relative hover:text-blue-200">
               <FaShoppingCart size={24} />
@@ -125,17 +123,15 @@ export default function Header() {
                 <span>Carrito ({cantidadTotal})</span>
               </Link>
               
-              {/* Botón de tema en móvil - solo se muestra si estamos en el cliente */}
-              {isClient && (
-                <button 
-                  onClick={toggleTheme} 
-                  className="flex items-center space-x-2 hover:text-blue-200"
-                  aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-                >
-                  {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
-                  <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-                </button>
-              )}
+              {/* Botón de tema en móvil */}
+              <button 
+                onClick={toggleTheme} 
+                className="flex items-center space-x-2 hover:text-blue-200"
+                aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              >
+                {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
+                <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
+              </button>
               
               <form onSubmit={handleSearch} className="relative">
                 <input
