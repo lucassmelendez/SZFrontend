@@ -16,6 +16,6 @@
   ],
   "regions": ["iad1"],
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://spinzone-backend.vercel.app/api"
+    "NEXT_PUBLIC_API_URL": "https://sz-backend.vercel.app/api"
   }
 } 
