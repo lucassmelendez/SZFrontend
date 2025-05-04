@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SpinZone - Frontend
 
-## Getting Started
+Frontend para la tienda de artículos de tenis de mesa SpinZone, desarrollado con Next.js.
 
-First, run the development server:
+## Características
+
+- Catálogo de productos
+- Detalles de producto
+- Carrito de compras
+- Búsqueda de productos
+- Filtrado por categorías
+- Diseño responsive
+
+## Tecnologías
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Axios
+
+## Requisitos
+
+- Node.js 14.x o superior
+- npm 7.x o superior
+
+## Instalación
+
+1. Clona el repositorio:
+```bash
+git clone <tu-repositorio>
+cd frontend
+```
+
+2. Instala las dependencias:
+```bash
+npm install
+```
+
+3. Crea un archivo `.env.local` con las siguientes variables:
+```
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+```
+
+## Desarrollo
+
+Para iniciar el servidor de desarrollo:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+El servidor estará disponible en [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Construcción
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Para construir la aplicación para producción:
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Para iniciar la versión de producción:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Despliegue en Vercel
 
-## Deploy on Vercel
+### Opción 1: Despliegue automático
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Conecta tu repositorio a Vercel.
+2. Configura las variables de entorno en el panel de Vercel.
+3. Despliega automáticamente.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Opción 2: Despliegue manual con Vercel CLI
+
+1. Instala Vercel CLI:
+```bash
+npm i -g vercel
+```
+
+2. Inicia sesión:
+```bash
+vercel login
+```
+
+3. Despliega:
+```bash
+vercel
+```
+
+## Estructura del proyecto
+
+- `src/app` - Páginas y rutas de la aplicación
+- `src/components` - Componentes reutilizables
+- `src/lib` - Utilidades, API y hooks
+- `public` - Archivos estáticos
+
+## Conexión con el backend
+
+El frontend se conecta al backend a través de la URL especificada en la variable de entorno `NEXT_PUBLIC_API_URL`. Asegúrate de que el backend esté en funcionamiento y accesible desde el frontend.
