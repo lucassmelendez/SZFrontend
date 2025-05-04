@@ -53,7 +53,7 @@ export default function Home() {
           </div>
           <div className="md:w-1/2 flex justify-center">
             <img
-              src="https://images.unsplash.com/photo-1584813539806-2538b8d918c2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+              src="/banner.jpg"
               alt="Tenis de mesa"
               className="rounded-lg shadow-xl"
               width={500}
