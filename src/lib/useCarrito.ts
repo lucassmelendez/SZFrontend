@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Producto } from './api';
 
@@ -11,17 +9,9 @@ export interface CarritoItem {
 
 export function useCarrito() {
   const [items, setItems] = useState<CarritoItem[]>([]);
-  const [isClient, setIsClient] = useState(false);
-  
-  // Detectar lado cliente
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
   
   // Cargar el carrito desde localStorage al iniciar
   useEffect(() => {
-    if (!isClient) return;
-    
     const savedCarrito = localStorage.getItem('carrito');
     if (savedCarrito) {
       try {
@@ -31,23 +21,19 @@ export function useCarrito() {
         localStorage.removeItem('carrito');
       }
     }
-  }, [isClient]);
+  }, []);
   
   // Guardar cambios en localStorage
   useEffect(() => {
-    if (!isClient) return;
-    
     if (items.length > 0) {
       localStorage.setItem('carrito', JSON.stringify(items));
     } else {
       localStorage.removeItem('carrito');
     }
-  }, [items, isClient]);
+  }, [items]);
   
   // Agregar un producto al carrito
   const agregarProducto = (producto: Producto, cantidad = 1) => {
-    if (!isClient) return;
-    
     setItems(prevItems => {
       const itemExistente = prevItems.find(item => item.producto.id_producto === producto.id_producto);
       
@@ -67,8 +53,6 @@ export function useCarrito() {
   
   // Actualizar cantidad de un producto
   const actualizarCantidad = (productoId: number, cantidad: number) => {
-    if (!isClient) return;
-    
     setItems(prevItems => {
       if (cantidad <= 0) {
         return prevItems.filter(item => item.producto.id_producto !== productoId);
@@ -84,15 +68,11 @@ export function useCarrito() {
   
   // Eliminar un producto del carrito
   const eliminarProducto = (productoId: number) => {
-    if (!isClient) return;
-    
     setItems(prevItems => prevItems.filter(item => item.producto.id_producto !== productoId));
   };
   
   // Limpiar todo el carrito
   const limpiarCarrito = () => {
-    if (!isClient) return;
-    
     setItems([]);
     localStorage.removeItem('carrito');
   };

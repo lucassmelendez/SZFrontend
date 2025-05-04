@@ -11,14 +11,6 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Valores predeterminados seguros para renderizado estático
-const defaultContextValue: ThemeContextType = {
-  theme: 'light',
-  toggleTheme: () => {
-    console.warn('toggleTheme fue llamado fuera de un ThemeProvider');
-  }
-};
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Comenzar sin definir el tema inicial
   const [theme, setTheme] = useState<Theme | null>(null);
@@ -97,16 +89,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 export function useTheme() {
   const context = useContext(ThemeContext);
-  
-  // En lugar de lanzar un error, devolver valores predeterminados
-  // Esto es importante para el renderizado estático de Vercel/Next.js
   if (context === undefined) {
-    // Solo mostrar advertencia en el navegador, no durante renderizado estático
-    if (typeof window !== 'undefined') {
-      console.warn('useTheme fue usado fuera de un ThemeProvider');
-    }
-    return defaultContextValue;
+    throw new Error('useTheme debe ser usado dentro de un ThemeProvider');
   }
-  
   return context;
 } 
