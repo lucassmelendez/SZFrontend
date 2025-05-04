@@ -3,16 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
-import { useTheme } from '@/lib/useTheme';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
   const { cantidadTotal } = useCarrito();
-  const { theme, toggleTheme } = useTheme();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -26,7 +24,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-blue-700 dark:bg-blue-900 text-white shadow-md transition-colors duration-200">
+    <header className="bg-blue-700 text-white shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
@@ -61,7 +59,7 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="Buscar productos..."
-                className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-48"
+                className="bg-blue-600 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-48"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -73,16 +71,6 @@ export default function Header() {
                 <FaSearch />
               </button>
             </form>
-            
-            {/* Botón de tema */}
-            <button 
-              onClick={toggleTheme} 
-              className="text-white hover:text-blue-200 p-1 rounded-full focus:outline-none"
-              aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-            >
-              {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
-            </button>
-            
             <Link href="/carrito" className="relative hover:text-blue-200">
               <FaShoppingCart size={24} />
               {cantidadTotal > 0 && (
@@ -96,7 +84,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-blue-600 dark:border-blue-800">
+          <div className="md:hidden py-4 border-t border-blue-600">
             <nav className="flex flex-col space-y-4">
               <Link
                 href="/"
@@ -122,22 +110,11 @@ export default function Header() {
                 <FaShoppingCart />
                 <span>Carrito ({cantidadTotal})</span>
               </Link>
-              
-              {/* Botón de tema en móvil */}
-              <button 
-                onClick={toggleTheme} 
-                className="flex items-center space-x-2 hover:text-blue-200"
-                aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-              >
-                {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
-                <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-              </button>
-              
               <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
                   placeholder="Buscar productos..."
-                  className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-1 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="bg-blue-600 text-white placeholder-blue-300 rounded-full py-1 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
