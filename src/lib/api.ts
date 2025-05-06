@@ -11,6 +11,15 @@ const api = axios.create({
   },
 });
 
+// Interceptor para agregar el token a las peticiones
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Interfaces para los datos
 export interface Producto {
   id_producto: number;
@@ -23,13 +32,27 @@ export interface Producto {
   categoria_id: number;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  nombre: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  data: {
+    user: User;
+    token: string;
+  };
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
 }
 
-// Funciones para interactuar con la API
+// API de productos
 export const productoApi = {
   getAll: async (): Promise<Producto[]> => {
     const response = await api.get<ApiResponse<Producto[]>>('/productos');
@@ -52,4 +75,32 @@ export const productoApi = {
   }
 };
 
-export default api; 
+// API de autenticación
+export const authApi = {
+  login: async (email: string, password: string): Promise<LoginResponse> => {
+    const response = await api.post<LoginResponse>('/auth/login', { email, password });
+    return response.data;
+  },
+
+  register: async (email: string, password: string, nombre: string): Promise<LoginResponse> => {
+    const response = await api.post<LoginResponse>('/auth/register', { email, password, nombre });
+    return response.data;
+  },
+
+  getProfile: async (): Promise<ApiResponse<User>> => {
+    const response = await api.get<ApiResponse<User>>('/auth/profile');
+    return response.data;
+  },
+
+  updateProfile: async (data: {
+    nombre?: string;
+    email?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }): Promise<ApiResponse<User>> => {
+    const response = await api.put<ApiResponse<User>>('/auth/profile', data);
+    return response.data;
+  },
+};
+
+export default api;

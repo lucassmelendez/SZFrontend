@@ -1,18 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useTheme } from '@/lib/useTheme';
+import { useAuth } from '../../lib/auth/AuthContext';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
   const { cantidadTotal } = useCarrito();
   const { theme, toggleTheme, isClient } = useTheme();
+  const { user, logout } = useAuth();
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar el menú de perfil cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -22,6 +40,16 @@ export default function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       window.location.href = `/productos/buscar?q=${encodeURIComponent(searchQuery)}`;
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsProfileOpen(false);
+      setIsMenuOpen(false);
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
     }
   };
 
@@ -93,6 +121,49 @@ export default function Header() {
                 </span>
               )}
             </Link>
+
+            {/* Botón de cuenta */}
+            <div className="relative" ref={profileMenuRef}>
+              {user ? (
+                <>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center space-x-2 hover:text-blue-200"
+                  >
+                    <FaUser size={20} />
+                    <span className="text-sm">{user.nombre.split(' ')[0]}</span>
+                  </button>
+                  
+                  {/* Menú desplegable de cuenta */}
+                  {isProfileOpen && (
+                    <div className="absolute right-0 mt-2 w-48 py-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50">
+                      <Link
+                        href="/perfil"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        Mi Perfil
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                      >
+                        <FaSignOutAlt className="mr-2" />
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="flex items-center space-x-2 hover:text-blue-200"
+                >
+                  <FaUser size={20} />
+                  <span className="text-sm">Iniciar sesión</span>
+                </Link>
+              )}
+            </div>
           </nav>
         </div>
 
@@ -153,10 +224,43 @@ export default function Header() {
                   <FaSearch />
                 </button>
               </form>
+
+              {/* Cuenta en móvil */}
+              {user ? (
+                <>
+                  <Link
+                    href="/perfil"
+                    className="flex items-center space-x-2 hover:text-blue-200"
+                    onClick={toggleMenu}
+                  >
+                    <FaUser />
+                    <span>Mi Perfil</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      toggleMenu();
+                    }}
+                    className="flex items-center space-x-2 hover:text-blue-200 text-red-400"
+                  >
+                    <FaSignOutAlt />
+                    <span>Cerrar sesión</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="flex items-center space-x-2 hover:text-blue-200"
+                  onClick={toggleMenu}
+                >
+                  <FaUser />
+                  <span>Iniciar sesión</span>
+                </Link>
+              )}
             </nav>
           </div>
         )}
       </div>
     </header>
   );
-} 
+}
