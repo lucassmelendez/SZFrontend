@@ -3,15 +3,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaUser, FaEnvelope, FaLock, FaArrowLeft } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaArrowLeft, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     nombre: '',
+    apellido: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    telefono: '',
+    direccion: ''
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +41,14 @@ export default function RegisterPage() {
     }
 
     try {
-      await register(formData.email, formData.password, formData.nombre);
+      await register(
+        formData.email, 
+        formData.password, 
+        formData.nombre, 
+        formData.apellido, 
+        formData.telefono, 
+        formData.direccion
+      );
       router.push('/'); // Redirigir al inicio después del registro exitoso
       router.refresh(); // Forzar la actualización de la interfaz
     } catch (error: any) {
@@ -81,7 +91,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Nombre completo
+                Nombre
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -95,7 +105,28 @@ export default function RegisterPage() {
                   value={formData.nombre}
                   onChange={handleChange}
                   className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                  placeholder="Francisco Melendez"
+                  placeholder="Francisco"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Apellido
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaUser className="text-gray-400" />
+                </div>
+                <input
+                  id="apellido"
+                  name="apellido"
+                  type="text"
+                  required
+                  value={formData.apellido}
+                  onChange={handleChange}
+                  className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                  placeholder="Meléndez"
                 />
               </div>
             </div>
@@ -118,6 +149,48 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                   placeholder="ejemplo@correo.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Teléfono
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaPhone className="text-gray-400" />
+                </div>
+                <input
+                  id="telefono"
+                  name="telefono"
+                  type="number"
+                  required
+                  value={formData.telefono}
+                  onChange={handleChange}
+                  className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                  placeholder="912345678"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Dirección
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaMapMarkerAlt className="text-gray-400" />
+                </div>
+                <input
+                  id="direccion"
+                  name="direccion"
+                  type="text"
+                  required
+                  value={formData.direccion}
+                  onChange={handleChange}
+                  className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                  placeholder="Av. Principal 123, Ciudad"
                 />
               </div>
             </div>

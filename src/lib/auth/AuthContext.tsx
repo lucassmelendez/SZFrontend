@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, nombre: string) => Promise<void>;
+  register: (email: string, password: string, nombre: string, apellido: string, telefono: string, direccion: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -55,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, nombre: string) => {
+  const register = async (email: string, password: string, nombre: string, apellido: string, telefono: string, direccion: string) => {
     try {
-      const response = await authApi.register(email, password, nombre);
+      const response = await authApi.register(email, password, nombre, apellido, telefono, direccion);
       if (response.success && response.data.user) {
         setUser(response.data.user);
         localStorage.setItem('auth_token', response.data.token);
