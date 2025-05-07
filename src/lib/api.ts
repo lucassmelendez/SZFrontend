@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Definir la URL de la API usando la variable de entorno o el valor por defecto
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sz-backend.vercel.app/api';
 
 // Crear una instancia de axios con la URL base
 const api = axios.create({
