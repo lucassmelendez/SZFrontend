@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://sz-backend.vercel.app/api',
   },
   images: {
     domains: ['picsum.photos', 'images.unsplash.com'],
@@ -11,7 +11,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://sz-backend.vercel.app/api'}/:path*`,
       },
     ];
   },
