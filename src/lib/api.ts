@@ -1,12 +1,11 @@
 import axios from 'axios';
 
-// Determinamos si estamos en el navegador (cliente)
 const isClient = typeof window !== 'undefined';
 
-// Definir la URL de la API usando la variable de entorno o el valor por defecto
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://sz-backend.vercel.app/api';
+//const API_URL = 'http://localhost:3000/api';
 
-console.log('API URL:', API_URL); // Para depuración
+console.log('API URL:', API_URL);
 
 // Crear una instancia de axios con la URL base
 const api = axios.create({
