@@ -216,35 +216,44 @@ export default function Header() {
                 </button>
               </div>
               
-              <nav className="flex flex-col space-y-4">
-                <Link
-                  href="/"
-                  className={`hover:text-blue-200 ${pathname === '/' ? 'font-bold' : ''}`}
-                  onClick={toggleMenu}
-                >
-                  Inicio
-                </Link>
-                <Link
-                  href="/productos"
-                  className={`hover:text-blue-200 ${
-                    pathname.startsWith('/productos') ? 'font-bold' : ''
-                  }`}
-                  onClick={toggleMenu}
-                >
-                  Productos
-                </Link>
-                
-                {/* Botón de tema en móvil - solo se muestra si estamos en el cliente */}
-                {isClient && (
-                  <button 
-                    onClick={toggleTheme} 
-                    className="flex items-center space-x-2 hover:text-blue-200 py-2"
-                    aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              <nav className="flex flex-col">
+                {/* Sección de navegación */}
+                <div className="space-y-0">
+                  <Link
+                    href="/"
+                    className={`block py-3 hover:text-blue-200 ${pathname === '/' ? 'font-bold' : ''}`}
+                    onClick={toggleMenu}
                   >
-                    {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
-                    <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-                  </button>
-                )}
+                    Inicio
+                  </Link>
+                  <Link
+                    href="/productos"
+                    className={`block py-3 hover:text-blue-200 ${
+                      pathname.startsWith('/productos') ? 'font-bold' : ''
+                    }`}
+                    onClick={toggleMenu}
+                  >
+                    Productos
+                  </Link>
+                </div>
+                
+                {/* Divisor principal */}
+                <div className="my-4 border-t border-blue-600 dark:border-blue-800"></div>
+                
+                {/* Sección de configuración */}
+                <div className="space-y-0">
+                  {/* Botón de tema en móvil - solo se muestra si estamos en el cliente */}
+                  {isClient && (
+                    <button 
+                      onClick={toggleTheme} 
+                      className="flex items-center space-x-2 hover:text-blue-200 py-3 w-full"
+                      aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                    >
+                      {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
+                      <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
+                    </button>
+                  )}
+                </div>
               </nav>
             </div>
           </div>
