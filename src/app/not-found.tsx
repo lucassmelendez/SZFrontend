@@ -1,6 +1,4 @@
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import { ThemeProvider } from '@/lib/useTheme';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 
@@ -9,7 +7,6 @@ export default function NotFound() {
     <AuthProvider>
       <ThemeProvider>
         <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200">
-          <Header />
           <main className="flex-grow container mx-auto px-4 py-8">
             <div className="flex flex-col items-center justify-center min-h-[60vh] py-16 px-4 text-center">
               <h1 className="text-6xl font-bold text-blue-700 dark:text-blue-500 mb-6">404</h1>
@@ -25,7 +22,6 @@ export default function NotFound() {
               </Link>
             </div>
           </main>
-          <Footer />
         </div>
       </ThemeProvider>
     </AuthProvider>
