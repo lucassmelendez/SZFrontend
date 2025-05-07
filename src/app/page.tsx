@@ -34,13 +34,21 @@ export default function Home() {
   return (
     <div className="space-y-12">
       {/* Hero section */}
-      <section className="bg-blue-700 dark:bg-blue-900 text-white rounded-lg overflow-hidden transition-colors duration-200">
-        <div className="container mx-auto px-6 py-16 flex flex-col md:flex-row items-center">
-          <div className="md:w-1/2 mb-8 md:mb-0">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+      <section className="relative bg-blue-700 dark:bg-blue-900 text-white rounded-lg overflow-hidden transition-colors duration-200 h-[500px]">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/banner.jpg"
+            alt="Tenis de mesa"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-blue-900/60 dark:bg-blue-950/70"></div>
+        </div>
+        <div className="container mx-auto px-6 py-16 relative z-10 h-full flex items-center">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
               Descubre el mejor equipamiento para tenis de mesa
             </h1>
-            <p className="text-lg mb-8">
+            <p className="text-lg mb-8 text-white/90">
               Todo lo que necesitas para mejorar tu juego: raquetas, pelotas, mesas y más.
               Productos de calidad para todos los niveles.
             </p>
@@ -50,15 +58,6 @@ export default function Home() {
             >
               Ver Catálogo <FaArrowRight className="ml-2" />
             </Link>
-          </div>
-          <div className="md:w-1/2 flex justify-center">
-            <img
-              src="/banner.jpg"
-              alt="Tenis de mesa"
-              className="rounded-lg shadow-xl"
-              width={500}
-              height={300}
-            />
           </div>
         </div>
       </section>
