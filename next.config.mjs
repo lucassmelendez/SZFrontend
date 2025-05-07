@@ -7,14 +7,6 @@ const nextConfig = {
   images: {
     domains: ['picsum.photos', 'images.unsplash.com'],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://sz-backend.vercel.app/api'}/:path*`,
-      },
-    ];
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
