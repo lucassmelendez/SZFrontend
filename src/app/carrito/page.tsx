@@ -114,8 +114,8 @@ export default function CarritoPage() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm text-gray-900">
-                    ${item.producto.precio.toFixed(2)}
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    ${Math.round(item.producto.precio)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -138,7 +138,7 @@ export default function CarritoPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="text-sm font-medium text-gray-900">
-                    ${(item.producto.precio * item.cantidad).toFixed(2)}
+                    ${Math.round(item.producto.precio * item.cantidad)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -159,20 +159,20 @@ export default function CarritoPage() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between mb-4">
           <span className="text-gray-600">Subtotal:</span>
-          <span className="font-medium">${calcularTotal().toFixed(2)}</span>
+          <span className="font-medium">${Math.round(calcularTotal())}</span>
         </div>
         <div className="flex justify-between mb-4">
           <span className="text-gray-600">Impuestos (19%):</span>
-          <span className="font-medium">${(calcularTotal() * 0.19).toFixed(2)}</span>
+          <span className="font-medium">${Math.round(calcularTotal() * 0.19)}</span>
         </div>
         <div className="flex justify-between mb-4">
           <span className="text-gray-600">Envío:</span>
-          <span className="font-medium">$10.00</span>
+          <span className="font-medium">$10</span>
         </div>
         <div className="border-t border-gray-200 my-4 pt-4 flex justify-between">
           <span className="text-lg font-bold">Total:</span>
           <span className="text-lg font-bold">
-            ${(calcularTotal() * 1.19 + 10).toFixed(2)}
+            ${Math.round(calcularTotal() * 1.19 + 10)}
           </span>
         </div>
 

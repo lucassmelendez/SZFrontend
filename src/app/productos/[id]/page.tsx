@@ -129,7 +129,7 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
             <h1 className="text-3xl font-bold text-gray-800 mb-4">{producto.nombre}</h1>
             
             <div className="text-2xl font-bold text-blue-700 mb-4">
-              ${producto.precio.toFixed(2)}
+              ${Math.round(producto.precio)}
             </div>
             
             <div className="mb-6">
