@@ -56,8 +56,9 @@ export default function Header() {
   return (
     <header className="bg-blue-700 dark:bg-blue-900 text-white shadow-md transition-colors duration-200">
       <div className="container mx-auto px-4">
+        {/* Primera fila: Menú, Logo, Perfil y Carrito */}
         <div className="flex justify-between items-center py-4">
-          {/* Sección izquierda: Logo y navegación */}
+          {/* Sección izquierda: Menú y Logo */}
           <div className="flex items-center space-x-4">
             {/* Hamburger menu for mobile */}
             <button
@@ -90,8 +91,86 @@ export default function Header() {
             </nav>
           </div>
 
-          {/* Sección central: Búsqueda */}
-          <div className="hidden md:block flex-grow max-w-md mx-auto">
+          {/* Sección derecha: Perfil y Carrito */}
+          <div className="flex items-center space-x-4">
+            {/* Perfil - visible en todas las pantallas */}
+            <div className="relative" ref={profileMenuRef}>
+              {user ? (
+                <>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center space-x-2 hover:text-blue-200"
+                  >
+                    <FaUser size={20} />
+                    <span className="hidden md:inline text-sm">{user.nombre.split(' ')[0]}</span>
+                  </button>
+                  
+                  {/* Menú desplegable de cuenta */}
+                  {isProfileOpen && (
+                    <div className="absolute right-0 mt-2 w-48 py-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50">
+                      <Link
+                        href="/perfil"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        Mi Perfil
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                      >
+                        <FaSignOutAlt className="mr-2" />
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="flex items-center space-x-2 hover:text-blue-200"
+                >
+                  <FaUser size={20} />
+                  <span className="hidden md:inline text-sm">Iniciar sesión</span>
+                </Link>
+              )}
+            </div>
+
+            {/* Carrito - visible en todas las pantallas */}
+            <Link href="/carrito" className="relative hover:text-blue-200">
+              <FaShoppingCart size={24} />
+              {cantidadTotal > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cantidadTotal}
+                </span>
+              )}
+            </Link>
+          </div>
+        </div>
+
+        {/* Segunda fila: Barra de búsqueda (solo en móvil) */}
+        <div className="md:hidden pb-4">
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              placeholder="Buscar productos..."
+              className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-white"
+              aria-label="Buscar"
+            >
+              <FaSearch />
+            </button>
+          </form>
+        </div>
+
+        {/* Desktop: Barra de búsqueda y tema */}
+        <div className="hidden md:flex items-center justify-between py-4">
+          <div className="flex-grow max-w-md mx-auto">
             <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
@@ -110,75 +189,16 @@ export default function Header() {
             </form>
           </div>
 
-          {/* Sección derecha: Tema, Perfil y Carrito */}
-          <div className="flex items-center space-x-6">
-            {/* Elementos visibles solo en desktop */}
-            <div className="hidden md:flex items-center space-x-6">
-              {/* Botón de tema - solo se muestra si estamos en el cliente */}
-              {isClient && (
-                <button 
-                  onClick={toggleTheme} 
-                  className="text-white hover:text-blue-200 p-1 rounded-full focus:outline-none"
-                  aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-                >
-                  {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
-                </button>
-              )}
-              
-              {/* Botón de cuenta */}
-              <div className="relative" ref={profileMenuRef}>
-                {user ? (
-                  <>
-                    <button
-                      onClick={() => setIsProfileOpen(!isProfileOpen)}
-                      className="flex items-center space-x-2 hover:text-blue-200"
-                    >
-                      <FaUser size={20} />
-                      <span className="text-sm">{user.nombre.split(' ')[0]}</span>
-                    </button>
-                    
-                    {/* Menú desplegable de cuenta */}
-                    {isProfileOpen && (
-                      <div className="absolute right-0 mt-2 w-48 py-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50">
-                        <Link
-                          href="/perfil"
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={() => setIsProfileOpen(false)}
-                        >
-                          Mi Perfil
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                        >
-                          <FaSignOutAlt className="mr-2" />
-                          Cerrar sesión
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    href="/auth/login"
-                    className="flex items-center space-x-2 hover:text-blue-200"
-                  >
-                    <FaUser size={20} />
-                    <span className="text-sm">Iniciar sesión</span>
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            {/* Carrito - visible en todas las pantallas */}
-            <Link href="/carrito" className="relative hover:text-blue-200">
-              <FaShoppingCart size={24} />
-              {cantidadTotal > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cantidadTotal}
-                </span>
-              )}
-            </Link>
-          </div>
+          {/* Botón de tema - solo se muestra si estamos en el cliente */}
+          {isClient && (
+            <button 
+              onClick={toggleTheme} 
+              className="text-white hover:text-blue-200 p-1 rounded-full focus:outline-none ml-4"
+              aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            >
+              {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
+            </button>
+          )}
         </div>
 
         {/* Mobile Navigation - Panel lateral desde la izquierda */}
@@ -214,24 +234,6 @@ export default function Header() {
                   Productos
                 </Link>
                 
-                {/* Búsqueda en móvil */}
-                <form onSubmit={handleSearch} className="relative py-4">
-                  <input
-                    type="text"
-                    placeholder="Buscar productos..."
-                    className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-1 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-white"
-                    aria-label="Buscar"
-                  >
-                    <FaSearch />
-                  </button>
-                </form>
-                
                 {/* Botón de tema en móvil - solo se muestra si estamos en el cliente */}
                 {isClient && (
                   <button 
@@ -242,39 +244,6 @@ export default function Header() {
                     {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
                     <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
                   </button>
-                )}
-
-                {/* Cuenta en móvil */}
-                {user ? (
-                  <>
-                    <Link
-                      href="/perfil"
-                      className="flex items-center space-x-2 hover:text-blue-200 py-2"
-                      onClick={toggleMenu}
-                    >
-                      <FaUser />
-                      <span>Mi Perfil</span>
-                    </Link>
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        toggleMenu();
-                      }}
-                      className="flex items-center space-x-2 hover:text-blue-200 text-red-400 py-2"
-                    >
-                      <FaSignOutAlt />
-                      <span>Cerrar sesión</span>
-                    </button>
-                  </>
-                ) : (
-                  <Link
-                    href="/auth/login"
-                    className="flex items-center space-x-2 hover:text-blue-200 py-2"
-                    onClick={toggleMenu}
-                  >
-                    <FaUser />
-                    <span>Iniciar sesión</span>
-                  </Link>
                 )}
               </nav>
             </div>
