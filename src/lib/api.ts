@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// Determinamos si estamos en el navegador (cliente)
+const isClient = typeof window !== 'undefined';
+
 // Definir la URL de la API usando la variable de entorno o el valor por defecto
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sz-backend.vercel.app/api';
+
+console.log('API URL:', API_URL); // Para depuración
 
 // Crear una instancia de axios con la URL base
 const api = axios.create({
@@ -9,13 +14,17 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Configurar CORS en Axios
+  withCredentials: false,
 });
 
 // Interceptor para agregar el token a las peticiones
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (isClient) {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
