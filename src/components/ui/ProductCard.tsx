@@ -43,7 +43,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
         <p className="text-gray-600 dark:text-gray-300 text-sm mb-2 line-clamp-2">{producto.descripcion}</p>
         
         <div className="flex justify-between items-center mb-2">
-          <span className="text-xl font-bold text-blue-700 dark:text-blue-400">${producto.precio.toFixed(2)}</span>
+          <span className="text-xl font-bold text-blue-700 dark:text-blue-400">${Math.round(producto.precio)}</span>
           <span className="text-sm text-gray-500 dark:text-gray-400">Stock: {producto.stock}</span>
         </div>
         
