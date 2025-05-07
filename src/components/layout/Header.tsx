@@ -57,39 +57,37 @@ export default function Header() {
     <header className="bg-blue-700 dark:bg-blue-900 text-white shadow-md transition-colors duration-200">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link href="/" className="text-2xl font-bold flex items-center">
-            <span>SpinZone</span>
-          </Link>
-
-          {/* Hamburger menu for mobile */}
-          <button
-            className="md:hidden text-white"
-            onClick={toggleMenu}
-            aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-          >
-            {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-          </button>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/"
-              className={`hover:text-blue-200 ${pathname === '/' ? 'font-bold' : ''}`}
-            >
-              Inicio
+          {/* Sección izquierda: Logo y navegación */}
+          <div className="flex items-center space-x-8">
+            {/* Logo */}
+            <Link href="/" className="text-2xl font-bold flex items-center">
+              <span>SpinZone</span>
             </Link>
-            <Link
-              href="/productos"
-              className={`hover:text-blue-200 ${pathname.startsWith('/productos') ? 'font-bold' : ''}`}
-            >
-              Productos
-            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link
+                href="/"
+                className={`hover:text-blue-200 ${pathname === '/' ? 'font-bold' : ''}`}
+              >
+                Inicio
+              </Link>
+              <Link
+                href="/productos"
+                className={`hover:text-blue-200 ${pathname.startsWith('/productos') ? 'font-bold' : ''}`}
+              >
+                Productos
+              </Link>
+            </nav>
+          </div>
+
+          {/* Sección central: Búsqueda */}
+          <div className="hidden md:block flex-grow max-w-md mx-auto">
             <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
                 placeholder="Buscar productos..."
-                className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-48"
+                className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -101,7 +99,10 @@ export default function Header() {
                 <FaSearch />
               </button>
             </form>
-            
+          </div>
+
+          {/* Sección derecha: Tema, Perfil y Carrito */}
+          <div className="hidden md:flex items-center space-x-6">
             {/* Botón de tema - solo se muestra si estamos en el cliente */}
             {isClient && (
               <button 
@@ -113,15 +114,6 @@ export default function Header() {
               </button>
             )}
             
-            <Link href="/carrito" className="relative hover:text-blue-200">
-              <FaShoppingCart size={24} />
-              {cantidadTotal > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cantidadTotal}
-                </span>
-              )}
-            </Link>
-
             {/* Botón de cuenta */}
             <div className="relative" ref={profileMenuRef}>
               {user ? (
@@ -164,7 +156,26 @@ export default function Header() {
                 </Link>
               )}
             </div>
-          </nav>
+
+            {/* Carrito */}
+            <Link href="/carrito" className="relative hover:text-blue-200">
+              <FaShoppingCart size={24} />
+              {cantidadTotal > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cantidadTotal}
+                </span>
+              )}
+            </Link>
+          </div>
+
+          {/* Hamburger menu for mobile */}
+          <button
+            className="md:hidden text-white"
+            onClick={toggleMenu}
+            aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          >
+            {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+          </button>
         </div>
 
         {/* Mobile Navigation */}
@@ -187,27 +198,8 @@ export default function Header() {
               >
                 Productos
               </Link>
-              <Link
-                href="/carrito"
-                className="flex items-center space-x-2 hover:text-blue-200"
-                onClick={toggleMenu}
-              >
-                <FaShoppingCart />
-                <span>Carrito ({cantidadTotal})</span>
-              </Link>
               
-              {/* Botón de tema en móvil - solo se muestra si estamos en el cliente */}
-              {isClient && (
-                <button 
-                  onClick={toggleTheme} 
-                  className="flex items-center space-x-2 hover:text-blue-200"
-                  aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-                >
-                  {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
-                  <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-                </button>
-              )}
-              
+              {/* Búsqueda en móvil */}
               <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
@@ -224,6 +216,18 @@ export default function Header() {
                   <FaSearch />
                 </button>
               </form>
+              
+              {/* Botón de tema en móvil - solo se muestra si estamos en el cliente */}
+              {isClient && (
+                <button 
+                  onClick={toggleTheme} 
+                  className="flex items-center space-x-2 hover:text-blue-200"
+                  aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                >
+                  {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
+                  <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
+                </button>
+              )}
 
               {/* Cuenta en móvil */}
               {user ? (
@@ -257,6 +261,16 @@ export default function Header() {
                   <span>Iniciar sesión</span>
                 </Link>
               )}
+              
+              {/* Carrito en móvil */}
+              <Link
+                href="/carrito"
+                className="flex items-center space-x-2 hover:text-blue-200"
+                onClick={toggleMenu}
+              >
+                <FaShoppingCart />
+                <span>Carrito ({cantidadTotal})</span>
+              </Link>
             </nav>
           </div>
         )}
