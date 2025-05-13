@@ -9,6 +9,15 @@ export function useFloatingCart() {
   // Para rastrear si un artículo se agregó recientemente
   const lastItemCountRef = useRef(cantidadTotal);
   
+  // Resetear el estado cuando el carrito está vacío
+  useEffect(() => {
+    // Si el carrito está vacío, resetear referencias
+    if (cantidadTotal === 0) {
+      lastItemCountRef.current = 0;
+      setShowCartAnimation(false);
+    }
+  }, [cantidadTotal]);
+  
   // Inicializar lastItemCount con el valor inicial de cantidadTotal
   useEffect(() => {
     lastItemCountRef.current = cantidadTotal;
@@ -39,7 +48,7 @@ export function useFloatingCart() {
         setShowCartAnimation(false);
       }, 1500);
       
-      // Actualizamos la referencia en lugar del estado
+      // Actualizamos la referencia
       lastItemCountRef.current = cantidadTotal;
       
       return () => clearTimeout(timer);

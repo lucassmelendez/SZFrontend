@@ -18,6 +18,14 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
   // Guarda el último artículo agregado para efecto visual
   const [lastAddedId, setLastAddedId] = useState<number | null>(null);
   
+  // Resetear lastItemRef cuando el carrito está vacío
+  useEffect(() => {
+    if (items.length === 0) {
+      lastItemRef.current = null;
+      setLastAddedId(null);
+    }
+  }, [items]);
+  
   // Detectar cuando se agrega un nuevo artículo para efectos visuales
   useEffect(() => {
     // Solo actualizamos el estado si el carrito está abierto y hay items
@@ -43,6 +51,15 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
       }
     }
   }, [isOpen, items]);
+
+  // Handler para eliminar productos
+  const handleEliminarProducto = (productoId: number) => {
+    // Si estamos eliminando el último producto resaltado, limpiar la referencia
+    if (lastAddedId === productoId) {
+      setLastAddedId(null);
+    }
+    eliminarProducto(productoId);
+  };
 
   // Cerrar carrito al hacer clic fuera
   useEffect(() => {
@@ -135,7 +152,7 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                         {item.producto.nombre}
                       </h3>
                       <button
-                        onClick={() => eliminarProducto(item.producto.id_producto)}
+                        onClick={() => handleEliminarProducto(item.producto.id_producto)}
                         className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                         title="Eliminar"
                       >

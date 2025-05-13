@@ -17,6 +17,13 @@ const notifyCarritoUpdated = () => {
   }
 };
 
+// Función para limpiar el carrito en localStorage
+const clearCartFromStorage = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('carrito');
+  }
+};
+
 export function useCarrito() {
   const [items, setItems] = useState<CarritoItem[]>([]);
   
@@ -26,11 +33,22 @@ export function useCarrito() {
       const savedCarrito = localStorage.getItem('carrito');
       if (savedCarrito) {
         try {
-          setItems(JSON.parse(savedCarrito));
+          const parsedItems = JSON.parse(savedCarrito);
+          // Verificar que sea un array válido y no esté vacío
+          if (Array.isArray(parsedItems) && parsedItems.length > 0) {
+            setItems(parsedItems);
+          } else {
+            // Si está vacío, eliminar del localStorage
+            clearCartFromStorage();
+            setItems([]);
+          }
         } catch (error) {
           console.error('Error al cargar el carrito desde localStorage:', error);
-          localStorage.removeItem('carrito');
+          clearCartFromStorage();
+          setItems([]);
         }
+      } else {
+        setItems([]);
       }
     };
 
@@ -50,7 +68,7 @@ export function useCarrito() {
     if (items.length > 0) {
       localStorage.setItem('carrito', JSON.stringify(items));
     } else {
-      localStorage.removeItem('carrito');
+      clearCartFromStorage();
     }
   }, [items]);
   
@@ -73,7 +91,9 @@ export function useCarrito() {
       }
       
       // Guardar el nuevo estado en localStorage inmediatamente
-      localStorage.setItem('carrito', JSON.stringify(newItems));
+      if (newItems.length > 0) {
+        localStorage.setItem('carrito', JSON.stringify(newItems));
+      }
       
       // Notificar a otros componentes
       notifyCarritoUpdated();
@@ -100,7 +120,7 @@ export function useCarrito() {
       if (newItems.length > 0) {
         localStorage.setItem('carrito', JSON.stringify(newItems));
       } else {
-        localStorage.removeItem('carrito');
+        clearCartFromStorage();
       }
       
       // Notificar a otros componentes
@@ -113,17 +133,23 @@ export function useCarrito() {
   // Eliminar un producto del carrito
   const eliminarProducto = (productoId: number) => {
     setItems(prevItems => {
+      // Obtener nuevos items filtrando el producto a eliminar
       const newItems = prevItems.filter(item => item.producto.id_producto !== productoId);
       
-      // Guardar en localStorage inmediatamente
-      if (newItems.length > 0) {
-        localStorage.setItem('carrito', JSON.stringify(newItems));
+      // Manejar específicamente el caso donde el carrito queda vacío
+      if (newItems.length === 0) {
+        // Asegurarse de que se limpie el localStorage
+        clearCartFromStorage();
+        console.log('Carrito vacío, localStorage limpiado');
       } else {
-        localStorage.removeItem('carrito');
+        // Si aún hay elementos, guardar en localStorage
+        localStorage.setItem('carrito', JSON.stringify(newItems));
       }
       
-      // Notificar a otros componentes
-      notifyCarritoUpdated();
+      // Notificar a otros componentes inmediatamente
+      setTimeout(() => {
+        notifyCarritoUpdated();
+      }, 0);
       
       return newItems;
     });
@@ -132,7 +158,7 @@ export function useCarrito() {
   // Limpiar todo el carrito
   const limpiarCarrito = () => {
     setItems([]);
-    localStorage.removeItem('carrito');
+    clearCartFromStorage();
     notifyCarritoUpdated();
   };
   
