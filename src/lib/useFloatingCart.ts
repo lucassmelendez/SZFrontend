@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useCarrito } from './useCarrito';
 
 export function useFloatingCart() {
@@ -7,7 +7,12 @@ export function useFloatingCart() {
   const { cantidadTotal } = useCarrito();
 
   // Para rastrear si un artículo se agregó recientemente
-  const [lastItemCount, setLastItemCount] = useState(cantidadTotal);
+  const lastItemCountRef = useRef(cantidadTotal);
+  
+  // Inicializar lastItemCount con el valor inicial de cantidadTotal
+  useEffect(() => {
+    lastItemCountRef.current = cantidadTotal;
+  }, []);
 
   const openCart = useCallback(() => {
     setIsCartOpen(true);
@@ -23,22 +28,26 @@ export function useFloatingCart() {
 
   // Mostrar animación cuando se agrega un nuevo artículo
   useEffect(() => {
-    if (cantidadTotal > lastItemCount) {
-      setShowCartAnimation(true);
-      
-      // Eliminamos la apertura automática aquí, ya que se manejará desde el ProductCard
-      // setIsCartOpen(true);
+    if (cantidadTotal > lastItemCountRef.current) {
+      // Actualizamos el estado con setTimeout para evitar actualizaciones durante el renderizado
+      setTimeout(() => {
+        setShowCartAnimation(true);
+      }, 0);
       
       // Resetear animación después de 1.5 segundos
       const timer = setTimeout(() => {
         setShowCartAnimation(false);
       }, 1500);
       
+      // Actualizamos la referencia en lugar del estado
+      lastItemCountRef.current = cantidadTotal;
+      
       return () => clearTimeout(timer);
+    } else if (cantidadTotal !== lastItemCountRef.current) {
+      // Si cantidadTotal cambió pero no aumentó (se eliminaron productos)
+      lastItemCountRef.current = cantidadTotal;
     }
-    
-    setLastItemCount(cantidadTotal);
-  }, [cantidadTotal, lastItemCount]);
+  }, [cantidadTotal]);
 
   return {
     isCartOpen,

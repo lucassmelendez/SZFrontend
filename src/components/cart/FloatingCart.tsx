@@ -13,22 +13,34 @@ interface FloatingCartProps {
 export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
   const { items, actualizarCantidad, eliminarProducto, calcularTotal } = useCarrito();
   const cartRef = useRef<HTMLDivElement>(null);
+  const lastItemRef = useRef<number | null>(null);
   
   // Guarda el último artículo agregado para efecto visual
   const [lastAddedId, setLastAddedId] = useState<number | null>(null);
   
   // Detectar cuando se agrega un nuevo artículo para efectos visuales
   useEffect(() => {
+    // Solo actualizamos el estado si el carrito está abierto y hay items
     if (isOpen && items.length > 0) {
       const lastItem = items[items.length - 1];
-      setLastAddedId(lastItem.producto.id_producto);
+      const lastItemId = lastItem.producto.id_producto;
       
-      // Eliminar el resaltado después de 2 segundos
-      const timer = setTimeout(() => {
-        setLastAddedId(null);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
+      // Solo establecer el lastAddedId si cambió el último item
+      if (lastItemRef.current !== lastItemId) {
+        lastItemRef.current = lastItemId;
+        
+        // Usar setTimeout para evitar actualizar durante el renderizado
+        setTimeout(() => {
+          setLastAddedId(lastItemId);
+        }, 0);
+        
+        // Eliminar el resaltado después de 2 segundos
+        const timer = setTimeout(() => {
+          setLastAddedId(null);
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+      }
     }
   }, [isOpen, items]);
 
