@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FaArrowLeft, FaCheck, FaShoppingCart } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 
@@ -242,7 +243,14 @@ export default function CheckoutPage() {
                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                 }`}>
                   <div className="flex items-center flex-1">
-                    <img src="/public/webpay.svg" alt="WebPay" className="h-8 w-auto mr-3" />
+                    <Image 
+                      src="/webpay.svg" 
+                      alt="WebPay" 
+                      width={100}
+                      height={32}
+                      className="h-8 w-auto mr-3"
+                      priority
+                    />
                     <div>
                       <p className="font-medium text-gray-700 dark:text-gray-300">WebPay</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Paga de forma segura con tarjeta de crédito o débito</p>
@@ -268,21 +276,24 @@ export default function CheckoutPage() {
                   value="transferencia"
                   checked={formData.metodoPago === 'transferencia'}
                   onChange={handleInputChange}
-                  className="sr-only"
+                  className="sr-only" // Ocultamos el radio button original
                 />
                 <div className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                  formData.metodoPago === 'transferencia'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-gray-700'
+                  formData.metodoPago === 'transferencia' 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-gray-700' 
                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                 }`}>
                   <div className="flex items-center flex-1">
-                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center mr-3">
-                      <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                      </svg>
-                    </div>
+                    <Image 
+                      src="/dinero.svg" 
+                      alt="Dinero" 
+                      width={100}
+                      height={32}
+                      className="h-8 w-auto mr-3"
+                      priority
+                    />
                     <div>
-                      <p className="font-medium text-gray-700 dark:text-gray-300">Transferencia bancaria</p>
+                      <p className="font-medium text-gray-700 dark:text-gray-300">Transferencia</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Realiza una transferencia directa a nuestra cuenta</p>
                     </div>
                   </div>
