@@ -300,7 +300,7 @@ export default function Header() {
 
           {/* Mobile Navigation - Panel lateral desde la izquierda */}
           {isMenuOpen && (
-            <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50">
+            <div className="md:hidden fixed inset-0 z-50 backdrop-blur-sm bg-transparent">
               <div className="bg-blue-700 dark:bg-blue-900 h-full w-4/5 max-w-sm py-4 px-6 overflow-y-auto transform transition-transform duration-300 ease-in-out">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-bold">Menú</h2>
