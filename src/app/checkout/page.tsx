@@ -31,8 +31,7 @@ export default function CheckoutPage() {
   
   // Banner simple para checkout
   const CheckoutBanner = () => (
-    <div className="bg-blue-600 text-white py-4 px-6 flex justify-between items-center">
-      <h1 className="text-xl font-bold">SpinZone</h1>
+    <div className="bg-blue-600 text-white py-4 px-6 flex items-center">
       <Link 
         href="/" 
         className="flex items-center text-white hover:text-blue-200 transition-colors"
@@ -40,6 +39,7 @@ export default function CheckoutPage() {
         <FaArrowLeft className="mr-2" />
         Volver al inicio
       </Link>
+      <h1 className="text-xl font-bold flex-grow text-center">SpinZone</h1>
     </div>
   );
 
