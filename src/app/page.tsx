@@ -107,16 +107,16 @@ export default function Home() {
         <div className="text-center text-red-600 dark:text-red-400">{error}</div>
       ) : (
         <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold dark:text-white">Productos Destacados</h2>
+          <h2 className="text-3xl font-bold text-center mb-8 dark:text-white">Productos Destacados</h2>
+          <ProductCarousel productos={productos} title="" />
+          <div className="flex justify-center mt-6">
             <Link
               href="/productos"
               className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium inline-flex items-center"
             >
-              Ver todos <FaArrowRight className="ml-1" size={14} />
+              Ver todos los productos <FaArrowRight className="ml-1" size={14} />
             </Link>
           </div>
-          <ProductCarousel productos={productos} title="" />
         </section>
       )}
 
