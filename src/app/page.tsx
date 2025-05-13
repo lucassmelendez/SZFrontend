@@ -106,7 +106,7 @@ export default function Home() {
       {error ? (
         <div className="text-center text-red-600 dark:text-red-400">{error}</div>
       ) : (
-        <section className="container mx-auto">
+        <section>
           <ProductCarousel productos={productos} title="Productos Destacados" />
         </section>
       )}
