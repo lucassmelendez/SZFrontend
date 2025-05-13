@@ -77,7 +77,7 @@ export default function Home() {
             {
               title: 'Pelotas',
               icon: <GiBallPyramid size={48} />,
-              description: 'Las mejores pelotas para tus entrenamientos y competiciones',
+              description: 'Pelotas profesionales para tus entrenamientos y competiciones',
               link: '/productos/categoria/3',
             },
             {
@@ -96,7 +96,7 @@ export default function Home() {
               <h3 className="text-xl font-semibold mb-2 dark:text-white">{category.title}</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">{category.description}</p>
               <span className="text-blue-600 dark:text-blue-400 font-medium inline-flex items-center">
-                Ver productos <FaArrowRight className="ml-1" size={14} />
+                Ver categoria <FaArrowRight className="ml-1" size={14} />
               </span>
             </Link>
           ))}
