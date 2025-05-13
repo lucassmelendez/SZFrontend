@@ -3,16 +3,25 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUser, FaSignOutAlt, FaChevronDown } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useTheme } from '@/lib/useTheme';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import FloatingCart from '../cart/FloatingCart';
 
+const categorias = [
+  { id: 1, nombre: 'Paletas' },
+  { id: 2, nombre: 'Bolsos' },
+  { id: 3, nombre: 'Pelotas' },
+  { id: 4, nombre: 'Mallas' },
+  { id: 5, nombre: 'Mesas' }
+];
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
   const { cantidadTotal } = useCarrito();
@@ -20,12 +29,16 @@ export default function Header() {
   const { user, logout } = useAuth();
   const { isCartOpen, showCartAnimation, openCart, closeCart } = useFloatingCartContext();
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const categoryMenuRef = useRef<HTMLDivElement>(null);
 
-  // Cerrar el menú de perfil cuando se hace clic fuera
+  // Cerrar los menús cuando se hace clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
+      }
+      if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
+        setIsCategoryOpen(false);
       }
     };
 
@@ -83,6 +96,32 @@ export default function Header() {
                 >
                   Productos
                 </Link>
+                {/* Menú desplegable de Categorías */}
+                <div className="relative" ref={categoryMenuRef}>
+                  <button
+                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                    className={`flex items-center space-x-1 hover:text-blue-200 ${isCategoryOpen ? 'text-blue-200' : ''}`}
+                  >
+                    <span>Categorías</span>
+                    <FaChevronDown className={`transform transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {/* Menú desplegable */}
+                  {isCategoryOpen && (
+                    <div className="absolute left-0 mt-2 w-48 py-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50">
+                      {categorias.map((categoria) => (
+                        <Link
+                          key={categoria.id}
+                          href={`/productos/categoria/${categoria.id}`}
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => setIsCategoryOpen(false)}
+                        >
+                          {categoria.nombre}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </nav>
             </div>
 
@@ -325,13 +364,27 @@ export default function Header() {
                     </Link>
                     <Link
                       href="/productos"
-                      className={`block py-3 hover:text-blue-200 ${
-                        pathname.startsWith('/productos') ? 'font-bold' : ''
-                      }`}
+                      className={`block py-3 hover:text-blue-200 ${pathname.startsWith('/productos') ? 'font-bold' : ''}`}
                       onClick={toggleMenu}
                     >
                       Productos
                     </Link>
+                    {/* Categorías en móvil */}
+                    <div className="py-3">
+                      <span className="block text-white mb-2">Categorías</span>
+                      <div className="pl-4 space-y-2">
+                        {categorias.map((categoria) => (
+                          <Link
+                            key={categoria.id}
+                            href={`/productos/categoria/${categoria.id}`}
+                            className="block py-2 text-sm hover:text-blue-200"
+                            onClick={toggleMenu}
+                          >
+                            {categoria.nombre}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Divisor principal */}
