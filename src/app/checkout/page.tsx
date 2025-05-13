@@ -33,11 +33,11 @@ export default function CheckoutPage() {
   const CheckoutBanner = () => (
     <div className="bg-blue-600 text-white py-4 px-6 flex items-center">
       <Link 
-        href="/" 
+        href="/productos" 
         className="flex items-center text-white hover:text-blue-200 transition-colors"
       >
         <FaArrowLeft className="mr-2" />
-        Volver al inicio
+        Seguir comprando
       </Link>
       <h1 className="text-xl font-bold flex-grow text-center">SpinZone</h1>
     </div>
@@ -153,14 +153,8 @@ export default function CheckoutPage() {
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
             <Link
-              href="/"
-              className="inline-flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-            >
-              Volver al inicio
-            </Link>
-            <Link
               href="/productos"
-              className="inline-flex items-center justify-center bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               Seguir comprando
             </Link>
@@ -178,10 +172,6 @@ export default function CheckoutPage() {
           {/* Formulario de checkout */}
           <div className="md:w-2/3">
             <div className="flex items-center mb-6">
-              <Link href="/productos" className="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
-                <FaArrowLeft className="mr-2" />
-                <span>Seguir comprando</span>
-              </Link>
               <h1 className="text-2xl font-bold text-gray-800 dark:text-white ml-4">Checkout</h1>
             </div>
 
