@@ -9,6 +9,7 @@ import { useTheme } from '@/lib/useTheme';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import FloatingCart from '../cart/FloatingCart';
+import { productoApi, Producto } from '@/lib/api';
 
 const categorias = [
   { id: 1, nombre: 'Paletas' },
@@ -22,7 +23,9 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Producto[]>([]);
   const pathname = usePathname();
   const { cantidadTotal } = useCarrito();
   const { theme, toggleTheme, isClient } = useTheme();
@@ -30,6 +33,7 @@ export default function Header() {
   const { isCartOpen, showCartAnimation, openCart, closeCart } = useFloatingCartContext();
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Cerrar los menús cuando se hace clic fuera
   useEffect(() => {
@@ -40,6 +44,9 @@ export default function Header() {
       if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
         setIsCategoryOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -48,11 +55,37 @@ export default function Header() {
     };
   }, []);
 
+  // Efecto para manejar la búsqueda en tiempo real
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (searchQuery.trim().length >= 2) {
+        try {
+          const results = await productoApi.search(searchQuery);
+          setSearchResults(results);
+          setIsSearchOpen(true);
+        } catch (error) {
+          console.error('Error al buscar productos:', error);
+          setSearchResults([]);
+        }
+      } else {
+        setSearchResults([]);
+        setIsSearchOpen(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchProducts, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       window.location.href = `/productos/buscar?q=${encodeURIComponent(searchQuery)}`;
@@ -126,14 +159,14 @@ export default function Header() {
             </div>
 
             {/* Sección central: Búsqueda */}
-            <div className="flex-grow max-w-md mx-auto px-4">
-              <form onSubmit={handleSearch} className="relative">
+            <div className="flex-grow max-w-md mx-auto px-4" ref={searchRef}>
+              <form onSubmit={handleSearchSubmit} className="relative">
                 <input
                   type="text"
                   placeholder="Buscar productos..."
                   className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchInput}
                 />
                 <button
                   type="submit"
@@ -142,6 +175,37 @@ export default function Header() {
                 >
                   <FaSearch />
                 </button>
+
+                {/* Resultados de búsqueda */}
+                {isSearchOpen && searchResults.length > 0 && (
+                  <div className="absolute left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50 max-h-96 overflow-y-auto">
+                    {searchResults.map((producto) => (
+                      <Link
+                        key={producto.id_producto}
+                        href={`/productos/${producto.id_producto}`}
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          setSearchQuery('');
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                            <img
+                              src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
+                              alt={producto.nombre}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="ml-3">
+                            <p className="font-medium">{producto.nombre}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">${Math.round(producto.precio)}</p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </form>
             </div>
 
@@ -318,14 +382,14 @@ export default function Header() {
           </div>
 
           {/* Segunda fila: Barra de búsqueda (solo en móvil) */}
-          <div className="md:hidden pb-4">
-            <form onSubmit={handleSearch} className="relative">
+          <div className="md:hidden pb-4" ref={searchRef}>
+            <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
                 placeholder="Buscar productos..."
                 className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchInput}
               />
               <button
                 type="submit"
@@ -334,6 +398,38 @@ export default function Header() {
               >
                 <FaSearch />
               </button>
+
+              {/* Resultados de búsqueda en móvil */}
+              {isSearchOpen && searchResults.length > 0 && (
+                <div className="absolute left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50 max-h-[60vh] overflow-y-auto">
+                  {searchResults.map((producto) => (
+                    <Link
+                      key={producto.id_producto}
+                      href={`/productos/${producto.id_producto}`}
+                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery('');
+                        setIsMenuOpen(false); // Cerrar el menú móvil si está abierto
+                      }}
+                    >
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                          <img
+                            src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
+                            alt={producto.nombre}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="ml-3 flex-grow">
+                          <p className="font-medium line-clamp-1">{producto.nombre}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">${Math.round(producto.precio)}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </form>
           </div>
 
