@@ -37,21 +37,25 @@ export function useFloatingCart() {
 
   // Mostrar animación cuando se agrega un nuevo artículo
   useEffect(() => {
+    // Solo hacemos esto si cantidadTotal realmente aumentó
     if (cantidadTotal > lastItemCountRef.current) {
-      // Actualizamos el estado con setTimeout para evitar actualizaciones durante el renderizado
-      setTimeout(() => {
+      // Actualizamos la referencia primero
+      lastItemCountRef.current = cantidadTotal;
+
+      // Establecer la animación con un efecto separado para evitar
+      // actualizar durante el renderizado
+      const animationTimer = setTimeout(() => {
         setShowCartAnimation(true);
+        
+        // Resetear animación después de 1.5 segundos
+        const resetTimer = setTimeout(() => {
+          setShowCartAnimation(false);
+        }, 1500);
+        
+        return () => clearTimeout(resetTimer);
       }, 0);
       
-      // Resetear animación después de 1.5 segundos
-      const timer = setTimeout(() => {
-        setShowCartAnimation(false);
-      }, 1500);
-      
-      // Actualizamos la referencia
-      lastItemCountRef.current = cantidadTotal;
-      
-      return () => clearTimeout(timer);
+      return () => clearTimeout(animationTimer);
     } else if (cantidadTotal !== lastItemCountRef.current) {
       // Si cantidadTotal cambió pero no aumentó (se eliminaron productos)
       lastItemCountRef.current = cantidadTotal;
