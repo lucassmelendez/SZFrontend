@@ -290,6 +290,7 @@ export default function CheckoutPage() {
                         width={100}
                         height={32}
                         className="h-8 w-auto mr-3"
+                        style={{ height: 'auto' }}
                         priority
                       />
                       <div>
@@ -331,6 +332,7 @@ export default function CheckoutPage() {
                         width={100}
                         height={32}
                         className="h-8 w-auto mr-3"
+                        style={{ height: 'auto' }}
                         priority
                       />
                       <div>

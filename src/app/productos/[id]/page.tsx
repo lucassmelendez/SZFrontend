@@ -6,6 +6,7 @@ import { productoApi, Producto } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
 import Loading from '@/components/ui/Loading';
 import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
+import React from 'react';
 
 interface PageParams {
   id: string;
@@ -14,6 +15,7 @@ interface PageParams {
 export default function ProductoDetailPage({ params }: { params: PageParams }) {
   const router = useRouter();
   const { agregarProducto } = useCarrito();
+  const productoId = React.use(Promise.resolve(params.id));
   const [producto, setProducto] = useState<Producto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,12 +25,12 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
   useEffect(() => {
     const fetchProducto = async () => {
       try {
-        const productoId = parseInt(params.id, 10);
-        if (isNaN(productoId)) {
+        const id = parseInt(productoId, 10);
+        if (isNaN(id)) {
           throw new Error('ID de producto inválido');
         }
         
-        const data = await productoApi.getById(productoId);
+        const data = await productoApi.getById(id);
         setProducto(data);
         setLoading(false);
       } catch (error) {
@@ -39,7 +41,7 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
     };
 
     fetchProducto();
-  }, [params.id]);
+  }, [productoId]);
 
   const handleAddToCart = () => {
     if (producto) {

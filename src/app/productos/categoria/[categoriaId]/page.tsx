@@ -6,6 +6,7 @@ import Loading from '@/components/ui/Loading';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
+import React from 'react';
 
 const categoriasMap = {
   '1': 'Paletas',
@@ -20,6 +21,7 @@ interface PageParams {
 }
 
 export default function CategoriaPage({ params }: { params: PageParams }) {
+  const categoriaId = React.use(Promise.resolve(params.categoriaId));
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,12 +29,12 @@ export default function CategoriaPage({ params }: { params: PageParams }) {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const categoriaId = parseInt(params.categoriaId, 10);
-        if (isNaN(categoriaId)) {
+        const id = parseInt(categoriaId, 10);
+        if (isNaN(id)) {
           throw new Error('ID de categoría inválido');
         }
         
-        const data = await productoApi.getByCategoria(categoriaId);
+        const data = await productoApi.getByCategoria(id);
         setProductos(data);
         setLoading(false);
       } catch (error) {
@@ -43,11 +45,11 @@ export default function CategoriaPage({ params }: { params: PageParams }) {
     };
 
     fetchProductos();
-  }, [params.categoriaId]);
+  }, [categoriaId]);
 
   if (loading) return <Loading />;
 
-  const categoriaNombre = categoriasMap[params.categoriaId as keyof typeof categoriasMap] || 'Categoría';
+  const categoriaNombre = categoriasMap[categoriaId as keyof typeof categoriasMap] || 'Categoría';
 
   return (
     <div className="container mx-auto px-4 py-8">
