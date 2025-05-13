@@ -47,7 +47,7 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 transition-opacity">
+    <div className="fixed inset-0 z-50 backdrop-blur-sm bg-transparent transition-opacity">
       {/* Carrito en desktop - desliza desde la derecha */}
       <div 
         ref={cartRef}
