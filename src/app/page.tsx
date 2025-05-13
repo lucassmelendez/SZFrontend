@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { productoApi, Producto } from '@/lib/api';
 import Loading from '@/components/ui/Loading';
-import ProductGrid from '@/components/ui/ProductGrid';
+import ProductCarousel from '@/components/ui/ProductCarousel';
 import { FaArrowRight, FaTable, FaShoppingBag, FaShieldAlt } from 'react-icons/fa';
 
 export default function Home() {
@@ -16,8 +16,8 @@ export default function Home() {
     const fetchProductos = async () => {
       try {
         const data = await productoApi.getAll();
-        // Mostrar solo los 8 primeros productos
-        setProductos(data.slice(0, 8));
+        // Mostrar hasta 15 productos para el carrusel
+        setProductos(data.slice(0, 15));
         setLoading(false);
       } catch (error) {
         console.error('Error al cargar productos:', error);
@@ -116,7 +116,7 @@ export default function Home() {
               Ver todos <FaArrowRight className="ml-1" size={14} />
             </Link>
           </div>
-          <ProductGrid productos={productos} />
+          <ProductCarousel productos={productos} title="" />
         </section>
       )}
 
