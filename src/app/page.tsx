@@ -56,7 +56,7 @@ export default function Home() {
               href="/productos"
               className="inline-flex items-center bg-white text-blue-700 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 dark:bg-blue-100 dark:hover:bg-white transition-colors"
             >
-              Ver Catálogo <FaArrowRight className="ml-2" />
+              Ver Productos <FaArrowRight className="ml-2" />
             </Link>
           </div>
         </div>
@@ -68,22 +68,22 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
-              title: 'Raquetas',
+              title: 'Paletas',
               icon: <FaTable size={40} />,
-              description: 'Raquetas profesionales para todos los niveles',
+              description: 'Paletas profesionales para todos los niveles',
               link: '/productos/categoria/1',
             },
             {
-              title: 'Accesorios',
+              title: 'Pelotas',
               icon: <FaShoppingBag size={40} />,
-              description: 'Pelotas, fundas y todo lo que necesitas',
-              link: '/productos/categoria/2',
+              description: 'Las mejores pelotas para tus entrenamientos y competiciones',
+              link: '/productos/categoria/3',
             },
             {
               title: 'Mesas',
               icon: <FaShieldAlt size={40} />,
               description: 'Mesas de competición y entrenamiento',
-              link: '/productos/categoria/3',
+              link: '/productos/categoria/5',
             },
           ].map((category, index) => (
             <Link
@@ -127,7 +127,7 @@ export default function Home() {
           Descubre nuestros kits para principiantes y lleva tu juego al siguiente nivel con equipamiento de calidad a precios accesibles.
         </p>
         <Link
-          href="/productos/categoria/4"
+          href="/productos"
           className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors"
         >
           Explorar Kits para Principiantes <FaArrowRight className="ml-2" />

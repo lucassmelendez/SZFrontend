@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { FaFacebook, FaTwitter, FaInstagram, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -19,7 +20,7 @@ export default function Footer() {
                 <FaFacebook size={20} />
               </a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white dark:text-gray-400 dark:hover:text-white">
-                <FaTwitter size={20} />
+                <FaXTwitter size={20} />
               </a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white dark:text-gray-400 dark:hover:text-white">
                 <FaInstagram size={20} />
@@ -41,11 +42,6 @@ export default function Footer() {
                   Productos
                 </Link>
               </li>
-              <li>
-                <Link href="/carrito" className="text-gray-300 hover:text-white dark:text-gray-400 dark:hover:text-white">
-                  Carrito
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -55,15 +51,15 @@ export default function Footer() {
             <ul className="space-y-2">
               <li className="flex items-center text-gray-300 dark:text-gray-400">
                 <FaMapMarkerAlt className="mr-2" />
-                <span>Av. Siempre Viva 123, Springfield</span>
+                <span>Av. Rorro Pirrorro, Edificio 77, Oficina 7</span>
               </li>
               <li className="flex items-center text-gray-300 dark:text-gray-400">
                 <FaPhone className="mr-2" />
-                <span>+1 (555) 123-4567</span>
+                <span>+56 9 4452 9183</span>
               </li>
               <li className="flex items-center text-gray-300 dark:text-gray-400">
                 <FaEnvelope className="mr-2" />
-                <span>info@spinzone.com</span>
+                <span>contacto@spinzone.com</span>
               </li>
             </ul>
           </div>
