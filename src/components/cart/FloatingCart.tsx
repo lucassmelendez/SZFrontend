@@ -211,6 +211,7 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
             <Link
               href="/checkout"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium flex items-center justify-center transition-colors"
+              onClick={onClose}
             >
               <span>Ir al Checkout</span>
               <FaArrowRight className="ml-2" />

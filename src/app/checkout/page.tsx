@@ -6,10 +6,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaArrowLeft, FaCheck, FaShoppingCart } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
+import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, limpiarCarrito, calcularTotal } = useCarrito();
+  const { closeCart } = useFloatingCartContext();
   const [loading, setLoading] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -21,8 +23,11 @@ export default function CheckoutPage() {
       setInitialLoading(false);
     }, 100);
     
+    // Cerrar el carrito cuando se carga la página de checkout
+    closeCart();
+    
     return () => clearTimeout(timer);
-  }, []);
+  }, [closeCart]);
   
   // Formulario de checkout
   const [formData, setFormData] = useState({
