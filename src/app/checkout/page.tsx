@@ -225,8 +225,8 @@ export default function CheckoutPage() {
             
             <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Método de pago</h2>
             
-            <div className="mb-6">             
-              <div className="flex items-center mb-3">
+            <div className="mb-6 space-y-4">             
+              <label className="block">
                 <input
                   type="radio"
                   id="webpay"
@@ -234,14 +234,33 @@ export default function CheckoutPage() {
                   value="webpay"
                   checked={formData.metodoPago === 'webpay'}
                   onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  className="sr-only" // Ocultamos el radio button original
                 />
-                <label htmlFor="webpay" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  WebPay
-                </label>
-              </div>
+                <div className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  formData.metodoPago === 'webpay' 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-gray-700' 
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                }`}>
+                  <div className="flex items-center flex-1">
+                    <img src="/public/webpay.svg" alt="WebPay" className="h-8 w-auto mr-3" />
+                    <div>
+                      <p className="font-medium text-gray-700 dark:text-gray-300">WebPay</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Paga de forma segura con tarjeta de crédito o débito</p>
+                    </div>
+                  </div>
+                  <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
+                    formData.metodoPago === 'webpay'
+                      ? 'border-blue-500 bg-blue-500'
+                      : 'border-gray-300 dark:border-gray-600'
+                  }`}>
+                    {formData.metodoPago === 'webpay' && (
+                      <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
+                    )}
+                  </div>
+                </div>
+              </label>
               
-              <div className="flex items-center">
+              <label className="block">
                 <input
                   type="radio"
                   id="transferencia"
@@ -249,12 +268,35 @@ export default function CheckoutPage() {
                   value="transferencia"
                   checked={formData.metodoPago === 'transferencia'}
                   onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  className="sr-only"
                 />
-                <label htmlFor="transferencia" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Transferencia bancaria
-                </label>
-              </div>
+                <div className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  formData.metodoPago === 'transferencia'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-gray-700'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                }`}>
+                  <div className="flex items-center flex-1">
+                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center mr-3">
+                      <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-700 dark:text-gray-300">Transferencia bancaria</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Realiza una transferencia directa a nuestra cuenta</p>
+                    </div>
+                  </div>
+                  <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
+                    formData.metodoPago === 'transferencia'
+                      ? 'border-blue-500 bg-blue-500'
+                      : 'border-gray-300 dark:border-gray-600'
+                  }`}>
+                    {formData.metodoPago === 'transferencia' && (
+                      <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
+                    )}
+                  </div>
+                </div>
+              </label>
             </div>
             
             <div className="md:hidden mt-6">
@@ -346,4 +388,4 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
-} 
+}
