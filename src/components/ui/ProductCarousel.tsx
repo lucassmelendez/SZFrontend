@@ -29,8 +29,11 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
       } else if (width < 1024) {
         setSlidesPerView(3);
         setIsMobile(false);
-      } else {
+      } else if (width < 1280) {
         setSlidesPerView(4);
+        setIsMobile(false);
+      } else {
+        setSlidesPerView(5);
         setIsMobile(false);
       }
     };
@@ -85,7 +88,7 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    <div className="max-w-full mx-auto">
       <div className="flex justify-center items-center mb-6">
         {title && <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-center">{title}</h2>}
       </div>
@@ -94,16 +97,16 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
         {/* Botón izquierdo */}
         <button 
           onClick={prevSlide}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
+          className="absolute left-1 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
           aria-label="Anterior"
         >
           <FaChevronLeft className="text-blue-600 dark:text-blue-400" />
         </button>
         
-        <div className="relative overflow-hidden px-10" ref={containerRef}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+        <div className="relative overflow-hidden px-1" ref={containerRef}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 max-w-full mx-auto">
             {visibleProductos.map((producto) => (
-              <div key={producto.id_producto} className="h-full">
+              <div key={producto.id_producto} className="h-full transform scale-110">
                 <ProductCard producto={producto} />
               </div>
             ))}
@@ -129,7 +132,7 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
         {/* Botón derecho */}
         <button 
           onClick={nextSlide}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
+          className="absolute right-1 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
           aria-label="Siguiente"
         >
           <FaChevronRight className="text-blue-600 dark:text-blue-400" />
