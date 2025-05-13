@@ -382,7 +382,7 @@ export default function Header() {
           </div>
 
           {/* Segunda fila: Barra de búsqueda (solo en móvil) */}
-          <div className="md:hidden pb-4">
+          <div className="md:hidden pb-4" ref={searchRef}>
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
@@ -398,6 +398,38 @@ export default function Header() {
               >
                 <FaSearch />
               </button>
+
+              {/* Resultados de búsqueda en móvil */}
+              {isSearchOpen && searchResults.length > 0 && (
+                <div className="absolute left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50 max-h-[60vh] overflow-y-auto">
+                  {searchResults.map((producto) => (
+                    <Link
+                      key={producto.id_producto}
+                      href={`/productos/${producto.id_producto}`}
+                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery('');
+                        setIsMenuOpen(false); // Cerrar el menú móvil si está abierto
+                      }}
+                    >
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                          <img
+                            src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
+                            alt={producto.nombre}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="ml-3 flex-grow">
+                          <p className="font-medium line-clamp-1">{producto.nombre}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">${Math.round(producto.precio)}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </form>
           </div>
 
