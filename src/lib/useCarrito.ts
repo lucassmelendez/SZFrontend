@@ -10,6 +10,9 @@ export interface CarritoItem {
 // Crear un evento personalizado para sincronizar el carrito
 const CARRITO_UPDATED_EVENT = 'carritoUpdated';
 
+// Clave para almacenar el carrito en localStorage
+const CARRITO_STORAGE_KEY = 'carrito';
+
 // Función para disparar el evento de actualización
 const notifyCarritoUpdated = () => {
   if (typeof window !== 'undefined') {
@@ -20,36 +23,53 @@ const notifyCarritoUpdated = () => {
 // Función para limpiar el carrito en localStorage
 const clearCartFromStorage = () => {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('carrito');
+    localStorage.removeItem(CARRITO_STORAGE_KEY);
+  }
+};
+
+// Función para obtener el carrito desde localStorage
+const getCartFromStorage = (): CarritoItem[] => {
+  if (typeof window === 'undefined') return [];
+  
+  try {
+    const savedCarrito = localStorage.getItem(CARRITO_STORAGE_KEY);
+    if (!savedCarrito) return [];
+    
+    const parsedItems = JSON.parse(savedCarrito);
+    if (!Array.isArray(parsedItems)) return [];
+    
+    return parsedItems;
+  } catch (error) {
+    console.error('Error al leer el carrito desde localStorage:', error);
+    return [];
+  }
+};
+
+// Función para guardar el carrito en localStorage
+const saveCartToStorage = (items: CarritoItem[]) => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    if (items.length > 0) {
+      localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(items));
+    } else {
+      clearCartFromStorage();
+    }
+  } catch (error) {
+    console.error('Error al guardar el carrito en localStorage:', error);
   }
 };
 
 export function useCarrito() {
   const [items, setItems] = useState<CarritoItem[]>([]);
+  const [initialized, setInitialized] = useState(false);
   
   // Cargar el carrito desde localStorage al iniciar
   useEffect(() => {
     const loadCartFromStorage = () => {
-      const savedCarrito = localStorage.getItem('carrito');
-      if (savedCarrito) {
-        try {
-          const parsedItems = JSON.parse(savedCarrito);
-          // Verificar que sea un array válido y no esté vacío
-          if (Array.isArray(parsedItems) && parsedItems.length > 0) {
-            setItems(parsedItems);
-          } else {
-            // Si está vacío, eliminar del localStorage
-            clearCartFromStorage();
-            setItems([]);
-          }
-        } catch (error) {
-          console.error('Error al cargar el carrito desde localStorage:', error);
-          clearCartFromStorage();
-          setItems([]);
-        }
-      } else {
-        setItems([]);
-      }
+      const cartItems = getCartFromStorage();
+      setItems(cartItems);
+      setInitialized(true);
     };
 
     // Cargar inicialmente
@@ -65,12 +85,10 @@ export function useCarrito() {
   
   // Guardar cambios en localStorage
   useEffect(() => {
-    if (items.length > 0) {
-      localStorage.setItem('carrito', JSON.stringify(items));
-    } else {
-      clearCartFromStorage();
-    }
-  }, [items]);
+    if (!initialized) return;
+    
+    saveCartToStorage(items);
+  }, [items, initialized]);
   
   // Agregar un producto al carrito
   const agregarProducto = (producto: Producto, cantidad = 1) => {
@@ -91,9 +109,7 @@ export function useCarrito() {
       }
       
       // Guardar el nuevo estado en localStorage inmediatamente
-      if (newItems.length > 0) {
-        localStorage.setItem('carrito', JSON.stringify(newItems));
-      }
+      saveCartToStorage(newItems);
       
       // Notificar a otros componentes
       notifyCarritoUpdated();
@@ -117,11 +133,7 @@ export function useCarrito() {
       }
       
       // Guardar en localStorage inmediatamente
-      if (newItems.length > 0) {
-        localStorage.setItem('carrito', JSON.stringify(newItems));
-      } else {
-        clearCartFromStorage();
-      }
+      saveCartToStorage(newItems);
       
       // Notificar a otros componentes
       notifyCarritoUpdated();
@@ -137,13 +149,11 @@ export function useCarrito() {
       const newItems = prevItems.filter(item => item.producto.id_producto !== productoId);
       
       // Manejar específicamente el caso donde el carrito queda vacío
+      saveCartToStorage(newItems);
+      
+      // Log para depuración
       if (newItems.length === 0) {
-        // Asegurarse de que se limpie el localStorage
-        clearCartFromStorage();
         console.log('Carrito vacío, localStorage limpiado');
-      } else {
-        // Si aún hay elementos, guardar en localStorage
-        localStorage.setItem('carrito', JSON.stringify(newItems));
       }
       
       // Notificar a otros componentes inmediatamente

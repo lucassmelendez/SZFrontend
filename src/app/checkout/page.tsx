@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FaArrowLeft, FaCheck, FaShoppingCart } from 'react-icons/fa';
@@ -11,6 +11,17 @@ export default function CheckoutPage() {
   const { items, limpiarCarrito, calcularTotal } = useCarrito();
   const [loading, setLoading] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  
+  // Asegurarnos de que la página tiene tiempo para cargar los datos del carrito
+  useEffect(() => {
+    // Pequeño delay para asegurar que useCarrito haya cargado los datos
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   // Formulario de checkout
   const [formData, setFormData] = useState({
@@ -69,6 +80,19 @@ export default function CheckoutPage() {
       limpiarCarrito();
     }, 2000);
   };
+
+  // Si estamos en carga inicial, mostrar un indicador de carga
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="bg-gray-200 dark:bg-gray-700 h-16 w-16 rounded-full mb-4"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 h-6 w-40 rounded mb-2"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 h-4 w-60 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   // Si no hay productos en el carrito, redirigir a la página de productos
   if (items.length === 0 && !checkoutSuccess) {
