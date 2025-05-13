@@ -17,10 +17,8 @@ export default function CheckoutPage() {
     nombre: '',
     apellido: '',
     email: '',
-    direccion: '',
-    ciudad: '',
-    codigoPostal: '',
     telefono: '',
+    direccion: '',
     metodoPago: 'tarjeta'
   });
 
@@ -31,7 +29,7 @@ export default function CheckoutPage() {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value   
     });
     
     // Limpiar error cuando el usuario edita el campo
@@ -50,10 +48,8 @@ export default function CheckoutPage() {
     if (!formData.apellido.trim()) newErrors.apellido = 'El apellido es requerido';
     if (!formData.email.trim()) newErrors.email = 'El email es requerido';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email inválido';
-    if (!formData.direccion.trim()) newErrors.direccion = 'La dirección es requerida';
-    if (!formData.ciudad.trim()) newErrors.ciudad = 'La ciudad es requerida';
-    if (!formData.codigoPostal.trim()) newErrors.codigoPostal = 'El código postal es requerido';
     if (!formData.telefono.trim()) newErrors.telefono = 'El teléfono es requerido';
+    if (!formData.direccion.trim()) newErrors.direccion = 'La dirección es requerida';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -208,11 +204,7 @@ export default function CheckoutPage() {
                 />
                 {errors.telefono && <p className="mt-1 text-sm text-red-500">{errors.telefono}</p>}
               </div>
-            </div>
-            
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Dirección de envío</h2>
-            
-            <div className="grid grid-cols-1 gap-4 mb-6">
+
               <div>
                 <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Dirección
@@ -229,74 +221,23 @@ export default function CheckoutPage() {
                 />
                 {errors.direccion && <p className="mt-1 text-sm text-red-500">{errors.direccion}</p>}
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="ciudad" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Ciudad
-                  </label>
-                  <input
-                    type="text"
-                    id="ciudad"
-                    name="ciudad"
-                    value={formData.ciudad}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${
-                      errors.ciudad ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
-                  />
-                  {errors.ciudad && <p className="mt-1 text-sm text-red-500">{errors.ciudad}</p>}
-                </div>
-                
-                <div>
-                  <label htmlFor="codigoPostal" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Código Postal
-                  </label>
-                  <input
-                    type="text"
-                    id="codigoPostal"
-                    name="codigoPostal"
-                    value={formData.codigoPostal}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${
-                      errors.codigoPostal ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
-                  />
-                  {errors.codigoPostal && <p className="mt-1 text-sm text-red-500">{errors.codigoPostal}</p>}
-                </div>
-              </div>
             </div>
             
             <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Método de pago</h2>
             
-            <div className="mb-6">
+            <div className="mb-6">             
               <div className="flex items-center mb-3">
                 <input
                   type="radio"
-                  id="tarjeta"
+                  id="webpay"
                   name="metodoPago"
-                  value="tarjeta"
-                  checked={formData.metodoPago === 'tarjeta'}
+                  value="webpay"
+                  checked={formData.metodoPago === 'webpay'}
                   onChange={handleInputChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                 />
-                <label htmlFor="tarjeta" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Tarjeta de crédito/débito
-                </label>
-              </div>
-              
-              <div className="flex items-center mb-3">
-                <input
-                  type="radio"
-                  id="paypal"
-                  name="metodoPago"
-                  value="paypal"
-                  checked={formData.metodoPago === 'paypal'}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="paypal" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  PayPal
+                <label htmlFor="webpay" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  WebPay
                 </label>
               </div>
               
@@ -326,10 +267,6 @@ export default function CheckoutPage() {
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600 dark:text-gray-300">Impuestos (19%):</span>
                   <span className="font-medium text-gray-800 dark:text-white">${Math.round(calcularTotal() * 0.19)}</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-600 dark:text-gray-300">Envío:</span>
-                  <span className="font-medium text-gray-800 dark:text-white">$10</span>
                 </div>
                 <div className="border-t border-gray-200 dark:border-gray-600 my-2 pt-2 flex justify-between">
                   <span className="font-bold text-gray-800 dark:text-white">Total:</span>
@@ -398,10 +335,6 @@ export default function CheckoutPage() {
               <div className="flex justify-between mb-2">
                 <span className="text-gray-600 dark:text-gray-300">Impuestos (19%):</span>
                 <span className="font-medium text-gray-800 dark:text-white">${Math.round(calcularTotal() * 0.19)}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-600 dark:text-gray-300">Envío:</span>
-                <span className="font-medium text-gray-800 dark:text-white">$10</span>
               </div>
               <div className="border-t border-gray-200 dark:border-gray-600 my-2 pt-2 flex justify-between">
                 <span className="font-bold text-gray-800 dark:text-white">Total:</span>
