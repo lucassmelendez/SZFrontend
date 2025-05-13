@@ -156,13 +156,11 @@ export function useCarrito() {
         console.log('Carrito vacío, localStorage limpiado');
       }
       
-      // Notificar a otros componentes inmediatamente
-      setTimeout(() => {
-        notifyCarritoUpdated();
-      }, 0);
-      
       return newItems;
     });
+    
+    // Notificar a otros componentes después de la actualización
+    notifyCarritoUpdated();
   };
   
   // Limpiar todo el carrito
