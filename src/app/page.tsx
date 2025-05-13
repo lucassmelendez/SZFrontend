@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { productoApi, Producto } from '@/lib/api';
 import Loading from '@/components/ui/Loading';
-import ProductCarousel from '@/components/ui/ProductCarousel';
+import ProductGrid from '@/components/ui/ProductGrid';
 import { FaArrowRight, FaTable, FaShoppingBag, FaShieldAlt } from 'react-icons/fa';
 
 export default function Home() {
@@ -16,8 +16,8 @@ export default function Home() {
     const fetchProductos = async () => {
       try {
         const data = await productoApi.getAll();
-        // Obtener todos los productos para el carrusel
-        setProductos(data);
+        // Mostrar solo los 8 primeros productos
+        setProductos(data.slice(0, 8));
         setLoading(false);
       } catch (error) {
         console.error('Error al cargar productos:', error);
@@ -106,8 +106,17 @@ export default function Home() {
       {error ? (
         <div className="text-center text-red-600 dark:text-red-400">{error}</div>
       ) : (
-        <section className="container mx-auto">
-          <ProductCarousel productos={productos} title="Productos Destacados" />
+        <section>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold dark:text-white">Productos Destacados</h2>
+            <Link
+              href="/productos"
+              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium inline-flex items-center"
+            >
+              Ver todos <FaArrowRight className="ml-1" size={14} />
+            </Link>
+          </div>
+          <ProductGrid productos={productos} />
         </section>
       )}
 
