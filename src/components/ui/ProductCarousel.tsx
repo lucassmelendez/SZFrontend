@@ -97,13 +97,13 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
         {/* Botón izquierdo */}
         <button 
           onClick={prevSlide}
-          className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
+          className="absolute -left-8 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-full shadow-md transition-colors"
           aria-label="Anterior"
         >
           <FaChevronLeft className="text-blue-600 dark:text-blue-400" />
         </button>
         
-        <div className="relative overflow-hidden px-1" ref={containerRef}>
+        <div className="relative overflow-hidden px-8" ref={containerRef}>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 max-w-full mx-auto">
             {visibleProductos.map((producto) => (
               <div key={producto.id_producto} className="h-full transform scale-110 p-2">
@@ -132,7 +132,7 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
         {/* Botón derecho */}
         <button 
           onClick={nextSlide}
-          className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
+          className="absolute -right-8 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-full shadow-md transition-colors"
           aria-label="Siguiente"
         >
           <FaChevronRight className="text-blue-600 dark:text-blue-400" />
