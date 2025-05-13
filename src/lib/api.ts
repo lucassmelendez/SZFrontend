@@ -44,9 +44,12 @@ export interface User {
   id_cliente: number;
   nombre: string;
   apellido: string;
-  email: string;
+  correo: string;
   telefono: number;
   direccion: string;
+  id_rol?: number;
+  rut?: string;
+  contrasena?: string;
 }
 
 export interface LoginResponse {
@@ -88,20 +91,25 @@ export const productoApi = {
 
 // API de autenticación
 export const authApi = {
-  login: async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>('/auth/login', { email, password });
+  login: async (correo: string, contrasena: string): Promise<LoginResponse> => {
+    const response = await api.post<LoginResponse>('/auth/login', { correo, contrasena });
     return response.data;
   },
 
-  register: async (email: string, password: string, nombre: string, apellido: string, telefono: string, direccion: string): Promise<LoginResponse> => {
+  register: async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string): Promise<LoginResponse> => {
     const response = await api.post<LoginResponse>('/auth/register', { 
-      email, 
-      password, 
+      correo, 
+      contrasena, 
       nombre, 
       apellido, 
       telefono, 
       direccion 
     });
+    return response.data;
+  },
+
+  logout: async (): Promise<ApiResponse<null>> => {
+    const response = await api.post<ApiResponse<null>>('/auth/logout');
     return response.data;
   },
 
@@ -113,7 +121,7 @@ export const authApi = {
   updateProfile: async (data: {
     nombre?: string;
     apellido?: string;
-    email?: string;
+    correo?: string;
     telefono?: string;
     direccion?: string;
   }): Promise<ApiResponse<User>> => {

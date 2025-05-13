@@ -6,8 +6,8 @@ import { User, authApi } from '@/lib/api';
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, nombre: string, apellido: string, telefono: string, direccion: string) => Promise<void>;
+  login: (correo: string, contrasena: string) => Promise<void>;
+  register: (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -40,9 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkSession();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (correo: string, contrasena: string) => {
     try {
-      const response = await authApi.login(email, password);
+      const response = await authApi.login(correo, contrasena);
       if (response.success && response.data.user) {
         setUser(response.data.user);
         localStorage.setItem('auth_token', response.data.token);
@@ -55,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, nombre: string, apellido: string, telefono: string, direccion: string) => {
+  const register = async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string) => {
     try {
-      const response = await authApi.register(email, password, nombre, apellido, telefono, direccion);
+      const response = await authApi.register(correo, contrasena, nombre, apellido, telefono, direccion);
       if (response.success && response.data.user) {
         setUser(response.data.user);
         localStorage.setItem('auth_token', response.data.token);
@@ -72,6 +72,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
+      // Intentar hacer logout en el servidor
+      await authApi.logout().catch(err => {
+        console.warn('Error al comunicar logout al servidor:', err);
+        // Continuar con el logout local aunque falle el servidor
+      });
+      
+      // Eliminar datos locales
       setUser(null);
       localStorage.removeItem('auth_token');
     } catch (error) {
