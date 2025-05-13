@@ -21,13 +21,13 @@ export function useFloatingCart() {
     setIsCartOpen(prevState => !prevState);
   }, []);
 
-  // Mostrar animación y abrir carrito cuando se agrega un nuevo artículo
+  // Mostrar animación cuando se agrega un nuevo artículo
   useEffect(() => {
     if (cantidadTotal > lastItemCount) {
       setShowCartAnimation(true);
       
-      // Abrir carrito automáticamente cuando se agrega un producto
-      setIsCartOpen(true);
+      // Eliminamos la apertura automática aquí, ya que se manejará desde el ProductCard
+      // setIsCartOpen(true);
       
       // Resetear animación después de 1.5 segundos
       const timer = setTimeout(() => {

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaShoppingCart } from 'react-icons/fa';
 import { Producto } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
+import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 
 interface ProductCardProps {
   producto: Producto;
@@ -12,6 +13,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ producto }: ProductCardProps) {
   const { agregarProducto } = useCarrito();
+  const { openCart } = useFloatingCartContext();
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddToCart = () => {
@@ -22,6 +24,9 @@ export default function ProductCard({ producto }: ProductCardProps) {
     setTimeout(() => {
       setIsAdding(false);
     }, 1000);
+    
+    // Abrir el carrito flotante automáticamente
+    openCart();
   };
 
   return (
