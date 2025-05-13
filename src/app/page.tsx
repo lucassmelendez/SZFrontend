@@ -9,10 +9,28 @@ import { FaArrowRight, FaTable, FaShoppingBag, FaShieldAlt } from 'react-icons/f
 
 export default function Home() {
   const [productos, setProductos] = useState<Producto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [firstVisit, setFirstVisit] = useState(true);
 
   useEffect(() => {
+    // Solo ejecutar código que accede a sessionStorage en el cliente
+    try {
+      // Verificamos si es la primera visita a la página de inicio
+      const isFirstVisit = sessionStorage.getItem('homeVisited') !== 'true';
+      setFirstVisit(isFirstVisit);
+      
+      // Marcamos que ya hemos visitado la página de inicio
+      sessionStorage.setItem('homeVisited', 'true');
+      
+      // Solo mostrar indicador de carga cuando NO es la primera carga
+      setLoading(!isFirstVisit);
+    } catch (e) {
+      // Si hay un error accediendo a sessionStorage, no mostramos carga
+      console.error('Error accediendo a sessionStorage:', e);
+      setLoading(false);
+    }
+    
     const fetchProductos = async () => {
       try {
         const data = await productoApi.getAll();
