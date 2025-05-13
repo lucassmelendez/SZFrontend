@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { productoApi, Producto } from '@/lib/api';
 import Loading from '@/components/ui/Loading';
 import ProductCarousel from '@/components/ui/ProductCarousel';
-import { FaArrowRight, FaTable, FaShoppingBag, FaShieldAlt } from 'react-icons/fa';
+import { FaArrowRight } from 'react-icons/fa';
+import { GiPingPongBat, GiTable, GiBallPyramid } from 'react-icons/gi';
 
 export default function Home() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -69,19 +70,19 @@ export default function Home() {
           {[
             {
               title: 'Paletas',
-              icon: <FaTable size={40} />,
+              icon: <GiPingPongBat size={48} />,
               description: 'Paletas profesionales para todos los niveles',
               link: '/productos/categoria/1',
             },
             {
               title: 'Pelotas',
-              icon: <FaShoppingBag size={40} />,
+              icon: <GiBallPyramid size={48} />,
               description: 'Las mejores pelotas para tus entrenamientos y competiciones',
               link: '/productos/categoria/3',
             },
             {
               title: 'Mesas',
-              icon: <FaShieldAlt size={40} />,
+              icon: <GiTable size={48} />,
               description: 'Mesas de competición y entrenamiento',
               link: '/productos/categoria/5',
             },
