@@ -85,51 +85,55 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        {title && <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{title}</h2>}
-        <div className="flex gap-2">
-          <button 
-            onClick={prevSlide}
-            className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
-            aria-label="Anterior"
-          >
-            <FaChevronLeft className="text-blue-600 dark:text-blue-400" />
-          </button>
-          <button 
-            onClick={nextSlide}
-            className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
-            aria-label="Siguiente"
-          >
-            <FaChevronRight className="text-blue-600 dark:text-blue-400" />
-          </button>
-        </div>
+    <div className="max-w-7xl mx-auto px-4">
+      <div className="flex justify-center items-center mb-6">
+        {title && <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-center">{title}</h2>}
       </div>
       
-      <div className="relative overflow-hidden" ref={containerRef}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {visibleProductos.map((producto) => (
-            <div key={producto.id_producto} className="h-full">
-              <ProductCard producto={producto} />
-            </div>
-          ))}
+      <div className="relative">
+        {/* Botón izquierdo */}
+        <button 
+          onClick={prevSlide}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
+          aria-label="Anterior"
+        >
+          <FaChevronLeft className="text-blue-600 dark:text-blue-400" />
+        </button>
+        
+        <div className="relative overflow-hidden px-8" ref={containerRef}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {visibleProductos.map((producto) => (
+              <div key={producto.id_producto} className="h-full transform scale-90">
+                <ProductCard producto={producto} />
+              </div>
+            ))}
+          </div>
+          
+          {/* Paginación */}
+          <div className="flex justify-center mt-6 space-x-2">
+            {Array.from({ length: maxPages }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToPage(index)}
+                className={`w-3 h-3 rounded-full ${
+                  Math.floor(currentIndex / slidesPerView) === index
+                    ? 'bg-blue-600 dark:bg-blue-500'
+                    : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+                aria-label={`Ir a la página ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
         
-        {/* Paginación */}
-        <div className="flex justify-center mt-6 space-x-2">
-          {Array.from({ length: maxPages }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToPage(index)}
-              className={`w-3 h-3 rounded-full ${
-                Math.floor(currentIndex / slidesPerView) === index
-                  ? 'bg-blue-600 dark:bg-blue-500'
-                  : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-              aria-label={`Ir a la página ${index + 1}`}
-            />
-          ))}
-        </div>
+        {/* Botón derecho */}
+        <button 
+          onClick={nextSlide}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-md transition-colors"
+          aria-label="Siguiente"
+        >
+          <FaChevronRight className="text-blue-600 dark:text-blue-400" />
+        </button>
       </div>
     </div>
   );
