@@ -123,13 +123,24 @@ export default function Header() {
               <div className="relative" ref={profileMenuRef}>
                 {user ? (
                   <>
-                    <button
-                      onClick={() => setIsProfileOpen(!isProfileOpen)}
-                      className="flex items-center space-x-2 hover:text-blue-200"
-                    >
-                      <FaUser size={20} />
-                      <span className="text-sm">{user.nombre.split(' ')[0]}</span>
-                    </button>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        className="flex items-center space-x-2 hover:text-blue-200"
+                      >
+                        <FaUser size={20} />
+                        <span className="text-sm">{user.nombre.split(' ')[0]}</span>
+                      </button>
+                      
+                      {/* Botón para cerrar sesión directamente */}
+                      <button
+                        onClick={handleLogout}
+                        className="hover:text-red-400"
+                        aria-label="Cerrar sesión"
+                      >
+                        <FaSignOutAlt size={20} />
+                      </button>
+                    </div>
                     
                     {/* Menú desplegable de cuenta */}
                     {isProfileOpen && (
@@ -202,13 +213,24 @@ export default function Header() {
               <div className="relative" ref={profileMenuRef}>
                 {user ? (
                   <>
-                    <button
-                      onClick={() => setIsProfileOpen(!isProfileOpen)}
-                      className="flex items-center space-x-2 hover:text-blue-200"
-                    >
-                      <FaUser size={20} />
-                      <span className="hidden md:inline text-sm">{user.nombre.split(' ')[0]}</span>
-                    </button>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        className="flex items-center space-x-2 hover:text-blue-200"
+                      >
+                        <FaUser size={20} />
+                        <span className="hidden md:inline text-sm">{user.nombre.split(' ')[0]}</span>
+                      </button>
+
+                      {/* Botón para cerrar sesión directamente */}
+                      <button
+                        onClick={handleLogout}
+                        className="hover:text-red-400"
+                        aria-label="Cerrar sesión"
+                      >
+                        <FaSignOutAlt size={20} />
+                      </button>
+                    </div>
                     
                     {/* Menú desplegable de cuenta */}
                     {isProfileOpen && (

@@ -7,8 +7,8 @@ import { FaEnvelope, FaLock, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login(correo, contrasena);
       router.push('/'); // Redirigir al inicio después del login exitoso
       router.refresh(); // Forzar la actualización de la interfaz
     } catch (error: any) {
@@ -62,7 +62,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="correo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Correo electrónico
               </label>
               <div className="mt-1 relative">
@@ -70,13 +70,13 @@ export default function LoginPage() {
                   <FaEnvelope className="text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
+                  id="correo"
+                  name="correo"
                   type="email"
                   autoComplete="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
                   className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                   placeholder="ejemplo@correo.com"
                 />
@@ -84,7 +84,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Contraseña
               </label>
               <div className="mt-1 relative">
@@ -92,13 +92,13 @@ export default function LoginPage() {
                   <FaLock className="text-gray-400" />
                 </div>
                 <input
-                  id="password"
-                  name="password"
+                  id="contrasena"
+                  name="contrasena"
                   type="password"
                   autoComplete="current-password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={contrasena}
+                  onChange={(e) => setContrasena(e.target.value)}
                   className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                   placeholder="••••••••"
                 />
