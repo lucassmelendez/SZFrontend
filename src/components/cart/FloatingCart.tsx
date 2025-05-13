@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { FaShoppingCart, FaTimes, FaTrash, FaArrowRight } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
@@ -13,6 +13,53 @@ interface FloatingCartProps {
 export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
   const { items, actualizarCantidad, eliminarProducto, calcularTotal } = useCarrito();
   const cartRef = useRef<HTMLDivElement>(null);
+  const lastItemRef = useRef<number | null>(null);
+  
+  // Guarda el último artículo agregado para efecto visual
+  const [lastAddedId, setLastAddedId] = useState<number | null>(null);
+  
+  // Resetear lastItemRef cuando el carrito está vacío
+  useEffect(() => {
+    if (items.length === 0) {
+      lastItemRef.current = null;
+      setLastAddedId(null);
+    }
+  }, [items]);
+  
+  // Detectar cuando se agrega un nuevo artículo para efectos visuales
+  useEffect(() => {
+    // Solo actualizamos el estado si el carrito está abierto y hay items
+    if (isOpen && items.length > 0) {
+      const lastItem = items[items.length - 1];
+      const lastItemId = lastItem.producto.id_producto;
+      
+      // Solo establecer el lastAddedId si cambió el último item
+      if (lastItemRef.current !== lastItemId) {
+        lastItemRef.current = lastItemId;
+        
+        // Usar setTimeout para evitar actualizar durante el renderizado
+        setTimeout(() => {
+          setLastAddedId(lastItemId);
+        }, 0);
+        
+        // Eliminar el resaltado después de 2 segundos
+        const timer = setTimeout(() => {
+          setLastAddedId(null);
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isOpen, items]);
+
+  // Handler para eliminar productos
+  const handleEliminarProducto = (productoId: number) => {
+    // Si estamos eliminando el último producto resaltado, limpiar la referencia
+    if (lastAddedId === productoId) {
+      setLastAddedId(null);
+    }
+    eliminarProducto(productoId);
+  };
 
   // Cerrar carrito al hacer clic fuera
   useEffect(() => {
@@ -47,7 +94,7 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 transition-opacity">
+    <div className="fixed inset-0 z-50 backdrop-blur-sm bg-transparent transition-opacity">
       {/* Carrito en desktop - desliza desde la derecha */}
       <div 
         ref={cartRef}
@@ -83,7 +130,12 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
           ) : (
             <div className="space-y-4">
               {items.map((item) => (
-                <div key={item.producto.id_producto} className="flex border-b pb-4 dark:border-gray-700">
+                <div 
+                  key={item.producto.id_producto} 
+                  className={`flex border-b pb-4 dark:border-gray-700 ${
+                    lastAddedId === item.producto.id_producto ? 'animate-pulse-once bg-blue-50 dark:bg-blue-900/20' : ''
+                  }`}
+                >
                   {/* Imagen */}
                   <div className="h-16 w-16 flex-shrink-0 bg-gray-200 dark:bg-gray-700 overflow-hidden rounded">
                     <img
@@ -100,7 +152,7 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                         {item.producto.nombre}
                       </h3>
                       <button
-                        onClick={() => eliminarProducto(item.producto.id_producto)}
+                        onClick={() => handleEliminarProducto(item.producto.id_producto)}
                         className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                         title="Eliminar"
                       >
@@ -159,7 +211,6 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
             <Link
               href="/checkout"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium flex items-center justify-center transition-colors"
-              onClick={onClose}
             >
               <span>Ir al Checkout</span>
               <FaArrowRight className="ml-2" />
