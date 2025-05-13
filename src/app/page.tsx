@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { productoApi, Producto } from '@/lib/api';
 import Loading from '@/components/ui/Loading';
-import ProductGrid from '@/components/ui/ProductGrid';
-import { FaArrowRight, FaTable, FaShoppingBag, FaShieldAlt } from 'react-icons/fa';
+import ProductCarousel from '@/components/ui/ProductCarousel';
+import { FaArrowRight } from 'react-icons/fa';
+import { GiPingPongBat, GiTable, GiBallPyramid } from 'react-icons/gi';
 
 export default function Home() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -16,8 +17,8 @@ export default function Home() {
     const fetchProductos = async () => {
       try {
         const data = await productoApi.getAll();
-        // Mostrar solo los 8 primeros productos
-        setProductos(data.slice(0, 8));
+        // Mostrar hasta 15 productos para el carrusel
+        setProductos(data.slice(0, 15));
         setLoading(false);
       } catch (error) {
         console.error('Error al cargar productos:', error);
@@ -69,19 +70,19 @@ export default function Home() {
           {[
             {
               title: 'Paletas',
-              icon: <FaTable size={40} />,
+              icon: <GiPingPongBat size={48} />,
               description: 'Paletas profesionales para todos los niveles',
               link: '/productos/categoria/1',
             },
             {
               title: 'Pelotas',
-              icon: <FaShoppingBag size={40} />,
-              description: 'Las mejores pelotas para tus entrenamientos y competiciones',
+              icon: <GiBallPyramid size={48} />,
+              description: 'Pelotas profesionales para tus entrenamientos y competiciones',
               link: '/productos/categoria/3',
             },
             {
               title: 'Mesas',
-              icon: <FaShieldAlt size={40} />,
+              icon: <GiTable size={48} />,
               description: 'Mesas de competición y entrenamiento',
               link: '/productos/categoria/5',
             },
@@ -95,7 +96,7 @@ export default function Home() {
               <h3 className="text-xl font-semibold mb-2 dark:text-white">{category.title}</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">{category.description}</p>
               <span className="text-blue-600 dark:text-blue-400 font-medium inline-flex items-center">
-                Ver productos <FaArrowRight className="ml-1" size={14} />
+                Ver categoria <FaArrowRight className="ml-1" size={14} />
               </span>
             </Link>
           ))}
@@ -107,16 +108,16 @@ export default function Home() {
         <div className="text-center text-red-600 dark:text-red-400">{error}</div>
       ) : (
         <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold dark:text-white">Productos Destacados</h2>
+          <h2 className="text-3xl font-bold text-center mb-8 dark:text-white">Productos Destacados</h2>
+          <ProductCarousel productos={productos} title="" />
+          <div className="flex justify-center mt-6">
             <Link
               href="/productos"
               className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium inline-flex items-center"
             >
-              Ver todos <FaArrowRight className="ml-1" size={14} />
+              Ver todos los productos <FaArrowRight className="ml-1" size={14} />
             </Link>
           </div>
-          <ProductGrid productos={productos} />
         </section>
       )}
 

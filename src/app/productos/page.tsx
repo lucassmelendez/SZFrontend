@@ -59,17 +59,6 @@ export default function ProductosPage() {
         <p className="mb-6">
           Explora nuestra amplia selección de artículos de tenis de mesa de alta calidad.
         </p>
-
-        <form onSubmit={handleSearchSubmit} className="relative max-w-md">
-          <input
-            type="text"
-            placeholder="Buscar productos..."
-            className="w-full bg-white text-gray-800 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-        </form>
       </div>
 
       {error ? (
