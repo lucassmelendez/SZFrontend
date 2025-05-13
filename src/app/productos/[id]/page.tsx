@@ -6,7 +6,6 @@ import { productoApi, Producto } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
 import Loading from '@/components/ui/Loading';
 import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
-import React from 'react';
 
 interface PageParams {
   id: string;
@@ -15,7 +14,6 @@ interface PageParams {
 export default function ProductoDetailPage({ params }: { params: PageParams }) {
   const router = useRouter();
   const { agregarProducto } = useCarrito();
-  const productoId = React.use(Promise.resolve(params.id));
   const [producto, setProducto] = useState<Producto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +23,7 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
   useEffect(() => {
     const fetchProducto = async () => {
       try {
-        const id = parseInt(productoId, 10);
+        const id = parseInt(params.id, 10);
         if (isNaN(id)) {
           throw new Error('ID de producto inválido');
         }
@@ -41,7 +39,7 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
     };
 
     fetchProducto();
-  }, [productoId]);
+  }, [params.id]);
 
   const handleAddToCart = () => {
     if (producto) {
@@ -71,34 +69,59 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
     }
   };
 
-  if (loading) return <Loading />;
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            <FaArrowLeft />
+            <span>Volver al catálogo</span>
+          </button>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 dark:border-blue-400"></div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-600 mb-4">{error}</div>
-        <button
-          onClick={handleGoBack}
-          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
-        >
-          <FaArrowLeft />
-          <span>Volver al catálogo</span>
-        </button>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            <FaArrowLeft />
+            <span>Volver al catálogo</span>
+          </button>
+        </div>
+        <div className="text-center py-12">
+          <div className="text-red-600 dark:text-red-400 mb-4">{error}</div>
+        </div>
       </div>
     );
   }
 
   if (!producto) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-600 mb-4">No se encontró el producto.</div>
-        <button
-          onClick={handleGoBack}
-          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
-        >
-          <FaArrowLeft />
-          <span>Volver al catálogo</span>
-        </button>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            <FaArrowLeft />
+            <span>Volver al catálogo</span>
+          </button>
+        </div>
+        <div className="text-center py-12">
+          <div className="text-red-600 dark:text-red-400 mb-4">No se encontró el producto.</div>
+        </div>
       </div>
     );
   }

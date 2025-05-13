@@ -6,7 +6,6 @@ import Loading from '@/components/ui/Loading';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
-import React from 'react';
 
 const categoriasMap = {
   '1': 'Paletas',
@@ -21,7 +20,6 @@ interface PageParams {
 }
 
 export default function CategoriaPage({ params }: { params: PageParams }) {
-  const categoriaId = React.use(Promise.resolve(params.categoriaId));
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +27,7 @@ export default function CategoriaPage({ params }: { params: PageParams }) {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const id = parseInt(categoriaId, 10);
+        const id = parseInt(params.categoriaId, 10);
         if (isNaN(id)) {
           throw new Error('ID de categoría inválido');
         }
@@ -45,11 +43,9 @@ export default function CategoriaPage({ params }: { params: PageParams }) {
     };
 
     fetchProductos();
-  }, [categoriaId]);
+  }, [params.categoriaId]);
 
-  if (loading) return <Loading />;
-
-  const categoriaNombre = categoriasMap[categoriaId as keyof typeof categoriasMap] || 'Categoría';
+  const categoriaNombre = categoriasMap[params.categoriaId as keyof typeof categoriasMap] || 'Categoría';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -66,7 +62,11 @@ export default function CategoriaPage({ params }: { params: PageParams }) {
         </h1>
       </div>
 
-      {error ? (
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 dark:border-blue-400"></div>
+        </div>
+      ) : error ? (
         <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
       ) : (
         <ProductGrid 
