@@ -100,10 +100,10 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
           <FaChevronLeft className="text-blue-600 dark:text-blue-400" />
         </button>
         
-        <div className="relative overflow-hidden px-10" ref={containerRef}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+        <div className="relative overflow-hidden px-8" ref={containerRef}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {visibleProductos.map((producto) => (
-              <div key={producto.id_producto} className="h-full">
+              <div key={producto.id_producto} className="h-full transform scale-90">
                 <ProductCard producto={producto} />
               </div>
             ))}
