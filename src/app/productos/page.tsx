@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { productoApi, Producto } from '@/lib/api';
-import Loading from '@/components/ui/Loading';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { FaSearch } from 'react-icons/fa';
 
@@ -50,8 +49,6 @@ export default function ProductosPage() {
     // La búsqueda ya se maneja en el efecto
   };
 
-  if (loading) return <Loading />;
-
   return (
     <div>
       <div className="bg-blue-700 text-white rounded-lg p-8 mb-8">
@@ -61,21 +58,27 @@ export default function ProductosPage() {
         </p>
       </div>
 
-      {error ? (
-        <div className="text-center text-red-600 py-8">{error}</div>
-      ) : (
-        <ProductGrid 
-          productos={filteredProductos} 
-          title={searchTerm ? `Resultados para "${searchTerm}"` : undefined}
-        />
-      )}
-
-      {filteredProductos.length === 0 && !error && !loading && (
-        <div className="text-center py-8">
-          <p className="text-gray-600">
-            No se encontraron productos que coincidan con tu búsqueda. Intenta con otros términos.
-          </p>
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 dark:border-blue-400"></div>
         </div>
+      ) : error ? (
+        <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
+      ) : (
+        <>
+          <ProductGrid 
+            productos={filteredProductos} 
+            title={searchTerm ? `Resultados para "${searchTerm}"` : undefined}
+          />
+          
+          {filteredProductos.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-600 dark:text-gray-400">
+                No se encontraron productos que coincidan con tu búsqueda. Intenta con otros términos.
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

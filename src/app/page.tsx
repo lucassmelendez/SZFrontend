@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { productoApi, Producto } from '@/lib/api';
-import Loading from '@/components/ui/Loading';
 import ProductCarousel from '@/components/ui/ProductCarousel';
 import { FaArrowRight } from 'react-icons/fa';
 import { GiPingPongBat, GiTable, GiBallPyramid } from 'react-icons/gi';
@@ -29,8 +28,6 @@ export default function Home() {
 
     fetchProductos();
   }, []);
-
-  if (loading) return <Loading />;
 
   return (
     <div className="space-y-12">
@@ -104,22 +101,29 @@ export default function Home() {
       </section>
 
       {/* Productos destacados */}
-      {error ? (
-        <div className="text-center text-red-600 dark:text-red-400">{error}</div>
-      ) : (
-        <section>
-          <h2 className="text-3xl font-bold text-center mb-8 dark:text-white">Productos Destacados</h2>
-          <ProductCarousel productos={productos} title="" />
-          <div className="flex justify-center mt-6">
-            <Link
-              href="/productos"
-              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium inline-flex items-center"
-            >
-              Ver todos los productos <FaArrowRight className="ml-1" size={14} />
-            </Link>
+      <section>
+        <h2 className="text-3xl font-bold text-center mb-8 dark:text-white">Productos Destacados</h2>
+        
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 dark:border-blue-400"></div>
           </div>
-        </section>
-      )}
+        ) : error ? (
+          <div className="text-center text-red-600 dark:text-red-400">{error}</div>
+        ) : (
+          <>
+            <ProductCarousel productos={productos} title="" />
+            <div className="flex justify-center mt-6">
+              <Link
+                href="/productos"
+                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium inline-flex items-center"
+              >
+                Ver todos los productos <FaArrowRight className="ml-1" size={14} />
+              </Link>
+            </div>
+          </>
+        )}
+      </section>
 
       {/* Banner promocional */}
       <section className="bg-gray-100 dark:bg-gray-800 rounded-lg p-8 text-center transition-colors duration-200">
