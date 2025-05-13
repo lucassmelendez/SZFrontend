@@ -7,20 +7,42 @@ export interface CarritoItem {
   cantidad: number;
 }
 
+// Crear un evento personalizado para sincronizar el carrito
+const CARRITO_UPDATED_EVENT = 'carritoUpdated';
+
+// Función para disparar el evento de actualización
+const notifyCarritoUpdated = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(CARRITO_UPDATED_EVENT));
+  }
+};
+
 export function useCarrito() {
   const [items, setItems] = useState<CarritoItem[]>([]);
   
   // Cargar el carrito desde localStorage al iniciar
   useEffect(() => {
-    const savedCarrito = localStorage.getItem('carrito');
-    if (savedCarrito) {
-      try {
-        setItems(JSON.parse(savedCarrito));
-      } catch (error) {
-        console.error('Error al cargar el carrito desde localStorage:', error);
-        localStorage.removeItem('carrito');
+    const loadCartFromStorage = () => {
+      const savedCarrito = localStorage.getItem('carrito');
+      if (savedCarrito) {
+        try {
+          setItems(JSON.parse(savedCarrito));
+        } catch (error) {
+          console.error('Error al cargar el carrito desde localStorage:', error);
+          localStorage.removeItem('carrito');
+        }
       }
-    }
+    };
+
+    // Cargar inicialmente
+    loadCartFromStorage();
+    
+    // También cargar cuando se actualice el carrito desde otro componente
+    window.addEventListener(CARRITO_UPDATED_EVENT, loadCartFromStorage);
+    
+    return () => {
+      window.removeEventListener(CARRITO_UPDATED_EVENT, loadCartFromStorage);
+    };
   }, []);
   
   // Guardar cambios en localStorage
@@ -37,44 +59,81 @@ export function useCarrito() {
     setItems(prevItems => {
       const itemExistente = prevItems.find(item => item.producto.id_producto === producto.id_producto);
       
+      let newItems;
       if (itemExistente) {
         // Actualizar cantidad si el producto ya existe
-        return prevItems.map(item => 
+        newItems = prevItems.map(item => 
           item.producto.id_producto === producto.id_producto 
             ? { ...item, cantidad: item.cantidad + cantidad }
             : item
         );
       } else {
         // Agregar nuevo producto
-        return [...prevItems, { producto, cantidad }];
+        newItems = [...prevItems, { producto, cantidad }];
       }
+      
+      // Guardar el nuevo estado en localStorage inmediatamente
+      localStorage.setItem('carrito', JSON.stringify(newItems));
+      
+      // Notificar a otros componentes
+      notifyCarritoUpdated();
+      
+      return newItems;
     });
   };
   
   // Actualizar cantidad de un producto
   const actualizarCantidad = (productoId: number, cantidad: number) => {
     setItems(prevItems => {
+      let newItems;
       if (cantidad <= 0) {
-        return prevItems.filter(item => item.producto.id_producto !== productoId);
+        newItems = prevItems.filter(item => item.producto.id_producto !== productoId);
+      } else {
+        newItems = prevItems.map(item => 
+          item.producto.id_producto === productoId 
+            ? { ...item, cantidad }
+            : item
+        );
       }
       
-      return prevItems.map(item => 
-        item.producto.id_producto === productoId 
-          ? { ...item, cantidad }
-          : item
-      );
+      // Guardar en localStorage inmediatamente
+      if (newItems.length > 0) {
+        localStorage.setItem('carrito', JSON.stringify(newItems));
+      } else {
+        localStorage.removeItem('carrito');
+      }
+      
+      // Notificar a otros componentes
+      notifyCarritoUpdated();
+      
+      return newItems;
     });
   };
   
   // Eliminar un producto del carrito
   const eliminarProducto = (productoId: number) => {
-    setItems(prevItems => prevItems.filter(item => item.producto.id_producto !== productoId));
+    setItems(prevItems => {
+      const newItems = prevItems.filter(item => item.producto.id_producto !== productoId);
+      
+      // Guardar en localStorage inmediatamente
+      if (newItems.length > 0) {
+        localStorage.setItem('carrito', JSON.stringify(newItems));
+      } else {
+        localStorage.removeItem('carrito');
+      }
+      
+      // Notificar a otros componentes
+      notifyCarritoUpdated();
+      
+      return newItems;
+    });
   };
   
   // Limpiar todo el carrito
   const limpiarCarrito = () => {
     setItems([]);
     localStorage.removeItem('carrito');
+    notifyCarritoUpdated();
   };
   
   // Calcular el total del carrito

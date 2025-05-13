@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { FaShoppingCart, FaTimes, FaTrash, FaArrowRight } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
@@ -13,6 +13,24 @@ interface FloatingCartProps {
 export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
   const { items, actualizarCantidad, eliminarProducto, calcularTotal } = useCarrito();
   const cartRef = useRef<HTMLDivElement>(null);
+  
+  // Guarda el último artículo agregado para efecto visual
+  const [lastAddedId, setLastAddedId] = useState<number | null>(null);
+  
+  // Detectar cuando se agrega un nuevo artículo para efectos visuales
+  useEffect(() => {
+    if (isOpen && items.length > 0) {
+      const lastItem = items[items.length - 1];
+      setLastAddedId(lastItem.producto.id_producto);
+      
+      // Eliminar el resaltado después de 2 segundos
+      const timer = setTimeout(() => {
+        setLastAddedId(null);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, items]);
 
   // Cerrar carrito al hacer clic fuera
   useEffect(() => {
@@ -83,7 +101,12 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
           ) : (
             <div className="space-y-4">
               {items.map((item) => (
-                <div key={item.producto.id_producto} className="flex border-b pb-4 dark:border-gray-700">
+                <div 
+                  key={item.producto.id_producto} 
+                  className={`flex border-b pb-4 dark:border-gray-700 ${
+                    lastAddedId === item.producto.id_producto ? 'animate-pulse-once bg-blue-50 dark:bg-blue-900/20' : ''
+                  }`}
+                >
                   {/* Imagen */}
                   <div className="h-16 w-16 flex-shrink-0 bg-gray-200 dark:bg-gray-700 overflow-hidden rounded">
                     <img
