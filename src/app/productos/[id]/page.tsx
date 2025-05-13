@@ -89,7 +89,7 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
   if (!producto) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-800 mb-4">Producto no encontrado</div>
+        <div className="text-red-600 mb-4">No se encontró el producto.</div>
         <button
           onClick={handleGoBack}
           className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
@@ -102,77 +102,79 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
   }
 
   return (
-    <div>
-      <button
-        onClick={handleGoBack}
-        className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 mb-6"
-      >
-        <FaArrowLeft />
-        <span>Volver al catálogo</span>
-      </button>
-
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8">
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-6">
+        <button
+          onClick={handleGoBack}
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+        >
+          <FaArrowLeft />
+          <span>Volver al catálogo</span>
+        </button>
+      </div>
+      
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <div className="flex flex-col md:flex-row">
           {/* Imagen del producto */}
-          <div className="md:w-1/2">
-            <div className="bg-gray-200 aspect-square rounded-md flex items-center justify-center overflow-hidden">
+          <div className="md:w-1/2 md:pr-8 mb-6 md:mb-0">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
               <img
-                src={`https://picsum.photos/seed/${producto.id_producto}/800/800`}
+                src={`https://picsum.photos/seed/${producto.id_producto}/600/600`}
                 alt={producto.nombre}
-                className="object-cover w-full h-full"
+                className="w-full h-auto object-cover"
               />
             </div>
           </div>
-
+          
           {/* Detalles del producto */}
           <div className="md:w-1/2">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">{producto.nombre}</h1>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">{producto.nombre}</h1>
             
-            <div className="text-2xl font-bold text-blue-700 mb-4">
+            <div className="text-2xl font-bold text-blue-700 dark:text-blue-400 mb-4">
               ${Math.round(producto.precio)}
             </div>
             
             <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-2">Descripción</h2>
-              <p className="text-gray-700">{producto.descripcion}</p>
+              <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">Descripción</h2>
+              <p className="text-gray-700 dark:text-gray-300">{producto.descripcion}</p>
             </div>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <span className="text-gray-500 text-sm">Marca</span>
-                <div className="font-medium">{producto.marca}</div>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">Marca</span>
+                <div className="font-medium text-gray-800 dark:text-white">{producto.marca}</div>
               </div>
               <div>
-                <span className="text-gray-500 text-sm">Peso</span>
-                <div className="font-medium">{producto.peso}</div>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">Peso</span>
+                <div className="font-medium text-gray-800 dark:text-white">{producto.peso}</div>
               </div>
               <div>
-                <span className="text-gray-500 text-sm">Stock</span>
-                <div className="font-medium">{producto.stock} unidades</div>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">Stock</span>
+                <div className="font-medium text-gray-800 dark:text-white">{producto.stock} unidades</div>
               </div>
               <div>
-                <span className="text-gray-500 text-sm">Categoría</span>
-                <div className="font-medium">ID: {producto.categoria_id}</div>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">Categoría</span>
+                <div className="font-medium text-gray-800 dark:text-white">ID: {producto.categoria_id}</div>
               </div>
             </div>
             
             {/* Selector de cantidad y botón para agregar al carrito */}
             <div className="mt-6">
               <div className="flex items-center mb-4">
-                <span className="mr-4">Cantidad:</span>
-                <div className="flex items-center border border-gray-300 rounded-md">
+                <span className="mr-4 text-gray-700 dark:text-gray-300">Cantidad:</span>
+                <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-md">
                   <button
                     onClick={decrementCantidad}
                     disabled={cantidad <= 1}
-                    className="px-3 py-1 border-r border-gray-300 hover:bg-gray-100 disabled:opacity-50"
+                    className="px-3 py-1 border-r border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300"
                   >
                     -
                   </button>
-                  <span className="px-4 py-1">{cantidad}</span>
+                  <span className="px-4 py-1 text-gray-800 dark:text-white">{cantidad}</span>
                   <button
                     onClick={incrementCantidad}
                     disabled={producto.stock <= cantidad}
-                    className="px-3 py-1 border-l border-gray-300 hover:bg-gray-100 disabled:opacity-50"
+                    className="px-3 py-1 border-l border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300"
                   >
                     +
                   </button>
@@ -184,10 +186,10 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
                 disabled={isAdding || producto.stock <= 0}
                 className={`w-full flex items-center justify-center space-x-2 py-3 px-6 rounded-md text-white ${
                   producto.stock <= 0
-                    ? 'bg-gray-400 cursor-not-allowed'
+                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
                     : isAdding
-                    ? 'bg-green-500'
-                    : 'bg-blue-600 hover:bg-blue-700'
+                    ? 'bg-green-500 dark:bg-green-600'
+                    : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600'
                 } transition-colors`}
               >
                 <FaShoppingCart />
