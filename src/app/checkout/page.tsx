@@ -1,5 +1,6 @@
 'use client';
 
+// Este archivo ahora se renderiza sin header ni footer gracias al layout.tsx
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
