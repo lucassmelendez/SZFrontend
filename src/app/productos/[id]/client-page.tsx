@@ -6,6 +6,7 @@ import { productoApi, Producto } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
 import { FaShoppingCart, FaCreditCard, FaCheckCircle, FaShieldAlt, FaTruck } from 'react-icons/fa';
 import Image from 'next/image';
+import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 
 interface ProductoDetailClientProps {
   id: string;
@@ -14,6 +15,7 @@ interface ProductoDetailClientProps {
 export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
   const router = useRouter();
   const { agregarProducto } = useCarrito();
+  const { openCart } = useFloatingCartContext();
   const [producto, setProducto] = useState<Producto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,10 +49,15 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
       setIsAdding(true);
       agregarProducto(producto, cantidad);
       
-      // Mostrar animación durante 2 segundos
+      // Abrir el carrito flotante después de agregar el producto
       setTimeout(() => {
-        setIsAdding(false);
-      }, 2000);
+        openCart(); // Abre el carrito flotante
+        
+        // Mostrar animación durante 2 segundos
+        setTimeout(() => {
+          setIsAdding(false);
+        }, 1500);
+      }, 300);
     }
   };
 
