@@ -42,7 +42,7 @@ export default function Modal({ isOpen, onClose, title, size = 'md', children }:
   // Dimensiones del modal según el tamaño
   const sizeClasses = {
     sm: 'max-w-md',
-    md: 'max-w-xl',
+    md: 'max-w-2xl',
     lg: 'max-w-3xl'
   };
 

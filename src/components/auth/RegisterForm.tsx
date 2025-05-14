@@ -67,13 +67,13 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
 
   return (
     <div>
-      <div className="text-center mb-4">
+      <div className="text-center mb-3">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Crear cuenta</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-2.5">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
+          <div className="bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-2 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -140,7 +140,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 value={formData.email}
                 onChange={handleChange}
                 className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
-                placeholder="test@correo.com"
+                placeholder="correo@correo.com"
               />
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
 
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Confirmar
+              Confirmar contraseña
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -258,7 +258,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-md text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+          className={`w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-md text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
             isLoading ? 'opacity-70 cursor-not-allowed' : ''
           }`}
         >
@@ -272,7 +272,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
           )}
         </button>
         
-        <div className="text-center pt-2">
+        <div className="text-center pt-1">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             ¿Ya tienes una cuenta?{' '}
             <button 
