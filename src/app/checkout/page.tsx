@@ -8,11 +8,13 @@ import Image from 'next/image';
 import { FaArrowLeft, FaCheck, FaShoppingCart } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, limpiarCarrito, calcularTotal } = useCarrito();
   const { closeCart } = useFloatingCartContext();
+  const { user, isLoading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -50,8 +52,22 @@ export default function CheckoutPage() {
     email: '',
     telefono: '',
     direccion: '',
-    metodoPago: 'tarjeta'
+    metodoPago: 'webpay'
   });
+
+  // Cargar los datos del usuario cuando esté disponible
+  useEffect(() => {
+    if (user && !authLoading) {
+      setFormData(prevData => ({
+        ...prevData,
+        nombre: user.nombre || '',
+        apellido: user.apellido || '',
+        email: user.correo || '',
+        telefono: user.telefono?.toString() || '',
+        direccion: user.direccion || ''
+      }));
+    }
+  }, [user, authLoading]);
 
   // Validación del formulario
   const [errors, setErrors] = useState<Record<string, string>>({});
