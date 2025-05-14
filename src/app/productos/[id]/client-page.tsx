@@ -128,11 +128,14 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
         <div className="flex flex-col md:flex-row">
           {/* Galería de imágenes del producto */}
           <div className="md:w-1/2 p-6">
-            <div className="relative bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden mb-4 transition-all duration-300 hover:shadow-lg">
-              <img
+            <div className="relative bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden mb-4 transition-all duration-300 hover:shadow-lg aspect-square">
+              <Image
                 src={productImages[selectedImage]}
                 alt={producto.nombre}
-                className="w-full h-auto object-cover aspect-square"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+                className="object-cover"
               />
             </div>
             
@@ -142,13 +145,19 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
                 <div 
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                  className={`w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all relative ${
                     selectedImage === index 
                       ? 'border-blue-500 shadow-md' 
                       : 'border-transparent hover:border-blue-300'
                   }`}
                 >
-                  <img src={img} alt={`Vista ${index + 1}`} className="w-full h-full object-cover" />
+                  <Image 
+                    src={img} 
+                    alt={`Vista ${index + 1}`} 
+                    fill
+                    sizes="80px"
+                    className="object-cover" 
+                  />
                 </div>
               ))}
             </div>
@@ -254,7 +263,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
                         alt="Webpay" 
                         width={80}
                         height={32}
-                        style={{ objectFit: 'contain' }}
+                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
                       />
                     </div>
                     <div className="relative h-8 w-12">
@@ -263,7 +272,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
                         alt="Visa" 
                         width={48}
                         height={32}
-                        style={{ objectFit: 'contain' }}
+                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
                       />
                     </div>
                     <div className="relative h-8 w-12">
@@ -272,7 +281,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
                         alt="Mastercard" 
                         width={48}
                         height={32}
-                        style={{ objectFit: 'contain' }}
+                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
                       />
                     </div>
                     <div className="relative h-8 w-20">
@@ -281,7 +290,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
                         alt="Redcompra" 
                         width={80}
                         height={32}
-                        style={{ objectFit: 'contain' }}
+                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
                       />
                     </div>
                   </div>
