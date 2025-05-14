@@ -97,16 +97,31 @@ export const authApi = {
   },
 
   register: async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>('/auth/register', { 
+    // Asegurarse de que el RUT no sea nulo o vacío
+    if (!rut || rut.trim() === '') {
+      throw new Error('El RUT es obligatorio');
+    }
+    
+    const userData = { 
       correo, 
       contrasena, 
       nombre, 
       apellido, 
       telefono, 
       direccion,
-      rut
-    });
-    return response.data;
+      rut: rut.trim()  // Asegurarse de que no haya espacios
+    };
+    
+    // Imprimir los datos que estamos enviando para depurar
+    console.log('Enviando datos al servidor:', userData);
+    
+    try {
+      const response = await api.post<LoginResponse>('/auth/register', userData);
+      return response.data;
+    } catch (error) {
+      console.error('Error en la solicitud API:', error);
+      throw error;
+    }
   },
 
   logout: async (): Promise<ApiResponse<null>> => {

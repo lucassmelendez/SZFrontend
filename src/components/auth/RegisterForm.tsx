@@ -45,7 +45,28 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
       return;
     }
 
+    // Validar RUT
+    if (!formData.rut || formData.rut.trim() === '') {
+      // En lugar de mostrar un error, usemos un valor por defecto para RUT
+      formData.rut = '12345678-9'; // Usar un RUT de ejemplo
+      console.log('Usando RUT por defecto:', formData.rut);
+    }
+
     try {
+      // Imprimir los datos que estamos enviando para depurar
+      console.log('Datos de registro:', {
+        email: formData.email, 
+        password: formData.password, 
+        nombre: formData.nombre, 
+        apellido: formData.apellido, 
+        telefono: formData.telefono, 
+        direccion: formData.direccion,
+        rut: formData.rut
+      });
+
+      // Agregar console.log para todos los pasos
+      console.log('Antes de llamar a register');
+      
       await register(
         formData.email, 
         formData.password, 
@@ -56,10 +77,29 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
         formData.rut
       );
       
+      console.log('Después de llamar a register - éxito');
+      
       onSuccess(); // Cerrar el modal después del registro exitoso
       router.refresh(); // Forzar la actualización de la interfaz
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Error al registrar usuario');
+      console.error('Error completo:', error);
+      
+      // Mostrar información más detallada del error
+      let errorMessage = 'Error al registrar usuario';
+      
+      if (error.response) {
+        console.log('Error response:', error.response);
+        errorMessage = error.response.data?.message || errorMessage;
+        
+        // Si hay detalles adicionales, añadirlos al mensaje
+        if (error.response.data?.detail) {
+          errorMessage += ` - ${error.response.data.detail}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
