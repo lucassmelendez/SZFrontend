@@ -51,7 +51,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
       <div className="relative overflow-hidden group">
         <div className="aspect-square bg-gray-100 dark:bg-gray-700">
           <img
-            src={`https://picsum.photos/seed/${producto.id_producto}/400/400`}
+            src={`/productos/${producto.id_producto}.webp`}
             alt={producto.nombre}
             className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
           />
