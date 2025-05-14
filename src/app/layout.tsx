@@ -5,7 +5,9 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { ThemeProvider } from '@/lib/useTheme';
 import { AuthProvider } from '@/lib/auth/AuthContext';
+import { LoginModalProvider } from '@/lib/auth/LoginModalContext';
 import AppProvider from './_app';
+import LoginModalWrapper from '@/components/auth/LoginModalWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,11 +26,14 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex flex-col`}>
         <ThemeProvider>
           <AuthProvider>
-            <AppProvider>
-              <Header />
-              <main className="flex-grow pt-4 pb-12">{children}</main>
-              <Footer />
-            </AppProvider>
+            <LoginModalProvider>
+              <AppProvider>
+                <Header />
+                <main className="flex-grow pb-12">{children}</main>
+                <Footer />
+                <LoginModalWrapper />
+              </AppProvider>
+            </LoginModalProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

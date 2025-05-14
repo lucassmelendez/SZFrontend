@@ -5,14 +5,18 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaArrowLeft, FaCheck, FaShoppingCart } from 'react-icons/fa';
+import { FaArrowLeft, FaCheck, FaShoppingCart, FaHome } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
+import { useAuth } from '@/lib/auth/AuthContext';
+import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, limpiarCarrito, calcularTotal } = useCarrito();
   const { closeCart } = useFloatingCartContext();
+  const { user, isLoading: authLoading } = useAuth();
+  const { openLoginModal } = useLoginModal();
   const [loading, setLoading] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -31,15 +35,26 @@ export default function CheckoutPage() {
   
   // Banner simple para checkout
   const CheckoutBanner = () => (
-    <div className="bg-blue-600 text-white py-4 px-6 flex items-center">
-      <Link 
-        href="/productos" 
-        className="flex items-center text-white hover:text-blue-200 transition-colors"
-      >
-        <FaArrowLeft className="mr-2" />
-        Seguir comprando
-      </Link>
-      <h1 className="text-xl font-bold flex-grow text-center">SpinZone</h1>
+    <div className="bg-blue-600 text-white py-4 flex items-center">
+      <div className="container mx-auto px-4 flex items-center relative">
+        <Link 
+          href="/productos" 
+          className="flex items-center text-white hover:text-blue-200 transition-colors z-10"
+        >
+          <FaArrowLeft className="mr-2" />
+          Seguir comprando
+        </Link>
+        <h1 className="text-xl font-bold absolute left-0 right-0 text-center">SpinZone</h1>
+        <div className="ml-auto z-10">
+          <Link
+            href="/"
+            className="flex items-center text-white hover:text-blue-200 transition-colors p-1"
+            aria-label="Ir al inicio"
+          >
+            <FaHome size={24} />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 
@@ -50,8 +65,22 @@ export default function CheckoutPage() {
     email: '',
     telefono: '',
     direccion: '',
-    metodoPago: 'tarjeta'
+    metodoPago: 'webpay'
   });
+
+  // Cargar los datos del usuario cuando esté disponible
+  useEffect(() => {
+    if (user && !authLoading) {
+      setFormData(prevData => ({
+        ...prevData,
+        nombre: user.nombre || '',
+        apellido: user.apellido || '',
+        email: user.correo || '',
+        telefono: user.telefono?.toString() || '',
+        direccion: user.direccion || ''
+      }));
+    }
+  }, [user, authLoading]);
 
   // Validación del formulario
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -176,6 +205,39 @@ export default function CheckoutPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+              {!user && !authLoading && (
+                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-blue-800 dark:text-blue-300 mb-2">
+                    ¿Ya tienes una cuenta? Accede para completar tus datos automáticamente.
+                  </p>
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={openLoginModal}
+                      className="text-sm px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                      Iniciar sesión
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        openLoginModal();
+                        // Pequeño timeout para asegurar que el modal está abierto antes de cambiar a registro
+                        setTimeout(() => {
+                          const registerTab = document.querySelector('[data-tab="register"]');
+                          if (registerTab) {
+                            (registerTab as HTMLElement).click();
+                          }
+                        }, 100);
+                      }}
+                      className="text-sm px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      Registrarse
+                    </button>
+                  </div>
+                </div>
+              )}
+              
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Información de contacto</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

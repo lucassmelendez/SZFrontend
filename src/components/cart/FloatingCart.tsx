@@ -153,8 +153,10 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                       </h3>
                       <button
                         onClick={() => handleEliminarProducto(item.producto.id_producto)}
-                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1 hover:bg-red-100 dark:hover:bg-red-900/20 rounded"
                         title="Eliminar"
+                        aria-label={`Eliminar ${item.producto.nombre} del carrito`}
+                        type="button"
                       >
                         <FaTrash size={14} />
                       </button>
