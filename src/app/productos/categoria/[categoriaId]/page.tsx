@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { productoApi, Producto } from '@/lib/api';
-import Loading from '@/components/ui/Loading';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
@@ -15,11 +14,19 @@ const categoriasMap = {
   '5': 'Mesas'
 };
 
-interface PageParams {
+interface CategoriaClientProps {
   categoriaId: string;
 }
 
-export default function CategoriaPage({ params }: { params: PageParams }) {
+export default function CategoriaPage({ params }: { params: { categoriaId: string } }) {
+  // Extraer el ID para evitar acceder directamente a params en el cliente
+  const categoriaId = params.categoriaId;
+  
+  return <CategoriaClient categoriaId={categoriaId} />;
+}
+
+// Componente cliente separado que no usa params directamente
+function CategoriaClient({ categoriaId }: CategoriaClientProps) {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +34,7 @@ export default function CategoriaPage({ params }: { params: PageParams }) {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const id = parseInt(params.categoriaId, 10);
+        const id = parseInt(categoriaId, 10);
         if (isNaN(id)) {
           throw new Error('ID de categoría inválido');
         }
@@ -43,9 +50,9 @@ export default function CategoriaPage({ params }: { params: PageParams }) {
     };
 
     fetchProductos();
-  }, [params.categoriaId]);
+  }, [categoriaId]);
 
-  const categoriaNombre = categoriasMap[params.categoriaId as keyof typeof categoriasMap] || 'Categoría';
+  const categoriaNombre = categoriasMap[categoriaId as keyof typeof categoriasMap] || 'Categoría';
 
   return (
     <div className="container mx-auto px-4 py-8">

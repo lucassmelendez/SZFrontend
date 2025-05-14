@@ -4,14 +4,21 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { productoApi, Producto } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
-import Loading from '@/components/ui/Loading';
 import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
 
-interface PageParams {
+interface ProductoDetailClientProps {
   id: string;
 }
 
-export default function ProductoDetailPage({ params }: { params: PageParams }) {
+export default function ProductoDetailPage({ params }: { params: { id: string } }) {
+  // Extraer el ID para evitar acceder directamente a params en el cliente
+  const id = params.id;
+  
+  return <ProductoDetailClient id={id} />;
+}
+
+// Componente cliente separado que no usa params directamente
+function ProductoDetailClient({ id }: ProductoDetailClientProps) {
   const router = useRouter();
   const { agregarProducto } = useCarrito();
   const [producto, setProducto] = useState<Producto | null>(null);
@@ -23,12 +30,12 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
   useEffect(() => {
     const fetchProducto = async () => {
       try {
-        const id = parseInt(params.id, 10);
-        if (isNaN(id)) {
+        const productoId = parseInt(id, 10);
+        if (isNaN(productoId)) {
           throw new Error('ID de producto inválido');
         }
         
-        const data = await productoApi.getById(id);
+        const data = await productoApi.getById(productoId);
         setProducto(data);
         setLoading(false);
       } catch (error) {
@@ -39,7 +46,7 @@ export default function ProductoDetailPage({ params }: { params: PageParams }) {
     };
 
     fetchProducto();
-  }, [params.id]);
+  }, [id]);
 
   const handleAddToCart = () => {
     if (producto) {
