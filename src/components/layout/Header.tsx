@@ -127,23 +127,7 @@ export default function Header() {
                 >
                   Productos
                 </Link>
-                {/* Opción de Administrar para roles de empleado (no clientes) */}
-                {user && isEmpleado(user) && (
-                  <Link
-                    href={
-                      user.rol_id === 2 ? '/admin/dashboard' :
-                      user.rol_id === 3 ? '/empleado/dashboard' :
-                      user.rol_id === 4 ? '/bodega/dashboard' :
-                      user.rol_id === 5 ? '/contabilidad/dashboard' : '/'
-                    }
-                    className={`hover:text-blue-200 ${
-                      pathname.includes('/admin') || pathname.includes('/empleado') || 
-                      pathname.includes('/bodega') || pathname.includes('/contabilidad') ? 'font-bold' : ''
-                    }`}
-                  >
-                    Administrar
-                  </Link>
-                )}
+          
                 {/* Menú desplegable de Categorías */}
                 <div className="relative" ref={categoryMenuRef}>
                   <button
@@ -170,6 +154,24 @@ export default function Header() {
                     </div>
                   )}
                 </div>
+                
+                {/* Opción de Administrar para roles de empleado (no clientes) */}
+                {user && isEmpleado(user) && (
+                  <Link
+                    href={
+                      user.rol_id === 2 ? '/admin/dashboard' :
+                      user.rol_id === 3 ? '/empleado/dashboard' :
+                      user.rol_id === 4 ? '/bodega/dashboard' :
+                      user.rol_id === 5 ? '/contabilidad/dashboard' : '/'
+                    }
+                    className={`hover:text-blue-200 ${
+                      pathname.includes('/admin') || pathname.includes('/empleado') || 
+                      pathname.includes('/bodega') || pathname.includes('/contabilidad') ? 'font-bold' : ''
+                    }`}
+                  >
+                    Administrar
+                  </Link>
+                )}
               </nav>
             </div>
 
