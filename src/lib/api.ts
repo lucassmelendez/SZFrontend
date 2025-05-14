@@ -127,9 +127,12 @@ export const productoApi = {
 // API de autenticación
 export const authApi = {
   // Login normal (para clientes, usando la API actual)
-  login: async (correo: string, contrasena: string, userType: 'cliente' | 'empleado' = 'cliente'): Promise<LoginResponse> => {
-    // Si es un login de cliente, usar la API normal
+  login: async (correo: string, contrasena: string, userType?: 'cliente' | 'empleado'): Promise<LoginResponse> => {
+    // Esta función se mantiene con el parámetro opcional userType por compatibilidad
+    // pero se debe usar sin especificar userType para la detección automática
+    
     if (userType === 'cliente') {
+      // Si se especifica 'cliente', usar la API normal
       try {
         const response = await api.post<LoginResponse>('/auth/login', { correo, contrasena });
         return response.data;
@@ -137,15 +140,13 @@ export const authApi = {
         console.error('Error en login de cliente:', error);
         throw error;
       }
-    } 
-    // Si es un login de empleado, usar la API de FastAPI
-    else {
+    } else if (userType === 'empleado') {
+      // Si se especifica 'empleado', usar la API de FastAPI para empleados
       try {
         const response = await apiFast.post('/empleados/login', { correo, contrasena });
         
         // Adaptar la respuesta de FastAPI al formato que espera nuestra aplicación
         const empleado = response.data.empleado;
-        localStorage.setItem('user_type', 'empleado');
         
         return {
           success: true,
@@ -158,14 +159,27 @@ export const authApi = {
         console.error('Error en login de empleado:', error);
         throw error;
       }
+    } else {
+      // Si no se especifica tipo, devolver el resultado para que lo maneje
+      // el flujo de autenticación automática en AuthContext
+      return {
+        success: true,
+        data: {
+          user: {} as User, // Este valor será reemplazado en el contexto de autenticación
+          token: ''
+        }
+      };
     }
   },
 
   // Login de cliente con FastAPI
   loginClienteFastAPI: async (correo: string, contrasena: string): Promise<any> => {
     try {
-      const response = await apiFast.post('/clientes/login', { correo, contrasena });
-      localStorage.setItem('user_type', 'cliente');
+      // Usamos directamente los parámetros en el cuerpo de la petición POST
+      const response = await apiFast.post('/clientes/login', {
+        correo: correo,
+        contrasena: contrasena
+      });
       return response.data;
     } catch (error) {
       console.error('Error en login de cliente con FastAPI:', error);
@@ -176,8 +190,11 @@ export const authApi = {
   // Login de empleado con FastAPI
   loginEmpleadoFastAPI: async (correo: string, contrasena: string): Promise<any> => {
     try {
-      const response = await apiFast.post('/empleados/login', { correo, contrasena });
-      localStorage.setItem('user_type', 'empleado');
+      // Usamos directamente los parámetros en el cuerpo de la petición POST
+      const response = await apiFast.post('/empleados/login', {
+        correo: correo,
+        contrasena: contrasena
+      });
       return response.data;
     } catch (error) {
       console.error('Error en login de empleado con FastAPI:', error);

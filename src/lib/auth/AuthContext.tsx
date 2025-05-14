@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   userType: 'cliente' | 'empleado' | null;
-  login: (correo: string, contrasena: string, userType: 'cliente' | 'empleado') => Promise<void>;
+  login: (correo: string, contrasena: string) => Promise<void>;
   register: (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -61,49 +61,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkSession();
   }, []);
 
-  const login = async (correo: string, contrasena: string, userType: 'cliente' | 'empleado' = 'cliente') => {
+  const login = async (correo: string, contrasena: string) => {
     setIsLoading(true);
     try {
-      if (userType === 'cliente') {
-        // Intenta primero con la API normal
-        try {
-          const response = await authApi.login(correo, contrasena, 'cliente');
-          if (response.success && response.data.user) {
-            setUser(response.data.user);
-            setUserType('cliente');
-            localStorage.setItem('auth_token', response.data.token);
-            localStorage.setItem('user_type', 'cliente');
-          }
-        } catch (error) {
-          // Si falla, intenta con FastAPI
-          console.log('Intentando login con FastAPI para cliente');
-          const response = await authApi.loginClienteFastAPI(correo, contrasena);
-          if (response && response.cliente) {
-            // Adaptar la respuesta a nuestro formato
-            const clienteData = response.cliente;
-            setUser(clienteData);
-            setUserType('cliente');
-            localStorage.setItem('auth_token', 'cliente_fastapi_' + Date.now());
-            localStorage.setItem('user_type', 'cliente');
-            localStorage.setItem('cliente_data', JSON.stringify(clienteData));
-          } else {
-            throw new Error('Error en el inicio de sesión con FastAPI');
-          }
+      // Intentar primero en la API normal (para clientes)
+      try {
+        const response = await authApi.login(correo, contrasena, 'cliente');
+        if (response.success && response.data.user) {
+          setUser(response.data.user);
+          setUserType('cliente');
+          localStorage.setItem('auth_token', response.data.token);
+          localStorage.setItem('user_type', 'cliente');
+          return; // Salir si el login fue exitoso
         }
-      } else if (userType === 'empleado') {
-        // Login de empleado con FastAPI
-        const response = await authApi.loginEmpleadoFastAPI(correo, contrasena);
-        if (response && response.empleado) {
-          const empleadoData = response.empleado;
+      } catch (error) {
+        console.log('Login con API normal falló, intentando FastAPI');
+      }
+      
+      // Si falla el primer intento, probar con FastAPI para clientes
+      try {
+        const clienteResponse = await authApi.loginClienteFastAPI(correo, contrasena);
+        if (clienteResponse && clienteResponse.cliente) {
+          // Adaptar la respuesta a nuestro formato
+          const clienteData = clienteResponse.cliente;
+          setUser(clienteData);
+          setUserType('cliente');
+          localStorage.setItem('auth_token', 'cliente_fastapi_' + Date.now());
+          localStorage.setItem('user_type', 'cliente');
+          localStorage.setItem('cliente_data', JSON.stringify(clienteData));
+          return; // Salir si el login fue exitoso
+        }
+      } catch (error) {
+        console.log('Login de cliente con FastAPI falló, intentando login de empleado');
+      }
+      
+      // Finalmente, probar login de empleado
+      try {
+        const empleadoResponse = await authApi.loginEmpleadoFastAPI(correo, contrasena);
+        if (empleadoResponse && empleadoResponse.empleado) {
+          const empleadoData = empleadoResponse.empleado;
           setUser(empleadoData);
           setUserType('empleado');
           localStorage.setItem('auth_token', 'empleado_session_' + Date.now());
           localStorage.setItem('user_type', 'empleado');
           localStorage.setItem('empleado_data', JSON.stringify(empleadoData));
-        } else {
-          throw new Error('Error en el inicio de sesión de empleado');
+          return; // Salir si el login fue exitoso
         }
+      } catch (error) {
+        console.error('Login de empleado falló');
+        throw new Error('Credenciales inválidas');
       }
+      
+      // Si llegamos aquí es porque ningún método de login funcionó
+      throw new Error('No se pudo autenticar con las credenciales proporcionadas');
+      
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       throw error;

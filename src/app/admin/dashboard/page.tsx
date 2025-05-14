@@ -11,8 +11,8 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!isLoading) {
-      // Si no hay usuario o el usuario no es un empleado administrador (rol 1)
-      if (!user || !isEmpleado(user) || user.rol_id !== 1) {
+      // Si no hay usuario o el usuario no es un empleado administrador (rol 2)
+      if (!user || !isEmpleado(user) || user.rol_id !== 2) {
         router.push('/');
       }
     }

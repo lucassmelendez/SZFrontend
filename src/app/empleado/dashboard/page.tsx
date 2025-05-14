@@ -11,8 +11,8 @@ export default function EmpleadoDashboard() {
 
   useEffect(() => {
     if (!isLoading) {
-      // Si no hay usuario o el usuario no es un empleado (rol 2)
-      if (!user || !isEmpleado(user) || user.rol_id !== 2) {
+      // Si no hay usuario o el usuario no es un vendedor (rol 3)
+      if (!user || !isEmpleado(user) || user.rol_id !== 3) {
         router.push('/');
       }
     }
@@ -26,14 +26,14 @@ export default function EmpleadoDashboard() {
     );
   }
 
-  // Si llegamos aquí, sabemos que el usuario es un empleado
+  // Si llegamos aquí, sabemos que el usuario es un vendedor
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Panel de Empleado</h1>
+      <h1 className="text-3xl font-bold mb-6">Panel de Vendedor</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Mis Asignaciones</h2>
+          <h2 className="text-xl font-semibold mb-4">Mis Ventas</h2>
           <div className="space-y-4">
             <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
               <h3 className="font-medium">Atención al cliente</h3>
