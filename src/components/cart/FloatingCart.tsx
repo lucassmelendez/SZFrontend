@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { FaShoppingCart, FaTimes, FaTrash, FaArrowRight } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
+import { useRouter } from 'next/navigation';
 
 interface FloatingCartProps {
   isOpen: boolean;
@@ -13,52 +14,17 @@ interface FloatingCartProps {
 export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
   const { items, actualizarCantidad, eliminarProducto, calcularTotal } = useCarrito();
   const cartRef = useRef<HTMLDivElement>(null);
-  const lastItemRef = useRef<number | null>(null);
+  const router = useRouter();
   
-  // Guarda el último artículo agregado para efecto visual
-  const [lastAddedId, setLastAddedId] = useState<number | null>(null);
-  
-  // Resetear lastItemRef cuando el carrito está vacío
-  useEffect(() => {
-    if (items.length === 0) {
-      lastItemRef.current = null;
-      setLastAddedId(null);
-    }
-  }, [items]);
-  
-  // Detectar cuando se agrega un nuevo artículo para efectos visuales
-  useEffect(() => {
-    // Solo actualizamos el estado si el carrito está abierto y hay items
-    if (isOpen && items.length > 0) {
-      const lastItem = items[items.length - 1];
-      const lastItemId = lastItem.producto.id_producto;
-      
-      // Solo establecer el lastAddedId si cambió el último item
-      if (lastItemRef.current !== lastItemId) {
-        lastItemRef.current = lastItemId;
-        
-        // Usar setTimeout para evitar actualizar durante el renderizado
-        setTimeout(() => {
-          setLastAddedId(lastItemId);
-        }, 0);
-        
-        // Eliminar el resaltado después de 2 segundos
-        const timer = setTimeout(() => {
-          setLastAddedId(null);
-        }, 2000);
-        
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [isOpen, items]);
-
   // Handler para eliminar productos
   const handleEliminarProducto = (productoId: number) => {
-    // Si estamos eliminando el último producto resaltado, limpiar la referencia
-    if (lastAddedId === productoId) {
-      setLastAddedId(null);
-    }
     eliminarProducto(productoId);
+  };
+
+  // Navegar a la página de detalle del producto
+  const handleNavigateToProduct = (productoId: number) => {
+    onClose(); // Cerrar el carrito
+    router.push(`/productos/${productoId}`);
   };
 
   // Cerrar carrito al hacer clic fuera
@@ -132,12 +98,13 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
               {items.map((item) => (
                 <div 
                   key={item.producto.id_producto} 
-                  className={`flex border-b pb-4 dark:border-gray-700 ${
-                    lastAddedId === item.producto.id_producto ? 'animate-pulse-once bg-blue-50 dark:bg-blue-900/20' : ''
-                  }`}
+                  className="flex border-b pb-4 dark:border-gray-700"
                 >
-                  {/* Imagen */}
-                  <div className="h-16 w-16 flex-shrink-0 bg-gray-200 dark:bg-gray-700 overflow-hidden rounded">
+                  {/* Imagen clickeable */}
+                  <div 
+                    className="h-16 w-16 flex-shrink-0 bg-gray-200 dark:bg-gray-700 overflow-hidden rounded cursor-pointer"
+                    onClick={() => handleNavigateToProduct(item.producto.id_producto)}
+                  >
                     <img
                       src={`/productos/${item.producto.id_producto}.webp`}
                       alt={item.producto.nombre}
@@ -148,7 +115,10 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                   {/* Detalles */}
                   <div className="ml-4 flex-grow">
                     <div className="flex justify-between">
-                      <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                      <h3 
+                        className="text-sm font-medium text-gray-800 dark:text-gray-200 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+                        onClick={() => handleNavigateToProduct(item.producto.id_producto)}
+                      >
                         {item.producto.nombre}
                       </h3>
                       <button
@@ -161,7 +131,10 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                         <FaTrash size={14} />
                       </button>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                    <p 
+                      className="text-sm text-gray-500 dark:text-gray-400 mb-2 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
+                      onClick={() => handleNavigateToProduct(item.producto.id_producto)}
+                    >
                       ${Math.round(item.producto.precio)} x {item.cantidad}
                     </p>
                     <div className="flex justify-between items-center">
@@ -181,7 +154,10 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                           +
                         </button>
                       </div>
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span 
+                        className="font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+                        onClick={() => handleNavigateToProduct(item.producto.id_producto)}
+                      >
                         ${Math.round(item.producto.precio * item.cantidad)}
                       </span>
                     </div>
