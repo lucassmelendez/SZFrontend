@@ -10,6 +10,7 @@ import { useAuth } from '../../lib/auth/AuthContext';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import FloatingCart from '../cart/FloatingCart';
 import { productoApi, Producto } from '@/lib/api';
+import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 const categorias = [
   { id: 1, nombre: 'Paletas' },
@@ -34,6 +35,7 @@ export default function Header() {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const { openLoginModal } = useLoginModal();
 
   // Cerrar los menús cuando se hace clic fuera
   useEffect(() => {
@@ -238,13 +240,13 @@ export default function Header() {
                   </button>
                 </div>
               ) : (
-                <Link
-                  href="/auth/login"
+                <button
+                  onClick={openLoginModal}
                   className="flex items-center space-x-2 hover:text-blue-200"
                 >
                   <FaUser size={20} />
                   <span className="text-sm">Iniciar sesión</span>
-                </Link>
+                </button>
               )}
 
               {/* Carrito - botón que abre el carrito flotante */}
@@ -302,12 +304,13 @@ export default function Header() {
                   </button>
                 </div>
               ) : (
-                <Link
-                  href="/auth/login"
-                  className="hover:text-blue-200"
+                <button
+                  onClick={openLoginModal}
+                  className="flex items-center space-x-2 hover:text-blue-200"
                 >
                   <FaUser size={20} />
-                </Link>
+                  <span className="text-sm">Iniciar sesión</span>
+                </button>
               )}
 
               {/* Carrito - botón que abre el carrito flotante */}
@@ -456,6 +459,30 @@ export default function Header() {
                     )}
                   </div>
                 </nav>
+
+                {/* Menú móvil - Login/Register */}
+                {!user && (
+                  <div className="border-t border-blue-800 dark:border-blue-700 pt-4 mt-4">
+                    <button
+                      onClick={() => {
+                        openLoginModal();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-blue-800 dark:hover:bg-blue-800"
+                    >
+                      <FaUser className="mr-2" />
+                      Iniciar sesión
+                    </button>
+                    <Link
+                      href="/auth/register"
+                      className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-blue-800 dark:hover:bg-blue-800"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <FaUser className="mr-2" />
+                      Registrarse
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           )}
