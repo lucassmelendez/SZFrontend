@@ -29,20 +29,26 @@ export default function ProductCard({ producto }: ProductCardProps) {
     
     setIsAdding(true);
     
-    // Agregar el producto y luego abrir el carrito con un pequeño retraso
-    // para asegurar que el estado se haya actualizado
-    agregarProducto(producto, 1);
-    
-    // Esperar un breve momento antes de abrir el carrito para asegurar que
-    // el estado del carrito esté actualizado cuando se abra
-    setTimeout(() => {
-      openCart();
+    // Agregar el producto pero sin actualizar el estado de UI inmediatamente
+    // para evitar modificar el estado de FloatingCart durante el renderizado
+    const timer1 = setTimeout(() => {
+      agregarProducto(producto, 1);
       
-      // Mantener el estado de "Agregado" por un momento para feedback visual
-      setTimeout(() => {
-        setIsAdding(false);
-      }, 800);
-    }, 200);
+      // Esperar un breve momento antes de abrir el carrito
+      const timer2 = setTimeout(() => {
+        openCart();
+        
+        // Restablecer el estado visual
+        const timer3 = setTimeout(() => {
+          setIsAdding(false);
+        }, 800);
+      }, 200);
+    }, 0);
+    
+    // Limpieza de timers si el componente se desmonta
+    return () => {
+      clearTimeout(timer1);
+    };
   };
 
   return (
