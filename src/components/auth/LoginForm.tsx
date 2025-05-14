@@ -23,10 +23,10 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      // El login ahora maneja la redirección automáticamente
+      // Realizar login
       await login(correo, contrasena);
-      // No necesitamos llamar a onSuccess() porque la redirección
-      // se hace automáticamente en el AuthContext
+      // Cerrar el modal después de iniciar sesión exitosamente
+      onSuccess();
     } catch (error: any) {
       setError(error.message || 'Error al iniciar sesión');
       setIsLoading(false);

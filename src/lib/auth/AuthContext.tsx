@@ -66,8 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
     
     if (isCliente(userObj)) {
-      // Es un cliente (rol 1)
-      window.location.href = '/perfil';
+      // Es un cliente (rol 1) - No redirigimos, se queda en la misma página
+      return; // Eliminamos la redirección
     } else if (isEmpleado(userObj)) {
       // Según el rol del empleado
       switch (userObj.rol_id) {
