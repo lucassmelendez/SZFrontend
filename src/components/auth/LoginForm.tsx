@@ -15,7 +15,6 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,12 +23,12 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
     setIsLoading(true);
 
     try {
+      // El login ahora maneja la redirección automáticamente
       await login(correo, contrasena);
-      onSuccess(); // Cerrar el modal después del login exitoso
-      router.refresh(); // Forzar la actualización de la interfaz
+      // No necesitamos llamar a onSuccess() porque la redirección
+      // se hace automáticamente en el AuthContext
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Error al iniciar sesión');
-    } finally {
+      setError(error.message || 'Error al iniciar sesión');
       setIsLoading(false);
     }
   };
@@ -38,6 +37,9 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
     <div>
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          El sistema detectará automáticamente si eres cliente o empleado
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

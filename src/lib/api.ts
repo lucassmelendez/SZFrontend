@@ -3,6 +3,8 @@ import axios from 'axios';
 const isClient = typeof window !== 'undefined';
 
 const API_URL = 'https://sz-backend.vercel.app/api';
+// API FastAPI local
+const API_FASTAPI_URL = 'http://127.0.0.1:8000';
 //const API_URL = 'http://localhost:3000/api';
 
 console.log('API URL:', API_URL);
@@ -14,6 +16,15 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   // Configurar CORS en Axios
+  withCredentials: false,
+});
+
+// Instancia para FastAPI
+const apiFast = axios.create({
+  baseURL: API_FASTAPI_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
   withCredentials: false,
 });
 
@@ -40,17 +51,41 @@ export interface Producto {
   categoria_id: number;
 }
 
-export interface User {
-  id_cliente: number;
+// Interfaz base para usuarios
+export interface UserBase {
   nombre: string;
   apellido: string;
   correo: string;
-  telefono: number;
+  telefono: string | number;
   direccion: string;
-  id_rol?: number;
   rut?: string;
   contrasena?: string;
 }
+
+// Interfaz para clientes
+export interface Cliente extends UserBase {
+  id_cliente: number;
+  id_rol: number;
+}
+
+// Interfaz para empleados
+export interface Empleado extends UserBase {
+  id_empleado: number;
+  rol_id: number;
+  informe_id?: number;
+}
+
+// Tipo unión para representar cualquier tipo de usuario
+export type User = Cliente | Empleado;
+
+// Helper para determinar el tipo de usuario
+export const isCliente = (user: User): user is Cliente => {
+  return 'id_cliente' in user;
+};
+
+export const isEmpleado = (user: User): user is Empleado => {
+  return 'id_empleado' in user;
+};
 
 export interface LoginResponse {
   success: boolean;
@@ -91,9 +126,80 @@ export const productoApi = {
 
 // API de autenticación
 export const authApi = {
-  login: async (correo: string, contrasena: string): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>('/auth/login', { correo, contrasena });
-    return response.data;
+  // Login normal (para clientes, usando la API actual)
+  login: async (correo: string, contrasena: string, userType?: 'cliente' | 'empleado'): Promise<LoginResponse> => {
+    // Esta función se mantiene con el parámetro opcional userType por compatibilidad
+    // pero se debe usar sin especificar userType para la detección automática
+    
+    if (userType === 'cliente') {
+      // Si se especifica 'cliente', usar la API normal
+      try {
+        const response = await api.post<LoginResponse>('/auth/login', { correo, contrasena });
+        return response.data;
+      } catch (error) {
+        console.error('Error en login de cliente:', error);
+        throw error;
+      }
+    } else if (userType === 'empleado') {
+      // Si se especifica 'empleado', usar la API de FastAPI para empleados
+      try {
+        const response = await apiFast.post('/empleados/login', { correo, contrasena });
+        
+        // Adaptar la respuesta de FastAPI al formato que espera nuestra aplicación
+        const empleado = response.data.empleado;
+        
+        return {
+          success: true,
+          data: {
+            user: empleado,
+            token: 'empleado_session_' + Date.now() // Token temporal
+          }
+        };
+      } catch (error) {
+        console.error('Error en login de empleado:', error);
+        throw error;
+      }
+    } else {
+      // Si no se especifica tipo, devolver el resultado para que lo maneje
+      // el flujo de autenticación automática en AuthContext
+      return {
+        success: true,
+        data: {
+          user: {} as User, // Este valor será reemplazado en el contexto de autenticación
+          token: ''
+        }
+      };
+    }
+  },
+
+  // Login de cliente con FastAPI
+  loginClienteFastAPI: async (correo: string, contrasena: string): Promise<any> => {
+    try {
+      // Usamos directamente los parámetros en el cuerpo de la petición POST
+      const response = await apiFast.post('/clientes/login', {
+        correo: correo,
+        contrasena: contrasena
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error en login de cliente con FastAPI:', error);
+      throw error;
+    }
+  },
+
+  // Login de empleado con FastAPI
+  loginEmpleadoFastAPI: async (correo: string, contrasena: string): Promise<any> => {
+    try {
+      // Usamos directamente los parámetros en el cuerpo de la petición POST
+      const response = await apiFast.post('/empleados/login', {
+        correo: correo,
+        contrasena: contrasena
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error en login de empleado con FastAPI:', error);
+      throw error;
+    }
   },
 
   register: async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string): Promise<LoginResponse> => {
@@ -125,6 +231,11 @@ export const authApi = {
   },
 
   logout: async (): Promise<ApiResponse<null>> => {
+    // Eliminar el tipo de usuario almacenado
+    if (isClient) {
+      localStorage.removeItem('user_type');
+    }
+    
     const response = await api.post<ApiResponse<null>>('/auth/logout');
     return response.data;
   },
