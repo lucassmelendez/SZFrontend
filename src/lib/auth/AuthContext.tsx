@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, authApi, isCliente, isEmpleado } from '@/lib/api';
+import { apiFast } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -93,7 +94,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (correo: string, contrasena: string) => {
     setIsLoading(true);
     try {
-      // Intentar primero en la API normal (para clientes)
+      // Intentar primero con FastAPI para clientes
+      try {
+        const clienteResponse = await authApi.loginClienteFastAPI(correo, contrasena);
+        if (clienteResponse && clienteResponse.cliente) {
+          // Adaptar la respuesta a nuestro formato
+          const clienteData = clienteResponse.cliente;
+          setUser(clienteData);
+          setUserType('cliente');
+          localStorage.setItem('auth_token', clienteResponse.token || 'cliente_fastapi_' + Date.now());
+          localStorage.setItem('user_type', 'cliente');
+          localStorage.setItem('cliente_data', JSON.stringify(clienteData));
+          redirectUserBasedOnRole(clienteData);
+          return; // Salir si el login fue exitoso
+        }
+      } catch (error) {
+        console.log('Login de cliente con FastAPI falló, intentando login de empleado');
+      }
+      
+      // Si falla el primer intento, probar login de empleado
+      try {
+        const empleadoResponse = await authApi.loginEmpleadoFastAPI(correo, contrasena);
+        if (empleadoResponse && empleadoResponse.empleado) {
+          const empleadoData = empleadoResponse.empleado;
+          setUser(empleadoData);
+          setUserType('empleado');
+          localStorage.setItem('auth_token', empleadoResponse.token || 'empleado_session_' + Date.now());
+          localStorage.setItem('user_type', 'empleado');
+          localStorage.setItem('empleado_data', JSON.stringify(empleadoData));
+          redirectUserBasedOnRole(empleadoData);
+          return; // Salir si el login fue exitoso
+        }
+      } catch (error) {
+        console.error('Login de empleado falló');
+        throw new Error('Credenciales inválidas');
+      }
+      
+      // Si ninguna de las anteriores funcionó, intentar con la API normal
       try {
         const response = await authApi.login(correo, contrasena, 'cliente');
         if (response.success && response.data.user) {
@@ -105,43 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return; // Salir si el login fue exitoso
         }
       } catch (error) {
-        console.log('Login con API normal falló, intentando FastAPI');
-      }
-      
-      // Si falla el primer intento, probar con FastAPI para clientes
-      try {
-        const clienteResponse = await authApi.loginClienteFastAPI(correo, contrasena);
-        if (clienteResponse && clienteResponse.cliente) {
-          // Adaptar la respuesta a nuestro formato
-          const clienteData = clienteResponse.cliente;
-          setUser(clienteData);
-          setUserType('cliente');
-          localStorage.setItem('auth_token', 'cliente_fastapi_' + Date.now());
-          localStorage.setItem('user_type', 'cliente');
-          localStorage.setItem('cliente_data', JSON.stringify(clienteData));
-          redirectUserBasedOnRole(clienteData);
-          return; // Salir si el login fue exitoso
-        }
-      } catch (error) {
-        console.log('Login de cliente con FastAPI falló, intentando login de empleado');
-      }
-      
-      // Finalmente, probar login de empleado
-      try {
-        const empleadoResponse = await authApi.loginEmpleadoFastAPI(correo, contrasena);
-        if (empleadoResponse && empleadoResponse.empleado) {
-          const empleadoData = empleadoResponse.empleado;
-          setUser(empleadoData);
-          setUserType('empleado');
-          localStorage.setItem('auth_token', 'empleado_session_' + Date.now());
-          localStorage.setItem('user_type', 'empleado');
-          localStorage.setItem('empleado_data', JSON.stringify(empleadoData));
-          redirectUserBasedOnRole(empleadoData);
-          return; // Salir si el login fue exitoso
-        }
-      } catch (error) {
-        console.error('Login de empleado falló');
-        throw new Error('Credenciales inválidas');
+        console.log('Login con API normal falló también');
       }
       
       // Si llegamos aquí es porque ningún método de login funcionó
@@ -157,6 +158,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string) => {
     try {
+      // Intentar primero con FastAPI
+      try {
+        const response = await authApi.registerFastAPI(correo, contrasena, nombre, apellido, telefono, direccion, rut);
+        if (response && response.cliente) {
+          setUser(response.cliente);
+          setUserType('cliente');
+          localStorage.setItem('auth_token', response.token || 'cliente_fastapi_' + Date.now());
+          localStorage.setItem('user_type', 'cliente');
+          localStorage.setItem('cliente_data', JSON.stringify(response.cliente));
+          redirectUserBasedOnRole(response.cliente);
+          return;
+        }
+      } catch (error) {
+        console.error('Error en registro con FastAPI, intentando con API normal:', error);
+      }
+
+      // Si falla, intentar con la API normal
       const response = await authApi.register(correo, contrasena, nombre, apellido, telefono, direccion, rut);
       if (response.success && response.data.user) {
         setUser(response.data.user);
@@ -175,12 +193,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      // Intentar hacer logout en el servidor solo si no es sesión de empleado
-      if (!localStorage.getItem('auth_token')?.startsWith('empleado_session_')) {
-        await authApi.logout().catch(err => {
-          console.warn('Error al comunicar logout al servidor:', err);
-          // Continuar con el logout local aunque falle el servidor
-        });
+      // Intentar hacer logout en el servidor solo si no es sesión interna
+      const authToken = localStorage.getItem('auth_token');
+      if (authToken && !authToken.startsWith('empleado_session_') && !authToken.startsWith('cliente_fastapi_')) {
+        try {
+          // Logout en la API normal
+          await authApi.logout().catch((err: Error) => {
+            console.warn('Error al comunicar logout al servidor:', err);
+          });
+        } catch (error) {
+          console.warn('Error durante el logout en la API normal:', error);
+        }
+      } else if (authToken && authToken.startsWith('cliente_fastapi_')) {
+        try {
+          // Intenta hacer logout en FastAPI para clientes
+          await apiFast.post('/clientes/logout').catch((err: Error) => {
+            console.warn('Error al comunicar logout de cliente a FastAPI:', err);
+          });
+        } catch (error) {
+          console.warn('Error durante el logout de cliente en FastAPI:', error);
+        }
+      } else if (authToken && authToken.startsWith('empleado_session_')) {
+        try {
+          // Intenta hacer logout en FastAPI para empleados
+          await apiFast.post('/empleados/logout').catch((err: Error) => {
+            console.warn('Error al comunicar logout de empleado a FastAPI:', err);
+          });
+        } catch (error) {
+          console.warn('Error durante el logout de empleado en FastAPI:', error);
+        }
       }
       
       // Eliminar datos locales

@@ -3,8 +3,8 @@ import axios from 'axios';
 const isClient = typeof window !== 'undefined';
 
 const API_URL = 'https://sz-backend.vercel.app/api';
-// API FastAPI local
-const API_FASTAPI_URL = 'http://127.0.0.1:8000';
+// API FastAPI - actualizada a la versión desplegada en Vercel
+const API_FASTAPI_URL = 'https://szfast-api.vercel.app';
 //const API_URL = 'http://localhost:3000/api';
 
 console.log('API URL:', API_URL);
@@ -20,7 +20,7 @@ const api = axios.create({
 });
 
 // Instancia para FastAPI
-const apiFast = axios.create({
+export const apiFast = axios.create({
   baseURL: API_FASTAPI_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -38,6 +38,33 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Interceptor para agregar el token a las peticiones de apiFast
+apiFast.interceptors.request.use((config) => {
+  if (isClient) {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
+// Interceptor para manejar respuestas y errores
+apiFast.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Manejar error de autenticación 
+      console.error('Error de autenticación en la API FastAPI');
+      // Aquí podrías implementar un redirect al login o un refresh del token
+    }
+    if (error.message === 'Network Error') {
+      console.error('Error de conexión con la API FastAPI. Posible problema de CORS.');
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Interfaces para los datos
 export interface Producto {
@@ -202,6 +229,27 @@ export const authApi = {
     }
   },
 
+  // Registro con FastAPI
+  registerFastAPI: async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string): Promise<any> => {
+    try {
+      const userData = { 
+        correo, 
+        contrasena, 
+        nombre, 
+        apellido, 
+        telefono, 
+        direccion,
+        rut: rut.trim()
+      };
+      
+      const response = await apiFast.post('/clientes/registro', userData);
+      return response.data;
+    } catch (error) {
+      console.error('Error en registro con FastAPI:', error);
+      throw error;
+    }
+  },
+
   register: async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string): Promise<LoginResponse> => {
     // Asegurarse de que el RUT no sea nulo o vacío
     if (!rut || rut.trim() === '') {
@@ -255,6 +303,165 @@ export const authApi = {
     const response = await api.put<ApiResponse<User>>('/auth/profile', data);
     return response.data;
   },
+};
+
+// API para clientes usando FastAPI
+export const clienteApiFast = {
+  getAll: async (): Promise<Cliente[]> => {
+    try {
+      const response = await apiFast.get('/clientes');
+      return response.data.clientes || [];
+    } catch (error) {
+      console.error('Error al obtener clientes desde FastAPI:', error);
+      throw error;
+    }
+  },
+  
+  getById: async (id: number): Promise<Cliente> => {
+    try {
+      const response = await apiFast.get(`/clientes/${id}`);
+      return response.data.cliente;
+    } catch (error) {
+      console.error(`Error al obtener cliente ${id} desde FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  create: async (cliente: Omit<Cliente, 'id_cliente'>): Promise<Cliente> => {
+    try {
+      const response = await apiFast.post('/clientes', cliente);
+      return response.data.cliente;
+    } catch (error) {
+      console.error('Error al crear cliente en FastAPI:', error);
+      throw error;
+    }
+  },
+  
+  update: async (id: number, cliente: Partial<Cliente>): Promise<Cliente> => {
+    try {
+      const response = await apiFast.put(`/clientes/${id}`, cliente);
+      return response.data.cliente;
+    } catch (error) {
+      console.error(`Error al actualizar cliente ${id} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  delete: async (id: number): Promise<void> => {
+    try {
+      await apiFast.delete(`/clientes/${id}`);
+    } catch (error) {
+      console.error(`Error al eliminar cliente ${id} en FastAPI:`, error);
+      throw error;
+    }
+  }
+};
+
+// API para empleados usando FastAPI
+export const empleadoApiFast = {
+  getAll: async (): Promise<Empleado[]> => {
+    try {
+      const response = await apiFast.get('/empleados');
+      return response.data.empleados || [];
+    } catch (error) {
+      console.error('Error al obtener empleados desde FastAPI:', error);
+      throw error;
+    }
+  },
+  
+  getById: async (id: number): Promise<Empleado> => {
+    try {
+      const response = await apiFast.get(`/empleados/${id}`);
+      return response.data.empleado;
+    } catch (error) {
+      console.error(`Error al obtener empleado ${id} desde FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  create: async (empleado: Omit<Empleado, 'id_empleado'>): Promise<Empleado> => {
+    try {
+      const response = await apiFast.post('/empleados', empleado);
+      return response.data.empleado;
+    } catch (error) {
+      console.error('Error al crear empleado en FastAPI:', error);
+      throw error;
+    }
+  },
+  
+  update: async (id: number, empleado: Partial<Empleado>): Promise<Empleado> => {
+    try {
+      const response = await apiFast.put(`/empleados/${id}`, empleado);
+      return response.data.empleado;
+    } catch (error) {
+      console.error(`Error al actualizar empleado ${id} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  delete: async (id: number): Promise<void> => {
+    try {
+      await apiFast.delete(`/empleados/${id}`);
+    } catch (error) {
+      console.error(`Error al eliminar empleado ${id} en FastAPI:`, error);
+      throw error;
+    }
+  }
+};
+
+// API para productos usando FastAPI
+export const productoApiFast = {
+  getAll: async (): Promise<Producto[]> => {
+    try {
+      const response = await apiFast.get('/productos');
+      return response.data.productos || [];
+    } catch (error) {
+      console.error('Error al obtener productos desde FastAPI:', error);
+      throw error;
+    }
+  },
+  
+  getById: async (id: number): Promise<Producto> => {
+    try {
+      const response = await apiFast.get(`/productos/${id}`);
+      return response.data.producto;
+    } catch (error) {
+      console.error(`Error al obtener producto ${id} desde FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  search: async (term: string): Promise<Producto[]> => {
+    try {
+      const response = await apiFast.get(`/productos/buscar?q=${term}`);
+      return response.data.productos || [];
+    } catch (error) {
+      console.error(`Error al buscar productos con "${term}" en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  getByCategoria: async (categoriaId: number): Promise<Producto[]> => {
+    try {
+      const response = await apiFast.get(`/productos/categoria/${categoriaId}`);
+      return response.data.productos || [];
+    } catch (error) {
+      console.error(`Error al obtener productos de categoría ${categoriaId} en FastAPI:`, error);
+      throw error;
+    }
+  }
+};
+
+// Función para verificar la conexión con FastAPI
+export const testFastApiConnection = async (): Promise<boolean> => {
+  try {
+    const response = await apiFast.get('/');
+    console.log('Conexión con FastAPI exitosa:', response.data);
+    return true;
+  } catch (error) {
+    console.error('Error al conectar con FastAPI:', error);
+    return false;
+  }
 };
 
 export default api;
