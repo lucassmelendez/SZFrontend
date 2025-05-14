@@ -148,7 +148,20 @@ export const productoApi = {
   getByCategoria: async (categoriaId: number): Promise<Producto[]> => {
     const response = await api.get<ApiResponse<Producto[]>>(`/productos/categoria/${categoriaId}`);
     return response.data.data;
-  }
+  },
+  updateStock: async (id: number, stock: number): Promise<Producto> => {
+    try {
+      // Usar la API correcta y endpoint correcto
+      const response = await api.patch(`/productos/${id}`, { stock });
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al actualizar stock');
+      }
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error al actualizar stock del producto ${id}:`, error);
+      throw error;
+    }
+  },
 };
 
 // API de autenticación
