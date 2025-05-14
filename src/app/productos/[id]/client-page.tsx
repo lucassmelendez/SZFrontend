@@ -187,79 +187,96 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
               </div>
             </div>
             
+            {/* Separador */}
+            <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
             {/* Selector de cantidad y botón para agregar al carrito */}
-            <div className="mt-1">
-              <div className="flex items-center mb-3 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                <span className="mr-4 text-gray-700 dark:text-gray-300 font-medium">Cantidad:</span>
-                <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                  <button
-                    onClick={decrementCantidad}
-                    disabled={cantidad <= 1 || producto.stock <= 0}
-                    className="px-4 py-2 border-r border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300"
-                  >
-                    -
-                  </button>
-                  <span className="px-4 py-2 text-gray-800 dark:text-white font-medium min-w-[40px] text-center">{cantidad}</span>
-                  <button
-                    onClick={incrementCantidad}
-                    disabled={producto.stock <= cantidad || producto.stock <= 0}
-                    className="px-4 py-2 border-l border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-              
-              <button
-                onClick={handleAddToCart}
-                disabled={isAdding || producto.stock <= 0}
-                className={`w-full flex items-center justify-center space-x-2 py-3 px-6 rounded-lg text-white ${
-                  producto.stock <= 0
-                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-                    : isAdding
-                    ? 'bg-green-500 dark:bg-green-600'
-                    : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600'
-                } transition-colors text-lg font-medium mb-5`}
-              >
-                <FaShoppingCart size={18} />
-                <span>
-                  {isAdding
-                    ? '¡Agregado al carrito!'
-                    : producto.stock <= 0
-                    ? 'Sin stock'
-                    : 'Agregar al carrito'}
-                </span>
-              </button>
-              
-              {/* Medios de pago y beneficios */}
-              <div className="mt-3">
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-gray-800 dark:text-white font-medium">Medios de pago</h3>
-                    <div className="relative h-6 w-24">
-                      <Image 
-                        src="/webpay.svg" 
-                        alt="Webpay" 
-                        width={100}
-                        height={30}
-                        style={{ objectFit: 'contain' }}
-                      />
-                    </div>
+            <div className="mt-3 mb-5">
+              <div className="flex flex-col md:flex-row items-center justify-center space-y-3 md:space-y-0 md:space-x-4">
+                <div className="flex items-center bg-gray-50 dark:bg-gray-700 p-3 rounded-lg w-full md:w-auto">
+                  <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden w-full">
+                    <button
+                      onClick={decrementCantidad}
+                      disabled={cantidad <= 1 || producto.stock <= 0}
+                      className="px-5 py-3 border-r border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300 text-lg"
+                    >
+                      -
+                    </button>
+                    <span className="px-5 py-3 text-gray-800 dark:text-white font-medium min-w-[40px] text-center text-lg">{cantidad}</span>
+                    <button
+                      onClick={incrementCantidad}
+                      disabled={producto.stock <= cantidad || producto.stock <= 0}
+                      className="px-5 py-3 border-l border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300 text-lg"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-                    <FaTruck className="text-blue-600 dark:text-blue-400" />
-                    <span>Entrega a domicilio</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-                    <FaShieldAlt className="text-blue-600 dark:text-blue-400" />
-                    <span>Compra protegida</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-                    <FaCreditCard className="text-blue-600 dark:text-blue-400" />
-                    <span>Pago seguro</span>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isAdding || producto.stock <= 0}
+                  className={`flex items-center justify-center space-x-2 py-3 px-6 rounded-lg text-white w-full md:w-auto md:flex-1 ${
+                    producto.stock <= 0
+                      ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                      : isAdding
+                      ? 'bg-green-500 dark:bg-green-600'
+                      : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600'
+                  } transition-colors font-medium text-lg`}
+                >
+                  <FaShoppingCart size={20} />
+                  <span>
+                    {isAdding
+                      ? '¡Agregado!'
+                      : producto.stock <= 0
+                      ? 'Sin stock'
+                      : 'Agregar al carrito'}
+                  </span>
+                </button>
+              </div>
+            </div>
+            
+            {/* Medios de pago */}
+            <div className="mb-5">
+              <div className="flex items-center justify-center">
+                <div className="flex items-center space-x-6 w-fit mx-auto">
+                  <h3 className="text-gray-800 dark:text-white font-medium">Medios de pago</h3>
+                  <div className="flex items-center space-x-4">
+                    <div className="relative h-8 w-20">
+                      <Image 
+                        src="/webpay.svg" 
+                        alt="Webpay" 
+                        width={80}
+                        height={32}
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </div>
+                    <div className="relative h-8 w-12">
+                      <Image 
+                        src="/visa.svg" 
+                        alt="Visa" 
+                        width={48}
+                        height={32}
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </div>
+                    <div className="relative h-8 w-12">
+                      <Image 
+                        src="/mastercard.svg" 
+                        alt="Mastercard" 
+                        width={48}
+                        height={32}
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </div>
+                    <div className="relative h-8 w-20">
+                      <Image 
+                        src="/redcompra.svg" 
+                        alt="Redcompra" 
+                        width={80}
+                        height={32}
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
