@@ -100,6 +100,19 @@ export default function Header() {
     }
   };
 
+  // Función para abrir el modal de registro
+  const handleOpenRegister = () => {
+    // Este es un hack para asegurarnos que el componente LoginModal
+    // tenga tiempo de renderizar y cambiar a la vista de registro
+    openLoginModal();
+    setTimeout(() => {
+      const registerBtn = document.querySelector('[data-testid="register-link"]');
+      if (registerBtn) {
+        (registerBtn as HTMLButtonElement).click();
+      }
+    }, 100);
+  };
+
   return (
     <>
       <header className="bg-blue-700 dark:bg-blue-900 text-white shadow-md transition-colors duration-200">
@@ -240,13 +253,21 @@ export default function Header() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={openLoginModal}
-                  className="flex items-center space-x-2 hover:text-blue-200"
-                >
-                  <FaUser size={20} />
-                  <span className="text-sm">Iniciar sesión</span>
-                </button>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={openLoginModal}
+                    className="flex items-center space-x-2 hover:text-blue-200"
+                  >
+                    <FaUser size={20} />
+                    <span className="text-sm">Iniciar sesión</span>
+                  </button>
+                  <button
+                    onClick={handleOpenRegister}
+                    className="flex items-center py-1.5 px-3 rounded-full border border-blue-300 hover:bg-blue-600 transition-colors"
+                  >
+                    <span className="text-sm">Registrarse</span>
+                  </button>
+                </div>
               )}
 
               {/* Carrito - botón que abre el carrito flotante */}
@@ -304,13 +325,21 @@ export default function Header() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={openLoginModal}
-                  className="flex items-center space-x-2 hover:text-blue-200"
-                >
-                  <FaUser size={20} />
-                  <span className="text-sm">Iniciar sesión</span>
-                </button>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={openLoginModal}
+                    className="flex items-center space-x-2 hover:text-blue-200"
+                  >
+                    <FaUser size={20} />
+                    <span className="text-sm">Iniciar sesión</span>
+                  </button>
+                  <button
+                    onClick={handleOpenRegister}
+                    className="flex items-center py-1.5 px-3 rounded-full border border-blue-300 hover:bg-blue-600 transition-colors"
+                  >
+                    <span className="text-sm">Registrarse</span>
+                  </button>
+                </div>
               )}
 
               {/* Carrito - botón que abre el carrito flotante */}
@@ -473,14 +502,16 @@ export default function Header() {
                       <FaUser className="mr-2" />
                       Iniciar sesión
                     </button>
-                    <Link
-                      href="/auth/register"
+                    <button
+                      onClick={() => {
+                        handleOpenRegister();
+                        setIsMenuOpen(false);
+                      }}
                       className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-blue-800 dark:hover:bg-blue-800"
-                      onClick={() => setIsMenuOpen(false)}
                     >
                       <FaUser className="mr-2" />
                       Registrarse
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
