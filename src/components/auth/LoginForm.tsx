@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaEnvelope, FaLock, FaSpinner } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaSpinner, FaUserTie, FaUser } from 'react-icons/fa';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 interface LoginFormProps {
   onRegister: () => void;
@@ -17,6 +18,7 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
+  const { userType, setUserType } = useLoginModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +26,9 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      await login(correo, contrasena);
+      // Verificar que userType sea válido, por defecto usamos 'cliente'
+      const tipo = userType === 'empleado' ? 'empleado' : 'cliente';
+      await login(correo, contrasena, tipo);
       onSuccess(); // Cerrar el modal después del login exitoso
       router.refresh(); // Forzar la actualización de la interfaz
     } catch (error: any) {
@@ -46,6 +50,34 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
             {error}
           </div>
         )}
+
+        {/* Selector de tipo de usuario */}
+        <div className="flex justify-center space-x-4 mb-4">
+          <button
+            type="button"
+            onClick={() => setUserType('cliente')}
+            className={`flex flex-col items-center p-3 rounded-lg border ${
+              userType === 'cliente' 
+                ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-900 dark:border-blue-400 dark:text-blue-300' 
+                : 'bg-gray-50 border-gray-300 text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300'
+            }`}
+          >
+            <FaUser className="text-2xl mb-1" />
+            <span className="text-sm font-medium">Cliente</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setUserType('empleado')}
+            className={`flex flex-col items-center p-3 rounded-lg border ${
+              userType === 'empleado' 
+                ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-900 dark:border-blue-400 dark:text-blue-300' 
+                : 'bg-gray-50 border-gray-300 text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300'
+            }`}
+          >
+            <FaUserTie className="text-2xl mb-1" />
+            <span className="text-sm font-medium">Empleado</span>
+          </button>
+        </div>
 
         <div>
           <label htmlFor="correo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -108,19 +140,21 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
           )}
         </button>
         
-        <div className="text-center pt-2">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            ¿No tienes cuenta?{' '}
-            <button 
-              onClick={onRegister}
-              className="text-blue-600 hover:text-blue-500 underline font-medium"
-              type="button"
-              data-testid="register-link"
-            >
-              Regístrate ahora
-            </button>
-          </p>
-        </div>
+        {userType === 'cliente' && (
+          <div className="text-center pt-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              ¿No tienes cuenta?{' '}
+              <button 
+                onClick={onRegister}
+                className="text-blue-600 hover:text-blue-500 underline font-medium"
+                type="button"
+                data-testid="register-link"
+              >
+                Regístrate ahora
+              </button>
+            </p>
+          </div>
+        )}
       </form>
     </div>
   );
