@@ -148,19 +148,19 @@ export function useCarrito() {
       // Obtener nuevos items filtrando el producto a eliminar
       const newItems = prevItems.filter(item => item.producto.id_producto !== productoId);
       
-      // Manejar específicamente el caso donde el carrito queda vacío
+      // Guardar el cambio en localStorage inmediatamente
       saveCartToStorage(newItems);
       
+      // Notificar a otros componentes
+      setTimeout(() => {
+        notifyCarritoUpdated();
+      }, 0);
+      
       // Log para depuración
-      if (newItems.length === 0) {
-        console.log('Carrito vacío, localStorage limpiado');
-      }
+      console.log(`Producto ${productoId} eliminado. Items restantes: ${newItems.length}`);
       
       return newItems;
     });
-    
-    // Notificar a otros componentes después de la actualización
-    notifyCarritoUpdated();
   };
   
   // Limpiar todo el carrito
