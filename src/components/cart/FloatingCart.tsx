@@ -139,7 +139,7 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                   {/* Imagen */}
                   <div className="h-16 w-16 flex-shrink-0 bg-gray-200 dark:bg-gray-700 overflow-hidden rounded">
                     <img
-                      src={`https://picsum.photos/seed/${item.producto.id_producto}/100/100`}
+                      src={`/productos/${item.producto.id_producto}.webp`}
                       alt={item.producto.nombre}
                       className="h-full w-full object-cover"
                     />

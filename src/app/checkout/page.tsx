@@ -463,7 +463,7 @@ export default function CheckoutPage() {
                   <div key={item.producto.id_producto} className="flex py-2 border-b border-gray-200 dark:border-gray-700">
                     <div className="h-16 w-16 flex-shrink-0 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
                       <img
-                        src={`https://picsum.photos/seed/${item.producto.id_producto}/100/100`}
+                        src={`/productos/${item.producto.id_producto}.webp`}
                         alt={item.producto.nombre}
                         className="h-full w-full object-cover"
                       />

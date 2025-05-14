@@ -115,11 +115,11 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
     );
   }
 
-  // Imágenes de muestra para la galería
-  const sampleImages = [
-    `https://picsum.photos/seed/${producto.id_producto}/600/600`,
-    `https://picsum.photos/seed/${producto.id_producto + 100}/600/600`,
-    `https://picsum.photos/seed/${producto.id_producto + 200}/600/600`,
+  // Imágenes de muestra para la galería (usando las imágenes de productos reales)
+  const productImages = [
+    `/productos/${producto.id_producto}.webp`,
+    `/productos/${producto.id_producto}.webp`, // Usar la misma imagen para todas las vistas
+    `/productos/${producto.id_producto}.webp`,
   ];
 
   return (
@@ -130,7 +130,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
           <div className="md:w-1/2 p-6">
             <div className="relative bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden mb-4 transition-all duration-300 hover:shadow-lg">
               <img
-                src={sampleImages[selectedImage]}
+                src={productImages[selectedImage]}
                 alt={producto.nombre}
                 className="w-full h-auto object-cover aspect-square"
               />
@@ -138,7 +138,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
             
             {/* Miniaturas */}
             <div className="flex gap-2 justify-center">
-              {sampleImages.map((img, index) => (
+              {productImages.map((img, index) => (
                 <div 
                   key={index}
                   onClick={() => setSelectedImage(index)}
