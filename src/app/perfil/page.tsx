@@ -3,10 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useRouter } from 'next/navigation';
-import { FaUser, FaEnvelope, FaKey, FaArrowLeft } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import Link from 'next/link';
 import { authApi } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
+
+// Interfaz para los pedidos
+interface Pedido {
+  id_pedido: number;
+  fecha: string;
+  estado: string;
+  total: number;
+  productos?: PedidoProducto[];
+}
+
+interface PedidoProducto {
+  nombre: string;
+  cantidad: number;
+  precio: number;
+}
 
 export default function PerfilPage() {
   const { user, logout } = useAuth();
@@ -15,7 +30,11 @@ export default function PerfilPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     nombre: user?.nombre || '',
-    email: user?.email || '',
+    apellido: user?.apellido || '',
+    email: user?.correo || '',
+    telefono: user?.telefono?.toString() || '',
+    direccion: user?.direccion || '',
+    rut: user?.rut || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -23,14 +42,105 @@ export default function PerfilPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('info');
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [loadingPedidos, setLoadingPedidos] = useState(false);
 
   // Proteger la ruta si no hay usuario autenticado
   useEffect(() => {
     if (!user) {
       router.push('/');
       openLoginModal();
+    } else {
+      setFormData({
+        nombre: user.nombre || '',
+        apellido: user.apellido || '',
+        email: user.correo || '',
+        telefono: user.telefono?.toString() || '',
+        direccion: user.direccion || '',
+        rut: user.rut || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      
+      // Cargar pedidos del usuario cuando el usuario esté autenticado
+      if (activeTab.startsWith('pedidos')) {
+        cargarPedidos();
+      }
     }
-  }, [user, router, openLoginModal]);
+  }, [user, router, openLoginModal, activeTab]);
+
+  // Función para cargar los pedidos del usuario
+  const cargarPedidos = async () => {
+    if (!user) return;
+    
+    setLoadingPedidos(true);
+    try {
+      // Aquí se implementaría la llamada a la API para obtener los pedidos
+      // Por ahora, usamos datos de ejemplo relacionados con tenis de mesa
+      const datosDePedidosEjemplo: Pedido[] = [
+        {
+          id_pedido: 1001,
+          fecha: '2023-11-15',
+          estado: 'Entregado',
+          total: 45990,
+          productos: [
+            { nombre: 'Paleta Profesional Butterfly', cantidad: 1, precio: 45990 }
+          ]
+        },
+        {
+          id_pedido: 1002,
+          fecha: '2023-12-05',
+          estado: 'En proceso',
+          total: 37980,
+          productos: [
+            { nombre: 'Pelotas Training 3 estrellas (Pack 6)', cantidad: 2, precio: 12990 },
+            { nombre: 'Cinta de protección para paleta', cantidad: 1, precio: 11990 }
+          ]
+        },
+        {
+          id_pedido: 1003,
+          fecha: '2024-01-20',
+          estado: 'Cancelado',
+          total: 129990,
+          productos: [
+            { nombre: 'Mesa Plegable Competición Stiga', cantidad: 1, precio: 129990 }
+          ]
+        },
+        {
+          id_pedido: 1004,
+          fecha: '2024-02-15',
+          estado: 'Entregado',
+          total: 78980,
+          productos: [
+            { nombre: 'Paleta Donic Waldner Carbon', cantidad: 1, precio: 52990 },
+            { nombre: 'Goma Yasaka Mark V', cantidad: 2, precio: 12995 }
+          ]
+        },
+        {
+          id_pedido: 1005,
+          fecha: '2024-03-10',
+          estado: 'En proceso',
+          total: 69980,
+          productos: [
+            { nombre: 'Red Profesional Joola', cantidad: 1, precio: 34990 },
+            { nombre: 'Zapatillas Butterfly Lezoline', cantidad: 1, precio: 34990 }
+          ]
+        }
+      ];
+      
+      // Simulamos un retraso en la respuesta
+      setTimeout(() => {
+        setPedidos(datosDePedidosEjemplo);
+        setLoadingPedidos(false);
+      }, 800);
+      
+    } catch (error) {
+      console.error('Error al cargar pedidos:', error);
+      setLoadingPedidos(false);
+    }
+  };
 
   if (!user) {
     return null;
@@ -67,7 +177,10 @@ export default function PerfilPage() {
 
       const updateData = {
         nombre: formData.nombre,
-        email: formData.email,
+        apellido: formData.apellido,
+        correo: formData.email,
+        telefono: formData.telefono,
+        direccion: formData.direccion,
         ...(formData.newPassword ? {
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword
@@ -84,45 +197,95 @@ export default function PerfilPage() {
     }
   };
 
-  return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          <FaArrowLeft className="mr-2" />
-          Volver al inicio
-        </Link>
+  const renderUserInfo = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:space-x-4">
+        <div className="flex-1 space-y-4">
+          <div className="bg-white dark:bg-gray-700 p-5 rounded-lg shadow">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 border-b pb-2">
+              Información Personal
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-start">
+                <FaUser className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Nombre Completo</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{user.nombre} {user.apellido}</p>
+                </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Mi Perfil</h1>
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="text-blue-600 hover:text-blue-500 dark:text-blue-400"
-          >
-            {isEditing ? 'Cancelar' : 'Editar'}
-          </button>
+              <div className="flex items-start">
+                <FaIdCard className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">RUT</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{user.rut || 'No disponible'}</p>
+                </div>
         </div>
 
-        {error && (
-          <div className="mb-4 bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
-            {error}
+              {user.id_rol !== undefined && (
+                <div className="flex items-start">
+                  <FaUserTag className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Tipo de Usuario</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{user.id_rol === 1 ? 'Cliente' : 'Administrador'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-
-        {success && (
-          <div className="mb-4 bg-green-50 dark:bg-green-900/50 text-green-600 dark:text-green-400 p-3 rounded-md text-sm">
-            {success}
+        </div>
+        
+        <div className="flex-1 space-y-4 mt-4 md:mt-0">
+          <div className="bg-white dark:bg-gray-700 p-5 rounded-lg shadow">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 border-b pb-2">
+              Información de Contacto
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-start">
+                <FaEnvelope className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Correo Electrónico</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{user.correo}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <FaPhone className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Teléfono</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{user.telefono || 'No disponible'}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <FaMapMarkerAlt className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Dirección</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{user.direccion || 'No disponible'}</p>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-
+        </div>
+      </div>
+      
+      <div className="flex justify-end">
+        <button
+          onClick={() => setIsEditing(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Editar Perfil
+        </button>
+      </div>
+    </div>
+  );
+  
+  const renderEditForm = () => (
         <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Nombre completo
+            Nombre
             </label>
             <div className="mt-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -132,10 +295,28 @@ export default function PerfilPage() {
                 id="nombre"
                 name="nombre"
                 type="text"
-                value={isEditing ? formData.nombre : user.nombre}
+              value={formData.nombre}
                 onChange={handleChange}
-                disabled={!isEditing}
-                className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Apellido
+          </label>
+          <div className="mt-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaUser className="text-gray-400" />
+            </div>
+            <input
+              id="apellido"
+              name="apellido"
+              type="text"
+              value={formData.apellido}
+              onChange={handleChange}
+              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               />
             </div>
           </div>
@@ -152,16 +333,58 @@ export default function PerfilPage() {
                 id="email"
                 name="email"
                 type="email"
-                value={isEditing ? formData.email : user.email}
+              value={formData.email}
                 onChange={handleChange}
-                disabled={!isEditing}
-                className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               />
             </div>
           </div>
 
-          {isEditing && (
-            <>
+        <div>
+          <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Teléfono
+          </label>
+          <div className="mt-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaPhone className="text-gray-400" />
+            </div>
+            <input
+              id="telefono"
+              name="telefono"
+              type="text"
+              value={formData.telefono}
+              onChange={handleChange}
+              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+            />
+          </div>
+        </div>
+
+        <div className="md:col-span-2">
+          <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Dirección
+          </label>
+          <div className="mt-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaMapMarkerAlt className="text-gray-400" />
+            </div>
+            <input
+              id="direccion"
+              name="direccion"
+              type="text"
+              value={formData.direccion}
+              onChange={handleChange}
+              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 border-t pt-6 dark:border-gray-600">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          Cambiar Contraseña (opcional)
+        </h3>
+        
+        <div className="space-y-4">
               <div>
                 <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Contraseña actual
@@ -184,7 +407,7 @@ export default function PerfilPage() {
 
               <div>
                 <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Nueva contraseña (opcional)
+              Nueva contraseña
                 </label>
                 <div className="mt-1 relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -219,10 +442,12 @@ export default function PerfilPage() {
                     className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                     placeholder="••••••••"
                   />
+            </div>
+          </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3">
+      <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
@@ -238,9 +463,236 @@ export default function PerfilPage() {
                   {isLoading ? 'Guardando...' : 'Guardar cambios'}
                 </button>
               </div>
-            </>
+    </form>
+  );
+
+  // Función para renderizar pedidos según el estado seleccionado
+  const renderPedidosPorEstado = (estado: string) => {
+    const pedidosFiltrados = pedidos.filter(pedido => pedido.estado === estado);
+    const estadoLabel = estado === 'En proceso' ? 'en proceso' : 
+                      estado === 'Entregado' ? 'entregados' : 'cancelados';
+    
+    // Colores según estado
+    const statusColor = estado === 'En proceso' ? 'yellow' : 
+                      estado === 'Entregado' ? 'green' : 'red';
+                      
+    // Iconos según estado
+    const StatusIcon = estado === 'En proceso' ? FaTruck : 
+                      estado === 'Entregado' ? FaCheckCircle : FaTimesCircle;
+    
+    return (
+      <div className="space-y-6">
+        {loadingPedidos ? (
+          <div className="flex justify-center py-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : pedidos.length === 0 ? (
+          <div className="text-center py-10 bg-white dark:bg-gray-700 rounded-lg shadow-md">
+            <FaShoppingBag className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">No tienes pedidos</h3>
+            <p className="mt-1 text-gray-500 dark:text-gray-400">¡Comienza a comprar ahora!</p>
+            <button 
+              onClick={() => router.push('/')}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Ver productos
+            </button>
+          </div>
+        ) : pedidosFiltrados.length === 0 ? (
+          <div className="text-center py-10 bg-white dark:bg-gray-700 rounded-lg shadow-md">
+            <StatusIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              No tienes pedidos {estadoLabel}
+            </h3>
+            <p className="mt-1 text-gray-500 dark:text-gray-400">
+              {estado === 'En proceso' ? 'Tus pedidos en proceso aparecerán aquí' : 
+               estado === 'Entregado' ? 'Tus pedidos entregados aparecerán aquí' : 
+               'Tus pedidos cancelados aparecerán aquí'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {pedidosFiltrados.map((pedido) => (
+              <div 
+                key={pedido.id_pedido} 
+                className="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-600"
+              >
+                <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
+                  <div className="flex flex-wrap items-center justify-between">
+                    <div className="flex items-center mb-2 md:mb-0">
+                      <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium">
+                        Pedido #{pedido.id_pedido}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <FaClock className="mr-1.5" />
+                      {pedido.fecha}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden mb-4">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-100 dark:bg-gray-800">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Producto
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Cantidad
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Precio
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
+                        {pedido.productos && pedido.productos.map((producto, index) => (
+                          <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                              {producto.nombre}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              {producto.cantidad}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white text-right">
+                              ${producto.precio.toLocaleString('es-CL')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="flex justify-between items-center pt-3 border-t dark:border-gray-700">
+                    <div className="flex items-center text-gray-700 dark:text-gray-300">
+                      <FaMoneyBillWave className="mr-2 text-green-600 dark:text-green-400" />
+                      <span className="font-medium">Total del pedido</span>
+                    </div>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">
+                      ${pedido.total.toLocaleString('es-CL')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+        <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-900">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6">
+            <div>
+              <p className="text-white font-medium text-lg">
+                {user.nombre} {user.apellido}
+              </p>
+              <p className="text-blue-100 text-sm mt-1">
+                {user.correo}
+              </p>
+            </div>
+          </div>
+          
+          <nav className="p-4 space-y-1">
+            <button
+              onClick={() => setActiveTab('info')}
+              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                activeTab === 'info'
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+            >
+              <FaUser className={`mr-3 h-5 w-5 ${
+                activeTab === 'info' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+              }`} />
+              Información Personal
+            </button>
+            
+            <div className="py-2">
+              <h3 className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Mis Pedidos
+              </h3>
+            </div>
+
+            <button
+              onClick={() => {
+                setActiveTab('pedidos-proceso');
+                cargarPedidos();
+              }}
+              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                activeTab === 'pedidos-proceso'
+                  ? 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+            >
+              <FaTruck className={`mr-3 h-5 w-5 ${
+                activeTab === 'pedidos-proceso' ? 'text-yellow-500 dark:text-yellow-400' : 'text-gray-400 dark:text-gray-500'
+              }`} />
+              En Proceso
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveTab('pedidos-entregados');
+                cargarPedidos();
+              }}
+              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                activeTab === 'pedidos-entregados'
+                  ? 'bg-green-50 text-green-700 dark:bg-green-900/50 dark:text-green-300'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+            >
+              <FaCheckCircle className={`mr-3 h-5 w-5 ${
+                activeTab === 'pedidos-entregados' ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
+              }`} />
+              Entregados
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveTab('pedidos-cancelados');
+                cargarPedidos();
+              }}
+              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                activeTab === 'pedidos-cancelados'
+                  ? 'bg-red-50 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+            >
+              <FaTimesCircle className={`mr-3 h-5 w-5 ${
+                activeTab === 'pedidos-cancelados' ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'
+              }`} />
+              Cancelados
+            </button>
+          </nav>
+        </div>
+
+        <div className="flex-1">
+          {error && (
+            <div className="m-6 bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
+              {error}
+            </div>
           )}
-        </form>
+
+          {success && (
+            <div className="m-6 bg-green-50 dark:bg-green-900/50 text-green-600 dark:text-green-400 p-3 rounded-md text-sm">
+              {success}
+            </div>
+          )}
+
+          <div className="p-6">
+            {activeTab === 'info' && (isEditing ? renderEditForm() : renderUserInfo())}
+            {activeTab === 'pedidos-proceso' && renderPedidosPorEstado('En proceso')}
+            {activeTab === 'pedidos-entregados' && renderPedidosPorEstado('Entregado')}
+            {activeTab === 'pedidos-cancelados' && renderPedidosPorEstado('Cancelado')}
+          </div>
+        </div>
       </div>
     </div>
   );
