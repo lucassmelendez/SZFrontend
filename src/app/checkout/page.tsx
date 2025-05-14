@@ -35,15 +35,17 @@ export default function CheckoutPage() {
   
   // Banner simple para checkout
   const CheckoutBanner = () => (
-    <div className="bg-blue-600 text-white py-4 px-6 flex items-center">
-      <Link 
-        href="/productos" 
-        className="flex items-center text-white hover:text-blue-200 transition-colors"
-      >
-        <FaArrowLeft className="mr-2" />
-        Seguir comprando
-      </Link>
-      <h1 className="text-xl font-bold flex-grow text-center">SpinZone</h1>
+    <div className="bg-blue-600 text-white py-4 flex items-center">
+      <div className="container mx-auto px-4 flex items-center">
+        <Link 
+          href="/productos" 
+          className="flex items-center text-white hover:text-blue-200 transition-colors"
+        >
+          <FaArrowLeft className="mr-2" />
+          Seguir comprando
+        </Link>
+        <h1 className="text-xl font-bold flex-grow text-center">SpinZone</h1>
+      </div>
     </div>
   );
 
