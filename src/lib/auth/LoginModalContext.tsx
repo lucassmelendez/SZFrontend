@@ -39,8 +39,8 @@ export function LoginModalProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     if (isCliente(user)) {
-      // Es un cliente (rol 1)
-      router.push('/perfil');
+      // Es un cliente (rol 1) - No redirigimos, se queda en la misma página
+      return; // Eliminamos la redirección
     } else if (isEmpleado(user)) {
       // Según el rol del empleado
       switch (user.rol_id) {

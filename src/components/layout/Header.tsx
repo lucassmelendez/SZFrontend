@@ -3,13 +3,13 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUser, FaSignOutAlt, FaChevronDown } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUser, FaSignOutAlt, FaChevronDown, FaCogs } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useTheme } from '@/lib/useTheme';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import FloatingCart from '../cart/FloatingCart';
-import { productoApi, Producto } from '@/lib/api';
+import { productoApi, Producto, isEmpleado } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 const categorias = [
@@ -127,6 +127,7 @@ export default function Header() {
                 >
                   Productos
                 </Link>
+          
                 {/* Menú desplegable de Categorías */}
                 <div className="relative" ref={categoryMenuRef}>
                   <button
@@ -153,6 +154,24 @@ export default function Header() {
                     </div>
                   )}
                 </div>
+                
+                {/* Opción de Administrar para roles de empleado (no clientes) */}
+                {user && isEmpleado(user) && (
+                  <Link
+                    href={
+                      user.rol_id === 2 ? '/admin/dashboard' :
+                      user.rol_id === 3 ? '/empleado/dashboard' :
+                      user.rol_id === 4 ? '/bodega/dashboard' :
+                      user.rol_id === 5 ? '/contabilidad/dashboard' : '/'
+                    }
+                    className={`hover:text-blue-200 ${
+                      pathname.includes('/admin') || pathname.includes('/empleado') || 
+                      pathname.includes('/bodega') || pathname.includes('/contabilidad') ? 'font-bold' : ''
+                    }`}
+                  >
+                    Administrar
+                  </Link>
+                )}
               </nav>
             </div>
 
@@ -412,6 +431,27 @@ export default function Header() {
                     >
                       Productos
                     </Link>
+                    {/* Opción de Administrar para roles de empleado (no clientes) */}
+                    {user && isEmpleado(user) && (
+                      <Link
+                        href={
+                          user.rol_id === 2 ? '/admin/dashboard' :
+                          user.rol_id === 3 ? '/empleado/dashboard' :
+                          user.rol_id === 4 ? '/bodega/dashboard' :
+                          user.rol_id === 5 ? '/contabilidad/dashboard' : '/'
+                        }
+                        className={`block py-3 hover:text-blue-200 ${
+                          pathname.includes('/admin') || pathname.includes('/empleado') || 
+                          pathname.includes('/bodega') || pathname.includes('/contabilidad') ? 'font-bold' : ''
+                        }`}
+                        onClick={toggleMenu}
+                      >
+                        <div className="flex items-center">
+                          <FaCogs className="mr-2" />
+                          Administrar
+                        </div>
+                      </Link>
+                    )}
                     {/* Categorías en móvil */}
                     <div className="py-3">
                       <span className="block text-white mb-2">Categorías</span>
