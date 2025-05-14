@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaArrowLeft, FaCheck, FaShoppingCart } from 'react-icons/fa';
+import { FaArrowLeft, FaCheck, FaShoppingCart, FaHome } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -36,15 +36,24 @@ export default function CheckoutPage() {
   // Banner simple para checkout
   const CheckoutBanner = () => (
     <div className="bg-blue-600 text-white py-4 flex items-center">
-      <div className="container mx-auto px-4 flex items-center">
+      <div className="container mx-auto px-4 flex items-center relative">
         <Link 
           href="/productos" 
-          className="flex items-center text-white hover:text-blue-200 transition-colors"
+          className="flex items-center text-white hover:text-blue-200 transition-colors z-10"
         >
           <FaArrowLeft className="mr-2" />
           Seguir comprando
         </Link>
-        <h1 className="text-xl font-bold flex-grow text-center">SpinZone</h1>
+        <h1 className="text-xl font-bold absolute left-0 right-0 text-center">SpinZone</h1>
+        <div className="ml-auto z-10">
+          <Link
+            href="/"
+            className="flex items-center text-white hover:text-blue-200 transition-colors p-1"
+            aria-label="Ir al inicio"
+          >
+            <FaHome size={24} />
+          </Link>
+        </div>
       </div>
     </div>
   );
