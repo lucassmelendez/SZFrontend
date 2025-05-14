@@ -9,7 +9,7 @@ import { useTheme } from '@/lib/useTheme';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import FloatingCart from '../cart/FloatingCart';
-import { productoApi, Producto } from '@/lib/api';
+import { productoApi, Producto, isEmpleado } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 const categorias = [
@@ -128,7 +128,7 @@ export default function Header() {
                   Productos
                 </Link>
                 {/* Opción de Administrar para roles de empleado (no clientes) */}
-                {user && user.rol_id !== 1 && (
+                {user && isEmpleado(user) && (
                   <Link
                     href={
                       user.rol_id === 2 ? '/admin/dashboard' :
@@ -430,7 +430,7 @@ export default function Header() {
                       Productos
                     </Link>
                     {/* Opción de Administrar para roles de empleado (no clientes) */}
-                    {user && user.rol_id !== 1 && (
+                    {user && isEmpleado(user) && (
                       <Link
                         href={
                           user.rol_id === 2 ? '/admin/dashboard' :
