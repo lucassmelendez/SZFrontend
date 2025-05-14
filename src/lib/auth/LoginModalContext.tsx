@@ -16,16 +16,13 @@ const LoginModalContext = createContext<LoginModalContextType | undefined>(undef
 
 export function LoginModalProvider({ children }: { children: ReactNode }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { user, userType } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   // Cerrar el modal si el usuario ya está autenticado
   useEffect(() => {
     if (user) {
       setIsLoginModalOpen(false);
-      
-      // Redirigir según el tipo de usuario
-      redirectBasedOnUserType();
     }
   }, [user]);
 

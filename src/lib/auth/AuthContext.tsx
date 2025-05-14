@@ -61,6 +61,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkSession();
   }, []);
 
+  // Función auxiliar para redirigir al usuario según su rol
+  const redirectUserBasedOnRole = (userObj: User) => {
+    if (typeof window === 'undefined') return;
+    
+    if (isCliente(userObj)) {
+      // Es un cliente (rol 1)
+      window.location.href = '/perfil';
+    } else if (isEmpleado(userObj)) {
+      // Según el rol del empleado
+      switch (userObj.rol_id) {
+        case 2: // Administrador
+          window.location.href = '/admin/dashboard';
+          break;
+        case 3: // Vendedor
+          window.location.href = '/empleado/dashboard';
+          break;
+        case 4: // Bodeguero
+          window.location.href = '/bodega/dashboard';
+          break;
+        case 5: // Contador
+          window.location.href = '/contabilidad/dashboard';
+          break;
+        default:
+          // En caso de otro rol no especificado, ir a la página principal
+          window.location.href = '/';
+      }
+    }
+  };
+
   const login = async (correo: string, contrasena: string) => {
     setIsLoading(true);
     try {
@@ -72,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserType('cliente');
           localStorage.setItem('auth_token', response.data.token);
           localStorage.setItem('user_type', 'cliente');
+          redirectUserBasedOnRole(response.data.user);
           return; // Salir si el login fue exitoso
         }
       } catch (error) {
@@ -89,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('auth_token', 'cliente_fastapi_' + Date.now());
           localStorage.setItem('user_type', 'cliente');
           localStorage.setItem('cliente_data', JSON.stringify(clienteData));
+          redirectUserBasedOnRole(clienteData);
           return; // Salir si el login fue exitoso
         }
       } catch (error) {
@@ -105,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('auth_token', 'empleado_session_' + Date.now());
           localStorage.setItem('user_type', 'empleado');
           localStorage.setItem('empleado_data', JSON.stringify(empleadoData));
+          redirectUserBasedOnRole(empleadoData);
           return; // Salir si el login fue exitoso
         }
       } catch (error) {
@@ -131,6 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserType('cliente'); // Por defecto registramos como cliente
         localStorage.setItem('auth_token', response.data.token);
         localStorage.setItem('user_type', 'cliente');
+        redirectUserBasedOnRole(response.data.user);
       } else {
         throw new Error('Error en el registro');
       }

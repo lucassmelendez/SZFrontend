@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaEnvelope, FaLock, FaSpinner } from 'react-icons/fa';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 interface LoginFormProps {
   onRegister: () => void;
@@ -16,9 +15,7 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const { login } = useAuth();
-  const { redirectBasedOnUserType } = useLoginModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,16 +23,12 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      // Se eliminó la selección de tipo de usuario
-      // El sistema ahora identifica automáticamente el tipo de usuario
+      // El login ahora maneja la redirección automáticamente
       await login(correo, contrasena);
-      
-      // La redirección se manejará en useEffect en LoginModalContext
-      onSuccess(); // Cerrar el modal después del login exitoso
-      router.refresh(); // Forzar la actualización de la interfaz
+      // No necesitamos llamar a onSuccess() porque la redirección
+      // se hace automáticamente en el AuthContext
     } catch (error: any) {
       setError(error.message || 'Error al iniciar sesión');
-    } finally {
       setIsLoading(false);
     }
   };
