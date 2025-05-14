@@ -81,6 +81,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Eliminar datos locales
       setUser(null);
       localStorage.removeItem('auth_token');
+      
+      // Redirigir a la página de inicio después de cerrar sesión
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
       throw error;

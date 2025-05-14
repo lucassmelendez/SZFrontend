@@ -289,7 +289,8 @@ export default function CheckoutPage() {
                         alt="WebPay" 
                         width={100}
                         height={32}
-                        className="h-8 w-auto mr-3"
+                        className="mr-3"
+                        style={{ height: '32px', width: 'auto' }}
                         priority
                       />
                       <div>
@@ -330,7 +331,8 @@ export default function CheckoutPage() {
                         alt="Dinero" 
                         width={100}
                         height={32}
-                        className="h-8 w-auto mr-3"
+                        className="mr-3"
+                        style={{ height: '32px', width: 'auto' }}
                         priority
                       />
                       <div>

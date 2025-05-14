@@ -38,9 +38,6 @@ export default function Header() {
   // Cerrar los menús cuando se hace clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
-        setIsProfileOpen(false);
-      }
       if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
         setIsCategoryOpen(false);
       }
@@ -95,7 +92,6 @@ export default function Header() {
   const handleLogout = async () => {
     try {
       await logout();
-      setIsProfileOpen(false);
       setIsMenuOpen(false);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
@@ -222,59 +218,34 @@ export default function Header() {
                 </button>
               )}
               
-              {/* Botón de cuenta */}
-              <div className="relative" ref={profileMenuRef}>
-                {user ? (
-                  <>
-                    <div className="flex items-center space-x-3">
-                      <button
-                        onClick={() => setIsProfileOpen(!isProfileOpen)}
-                        className="flex items-center space-x-2 hover:text-blue-200"
-                      >
-                        <FaUser size={20} />
-                        <span className="text-sm">{user.nombre.split(' ')[0]}</span>
-                      </button>
-                      
-                      {/* Botón para cerrar sesión directamente */}
-                      <button
-                        onClick={handleLogout}
-                        className="hover:text-red-400"
-                        aria-label="Cerrar sesión"
-                      >
-                        <FaSignOutAlt size={20} />
-                      </button>
-                    </div>
-                    
-                    {/* Menú desplegable de cuenta */}
-                    {isProfileOpen && (
-                      <div className="absolute right-0 mt-2 w-48 py-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50">
-                        <Link
-                          href="/perfil"
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={() => setIsProfileOpen(false)}
-                        >
-                          Mi Perfil
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                        >
-                          <FaSignOutAlt className="mr-2" />
-                          Cerrar sesión
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
+              {/* Botones de Perfil y Cerrar Sesión */}
+              {user ? (
+                <div className="flex items-center space-x-3">
                   <Link
-                    href="/auth/login"
+                    href="/perfil"
                     className="flex items-center space-x-2 hover:text-blue-200"
                   >
                     <FaUser size={20} />
-                    <span className="text-sm">Iniciar sesión</span>
+                    <span className="text-sm">{user.nombre.split(' ')[0]}</span>
                   </Link>
-                )}
-              </div>
+                  
+                  <button
+                    onClick={handleLogout}
+                    className="hover:text-red-400"
+                    aria-label="Cerrar sesión"
+                  >
+                    <FaSignOutAlt size={20} />
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="flex items-center space-x-2 hover:text-blue-200"
+                >
+                  <FaUser size={20} />
+                  <span className="text-sm">Iniciar sesión</span>
+                </Link>
+              )}
 
               {/* Carrito - botón que abre el carrito flotante */}
               <button 
@@ -312,59 +283,32 @@ export default function Header() {
 
             {/* Sección derecha: Perfil y Carrito */}
             <div className="flex items-center space-x-4">
-              {/* Perfil - visible en todas las pantallas */}
-              <div className="relative" ref={profileMenuRef}>
-                {user ? (
-                  <>
-                    <div className="flex items-center space-x-3">
-                      <button
-                        onClick={() => setIsProfileOpen(!isProfileOpen)}
-                        className="flex items-center space-x-2 hover:text-blue-200"
-                      >
-                        <FaUser size={20} />
-                        <span className="hidden md:inline text-sm">{user.nombre.split(' ')[0]}</span>
-                      </button>
-
-                      {/* Botón para cerrar sesión directamente */}
-                      <button
-                        onClick={handleLogout}
-                        className="hover:text-red-400"
-                        aria-label="Cerrar sesión"
-                      >
-                        <FaSignOutAlt size={20} />
-                      </button>
-                    </div>
-                    
-                    {/* Menú desplegable de cuenta */}
-                    {isProfileOpen && (
-                      <div className="absolute right-0 mt-2 w-48 py-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50">
-                        <Link
-                          href="/perfil"
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={() => setIsProfileOpen(false)}
-                        >
-                          Mi Perfil
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                        >
-                          <FaSignOutAlt className="mr-2" />
-                          Cerrar sesión
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
+              {/* Botones de Perfil y Cerrar Sesión */}
+              {user ? (
+                <div className="flex items-center space-x-3">
                   <Link
-                    href="/auth/login"
-                    className="flex items-center space-x-2 hover:text-blue-200"
+                    href="/perfil"
+                    className="hover:text-blue-200"
                   >
                     <FaUser size={20} />
-                    <span className="hidden md:inline text-sm">Iniciar sesión</span>
                   </Link>
-                )}
-              </div>
+                  
+                  <button
+                    onClick={handleLogout}
+                    className="hover:text-red-400"
+                    aria-label="Cerrar sesión"
+                  >
+                    <FaSignOutAlt size={20} />
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="hover:text-blue-200"
+                >
+                  <FaUser size={20} />
+                </Link>
+              )}
 
               {/* Carrito - botón que abre el carrito flotante */}
               <button 
@@ -481,6 +425,17 @@ export default function Header() {
                         ))}
                       </div>
                     </div>
+                    
+                    {/* Enlace a perfil en móvil (dentro del menú) */}
+                    {user && (
+                      <Link
+                        href="/perfil"
+                        className={`block py-3 hover:text-blue-200 ${pathname === '/perfil' ? 'font-bold' : ''}`}
+                        onClick={toggleMenu}
+                      >
+                        Mi Perfil
+                      </Link>
+                    )}
                   </div>
                   
                   {/* Divisor principal */}
