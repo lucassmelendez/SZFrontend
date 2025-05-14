@@ -65,28 +65,18 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
 
   return (
     <div>
-      <div className="text-center mb-6">
+      <div className="text-center mb-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Crear cuenta</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          ¿Ya tienes una cuenta?{' '}
-          <button 
-            onClick={onBackToLogin}
-            className="text-blue-600 hover:text-blue-500 underline font-medium"
-            type="button"
-          >
-            Inicia sesión
-          </button>
-        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {error && (
           <div className="bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Nombre
@@ -152,87 +142,91 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
           </div>
         </div>
 
-        <div>
-          <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Teléfono
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaPhone className="text-gray-400" />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Teléfono
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaPhone className="text-gray-400" />
+              </div>
+              <input
+                id="telefono"
+                name="telefono"
+                type="number"
+                required
+                value={formData.telefono}
+                onChange={handleChange}
+                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                placeholder="912345678"
+              />
             </div>
-            <input
-              id="telefono"
-              name="telefono"
-              type="number"
-              required
-              value={formData.telefono}
-              onChange={handleChange}
-              className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
-              placeholder="912345678"
-            />
+          </div>
+
+          <div>
+            <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Dirección
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaMapMarkerAlt className="text-gray-400" />
+              </div>
+              <input
+                id="direccion"
+                name="direccion"
+                type="text"
+                required
+                value={formData.direccion}
+                onChange={handleChange}
+                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                placeholder="Av. Principal 123"
+              />
+            </div>
           </div>
         </div>
 
-        <div>
-          <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Dirección
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaMapMarkerAlt className="text-gray-400" />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Contraseña
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaLock className="text-gray-400" />
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                placeholder="••••••••"
+              />
             </div>
-            <input
-              id="direccion"
-              name="direccion"
-              type="text"
-              required
-              value={formData.direccion}
-              onChange={handleChange}
-              className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
-              placeholder="Av. Principal 123, Ciudad"
-            />
           </div>
-        </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Contraseña
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaLock className="text-gray-400" />
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Confirmar
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaLock className="text-gray-400" />
+              </div>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                placeholder="••••••••"
+              />
             </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
-              placeholder="••••••••"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Confirmar contraseña
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaLock className="text-gray-400" />
-            </div>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              required
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
-              placeholder="••••••••"
-            />
           </div>
         </div>
 
@@ -252,6 +246,19 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
             'Crear cuenta'
           )}
         </button>
+        
+        <div className="text-center pt-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            ¿Ya tienes una cuenta?{' '}
+            <button 
+              onClick={onBackToLogin}
+              className="text-blue-600 hover:text-blue-500 underline font-medium"
+              type="button"
+            >
+              Inicia sesión
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   );

@@ -22,7 +22,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={isLoginView ? "sm" : "lg"}>
+    <Modal isOpen={isOpen} onClose={onClose} size="sm">
       <div className="bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 -mx-6 -mt-4 px-6 py-6 rounded-t-lg">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white">Bienvenido a SpinZone</h2>

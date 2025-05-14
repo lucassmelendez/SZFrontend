@@ -38,17 +38,6 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
     <div>
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          ¿No tienes cuenta?{' '}
-          <button 
-            onClick={onRegister}
-            className="text-blue-600 hover:text-blue-500 underline font-medium"
-            type="button"
-            data-testid="register-link"
-          >
-            Regístrate ahora
-          </button>
-        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -118,6 +107,20 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
             'Iniciar sesión'
           )}
         </button>
+        
+        <div className="text-center pt-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            ¿No tienes cuenta?{' '}
+            <button 
+              onClick={onRegister}
+              className="text-blue-600 hover:text-blue-500 underline font-medium"
+              type="button"
+              data-testid="register-link"
+            >
+              Regístrate ahora
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   );
