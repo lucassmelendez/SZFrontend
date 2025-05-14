@@ -61,7 +61,7 @@ export default function Home() {
       </section>
 
       {/* Categorías */}
-      <section>
+      <section className="mx-2 md:mx-4 lg:mx-8">
         <h2 className="text-3xl font-bold text-center mb-8 dark:text-white">Categorías Destacadas</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
