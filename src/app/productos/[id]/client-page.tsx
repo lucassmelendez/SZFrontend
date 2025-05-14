@@ -159,7 +159,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{producto.descripcion}</p>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-4 mb-3">
               <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                 <span className="text-gray-500 dark:text-gray-400 text-sm block mb-1">Marca</span>
                 <div className="font-medium text-gray-800 dark:text-white">{producto.marca}</div>
@@ -188,9 +188,9 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
             </div>
             
             {/* Selector de cantidad y botón para agregar al carrito */}
-            <div className="mt-auto">
-              <div className="flex items-center mb-4">
-                <span className="mr-4 text-gray-700 dark:text-gray-300">Cantidad:</span>
+            <div className="mt-1">
+              <div className="flex items-center mb-3 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <span className="mr-4 text-gray-700 dark:text-gray-300 font-medium">Cantidad:</span>
                 <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
                   <button
                     onClick={decrementCantidad}
@@ -219,7 +219,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
                     : isAdding
                     ? 'bg-green-500 dark:bg-green-600'
                     : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600'
-                } transition-colors text-lg font-medium`}
+                } transition-colors text-lg font-medium mb-5`}
               >
                 <FaShoppingCart size={18} />
                 <span>
@@ -232,7 +232,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
               </button>
               
               {/* Medios de pago y beneficios */}
-              <div className="mt-8">
+              <div className="mt-3">
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-gray-800 dark:text-white font-medium">Medios de pago</h3>
