@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaMapMarkerAlt, FaSpinner } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaMapMarkerAlt, FaSpinner, FaIdCard } from 'react-icons/fa';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 interface RegisterFormProps {
@@ -18,7 +18,8 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
     password: '',
     confirmPassword: '',
     telefono: '',
-    direccion: ''
+    direccion: '',
+    rut: ''
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +52,8 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
         formData.nombre, 
         formData.apellido, 
         formData.telefono, 
-        formData.direccion
+        formData.direccion,
+        formData.rut
       );
       
       onSuccess(); // Cerrar el modal después del registro exitoso
@@ -120,25 +122,48 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
           </div>
         </div>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Correo electrónico
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaEnvelope className="text-gray-400" />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Correo electrónico
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaEnvelope className="text-gray-400" />
+              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                placeholder="test@correo.com"
+              />
             </div>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
-              placeholder="ejemplo@correo.com"
-            />
+          </div>
+
+          <div>
+            <label htmlFor="rut" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              RUT
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaIdCard className="text-gray-400" />
+              </div>
+              <input
+                id="rut"
+                name="rut"
+                type="text"
+                required
+                value={formData.rut}
+                onChange={handleChange}
+                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                placeholder="12345678-9"
+              />
+            </div>
           </div>
         </div>
 

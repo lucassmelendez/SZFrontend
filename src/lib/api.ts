@@ -96,14 +96,15 @@ export const authApi = {
     return response.data;
   },
 
-  register: async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string): Promise<LoginResponse> => {
+  register: async (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string): Promise<LoginResponse> => {
     const response = await api.post<LoginResponse>('/auth/register', { 
       correo, 
       contrasena, 
       nombre, 
       apellido, 
       telefono, 
-      direccion 
+      direccion,
+      rut
     });
     return response.data;
   },
