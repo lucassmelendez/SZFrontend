@@ -29,7 +29,7 @@ export default function RootLayout({
             <LoginModalProvider>
               <AppProvider>
                 <Header />
-                <main className="flex-grow pt-4 pb-12">{children}</main>
+                <main className="flex-grow pb-12">{children}</main>
                 <Footer />
                 <LoginModalWrapper />
               </AppProvider>
