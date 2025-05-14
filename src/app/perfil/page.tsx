@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaKey, FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
 import { authApi } from '@/lib/api';
+import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 export default function PerfilPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { openLoginModal } = useLoginModal();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     nombre: user?.nombre || '',
@@ -23,8 +25,14 @@ export default function PerfilPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Proteger la ruta si no hay usuario autenticado
+  useEffect(() => {
+    if (!user) {
+      router.push('/');
+      openLoginModal();
+    }
+  }, [user, router, openLoginModal]);
+
   if (!user) {
-    router.push('/auth/login');
     return null;
   }
 

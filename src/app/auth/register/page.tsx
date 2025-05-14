@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaLock, FaArrowLeft, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -20,6 +21,7 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { register } = useAuth();
+  const { openLoginModal } = useLoginModal();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -76,9 +78,15 @@ export default function RegisterPage() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Crear cuenta</h1>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               ¿Ya tienes una cuenta?{' '}
-              <Link href="/auth/login" className="text-blue-600 hover:text-blue-500">
+              <button 
+                onClick={() => {
+                  router.push('/');
+                  openLoginModal();
+                }}
+                className="text-blue-600 hover:text-blue-500 underline font-medium"
+              >
                 Inicia sesión
-              </Link>
+              </button>
             </p>
           </div>
 
