@@ -99,7 +99,6 @@ export interface Cliente extends UserBase {
 export interface Empleado extends UserBase {
   id_empleado: number;
   rol_id: number;
-  informe_id?: number;
 }
 
 // Tipo unión para representar cualquier tipo de usuario
