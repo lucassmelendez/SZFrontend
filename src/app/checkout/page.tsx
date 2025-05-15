@@ -10,6 +10,7 @@ import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
+import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente } from '@/lib/api';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -127,19 +128,70 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
     
+    // Verificar si el usuario está autenticado
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    
+    // Verificar que el usuario sea un cliente
+    if (!isCliente(user)) {
+      alert('Solo los clientes pueden realizar pedidos');
+      return;
+    }
+    
     setLoading(true);
     
-    // Simular procesamiento del pago
-    setTimeout(() => {
+    try {
+      // Si el método de pago es transferencia, crear pedido en la base de datos
+      if (formData.metodoPago === 'transferencia') {
+        // Crear el pedido con los valores específicos solicitados
+        const nuevoPedido = await pedidoApiFast.create({
+          fecha: new Date().toISOString(),
+          medio_pago_id: 1, // ID para transferencia
+          id_estado_envio: 2, // Estado de envío 2
+          id_estado: 2, // Estado de pedido 2
+          id_cliente: user.id_cliente
+        });
+        
+        if (nuevoPedido && nuevoPedido.id_pedido) {
+          // Preparar los productos para agregar al pedido
+          const productosParaPedido: PedidoProducto[] = items.map(item => ({
+            id_pedido: nuevoPedido.id_pedido!,
+            id_producto: item.producto.id_producto,
+            cantidad: item.cantidad,
+            precio_unitario: item.producto.precio,
+            subtotal: item.producto.precio * item.cantidad
+          }));
+          
+          // Agregar los productos al pedido usando el método bulk
+          await pedidoProductoApiFast.addBulk(nuevoPedido.id_pedido, productosParaPedido);
+          
+          // Limpiar el carrito y mostrar mensaje de éxito
+          limpiarCarrito();
+          setCheckoutSuccess(true);
+        } else {
+          throw new Error('No se pudo crear el pedido');
+        }
+      } else {
+        // Si es otro método de pago (webpay), mantener el comportamiento actual
+        // Simular procesamiento del pago por 2 segundos
+        setTimeout(() => {
+          limpiarCarrito();
+          setCheckoutSuccess(true);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error al procesar el pedido:', error);
+      alert('Hubo un error al procesar tu pedido. Por favor, intenta nuevamente.');
+    } finally {
       setLoading(false);
-      setCheckoutSuccess(true);
-      limpiarCarrito();
-    }, 2000);
+    }
   };
 
   // Si estamos en carga inicial, mostrar un indicador de carga
