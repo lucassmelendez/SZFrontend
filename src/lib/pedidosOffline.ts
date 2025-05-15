@@ -1,4 +1,4 @@
-import { Pedido, PedidoProducto } from './api';
+import { Pedido, PedidoProducto, pedidoApiFast, pedidoProductoApiFast } from './api';
 import { CarritoItem } from './useCarrito';
 
 // Clave para almacenar pedidos en localStorage
@@ -126,10 +126,100 @@ export const convertirAPedidoApi = (pedidoOffline: PedidoOffline): Pedido => {
 // Convertir productos de un PedidoOffline a formato API
 export const convertirAProductosApi = (pedidoOffline: PedidoOffline): PedidoProducto[] => {
   return pedidoOffline.productos.map(producto => ({
-    id_pedido: pedidoOffline.id_pedido,
-    id_producto: producto.id_producto,
     cantidad: producto.cantidad,
     precio_unitario: producto.precio,
-    subtotal: producto.subtotal
+    subtotal: producto.subtotal,
+    id_pedido: pedidoOffline.id_pedido,
+    id_producto: producto.id_producto
   }));
+};
+
+// Sincronizar pedidos offline con la API
+export const sincronizarPedidosOffline = async (): Promise<{exito: boolean, sincronizados: number, total: number}> => {
+  try {
+    const pedidosOffline = getPedidosOffline();
+    const pedidosNoSincronizados = pedidosOffline.filter(p => !p.sincronizado);
+    
+    if (pedidosNoSincronizados.length === 0) {
+      return { exito: true, sincronizados: 0, total: 0 };
+    }
+    
+    console.log(`Intentando sincronizar ${pedidosNoSincronizados.length} pedidos offline...`);
+    
+    let sincronizados = 0;
+    
+    for (const pedidoOffline of pedidosNoSincronizados) {
+      try {
+        // 1. Convertir a formato de API y crear pedido
+        const pedidoApi = convertirAPedidoApi(pedidoOffline);
+        const nuevoPedido = await pedidoApiFast.create(pedidoApi);
+        
+        if (!nuevoPedido || !nuevoPedido.id_pedido) {
+          console.error('Error al sincronizar pedido: No se obtuvo un ID de pedido válido');
+          continue;
+        }
+        
+        // 2. Agregar productos al pedido creado
+        const productosApi = pedidoOffline.productos.map(producto => ({
+          cantidad: producto.cantidad,
+          precio_unitario: producto.precio,
+          subtotal: producto.subtotal,
+          id_pedido: nuevoPedido.id_pedido as number,
+          id_producto: producto.id_producto
+        }));
+        
+        await pedidoProductoApiFast.addBulk(nuevoPedido.id_pedido, productosApi);
+        
+        // 3. Marcar como sincronizado y contar
+        marcarPedidoSincronizado(pedidoOffline.id_pedido);
+        sincronizados++;
+        
+        console.log(`Pedido ${pedidoOffline.id_pedido} sincronizado correctamente`);
+      } catch (error) {
+        console.error(`Error al sincronizar pedido ${pedidoOffline.id_pedido}:`, error);
+      }
+    }
+    
+    return {
+      exito: sincronizados > 0,
+      sincronizados,
+      total: pedidosNoSincronizados.length
+    };
+  } catch (error) {
+    console.error('Error general al sincronizar pedidos offline:', error);
+    return { exito: false, sincronizados: 0, total: 0 };
+  }
+};
+
+// Iniciar monitor de conectividad para sincronizar pedidos
+export const iniciarMonitorConexion = () => {
+  if (typeof window === 'undefined') return;
+  
+  // Verificar si hay pedidos no sincronizados
+  const verificarYSincronizar = async () => {
+    try {
+      const pedidosOffline = getPedidosOffline();
+      const hayPedidosNoSincronizados = pedidosOffline.some(p => !p.sincronizado);
+      
+      if (hayPedidosNoSincronizados && navigator.onLine) {
+        console.log('Conexión recuperada y hay pedidos sin sincronizar. Intentando sincronización...');
+        const resultado = await sincronizarPedidosOffline();
+        console.log('Resultado de sincronización automática:', resultado);
+      }
+    } catch (error) {
+      console.error('Error en verificación automática de sincronización:', error);
+    }
+  };
+  
+  // Escuchar eventos de conexión/desconexión
+  window.addEventListener('online', verificarYSincronizar);
+  
+  // Verificar periódicamente (cada 3 minutos)
+  const intervalo = setInterval(verificarYSincronizar, 3 * 60 * 1000);
+  
+  // Devolver función para detener el monitor
+  return () => {
+    window.removeEventListener('online', verificarYSincronizar);
+    clearInterval(intervalo);
+  };
 }; 

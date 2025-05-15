@@ -11,7 +11,7 @@ import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast } from '@/lib/api';
-import { guardarPedidoOffline } from '@/lib/pedidosOffline';
+import { guardarPedidoOffline, sincronizarPedidosOffline, getPedidosOffline } from '@/lib/pedidosOffline';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -34,6 +34,30 @@ export default function CheckoutPage() {
 
     return () => clearTimeout(timer);
   }, [closeCart]);
+  
+  // Intentar sincronizar pedidos offline cuando el usuario está autenticado
+  useEffect(() => {
+    const intentarSincronizacion = async () => {
+      if (user && !authLoading && isCliente(user)) {
+        const pedidosOffline = getPedidosOffline();
+        const hayPedidosNoSincronizados = pedidosOffline.some(p => !p.sincronizado);
+        
+        if (hayPedidosNoSincronizados) {
+          try {
+            console.log('Intentando sincronizar pedidos offline pendientes...');
+            const resultado = await sincronizarPedidosOffline();
+            if (resultado.sincronizados > 0) {
+              console.log(`Se sincronizaron ${resultado.sincronizados} de ${resultado.total} pedidos offline`);
+            }
+          } catch (error) {
+            console.error('Error al sincronizar pedidos offline:', error);
+          }
+        }
+      }
+    };
+    
+    intentarSincronizacion();
+  }, [user, authLoading]);
   
   // Banner simple para checkout
   const CheckoutBanner = () => (
@@ -180,6 +204,31 @@ export default function CheckoutPage() {
             const nuevoPedido = await pedidoApiFast.create(datosPedido);
             console.log("Pedido creado exitosamente con la API:", nuevoPedido);
             
+            // Agregar los productos al pedido
+            try {
+              if (!nuevoPedido.id_pedido) {
+                throw new Error("El pedido creado no tiene un ID válido");
+              }
+              
+              // Preparar los productos para guardar en la relación pedido-producto
+              const productosParaPedido = items.map(item => ({
+                cantidad: item.cantidad,
+                precio_unitario: item.producto.precio,
+                subtotal: item.producto.precio * item.cantidad,
+                id_pedido: nuevoPedido.id_pedido as number,
+                id_producto: item.producto.id_producto
+              }));
+              
+              console.log("Agregando productos al pedido:", productosParaPedido);
+              
+              // Guardar los productos usando la función de addBulk
+              const productosGuardados = await pedidoProductoApiFast.addBulk(nuevoPedido.id_pedido, productosParaPedido);
+              console.log("Productos agregados exitosamente al pedido:", productosGuardados);
+            } catch (productosError) {
+              console.error("Error al añadir productos al pedido, pero el pedido fue creado:", productosError);
+              // Continuamos aunque no se puedan guardar los productos para no detener el flujo
+            }
+            
             // Si llegamos aquí, el pedido se creó correctamente
             limpiarCarrito();
             setCheckoutSuccess(true);
@@ -187,7 +236,7 @@ export default function CheckoutPage() {
             // Si la API falla, usamos el sistema offline como respaldo
             console.error("Error al crear pedido con la API. Usando sistema offline:", apiError);
             
-            // Guardar el pedido localmente
+            // Guardar el pedido localmente con todos sus productos
             const pedidoOffline = guardarPedidoOffline(
               user.id_cliente,
               items,
@@ -196,7 +245,8 @@ export default function CheckoutPage() {
               2   // id_estado
             );
             
-            console.log("Pedido guardado localmente:", pedidoOffline);
+            console.log("Pedido guardado localmente con sus productos:", pedidoOffline);
+            console.log(`El pedido contiene ${pedidoOffline.productos.length} productos que se sincronizarán cuando haya conexión`);
             
             // Mostrar éxito al usuario y limpiar carrito
             limpiarCarrito();
