@@ -11,7 +11,6 @@ import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast } from '@/lib/api';
-import { guardarPedidoOffline, sincronizarPedidosOffline, getPedidosOffline } from '@/lib/pedidosOffline';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -34,30 +33,6 @@ export default function CheckoutPage() {
 
     return () => clearTimeout(timer);
   }, [closeCart]);
-  
-  // Intentar sincronizar pedidos offline cuando el usuario está autenticado
-  useEffect(() => {
-    const intentarSincronizacion = async () => {
-      if (user && !authLoading && isCliente(user)) {
-        const pedidosOffline = getPedidosOffline();
-        const hayPedidosNoSincronizados = pedidosOffline.some(p => !p.sincronizado);
-        
-        if (hayPedidosNoSincronizados) {
-          try {
-            console.log('Intentando sincronizar pedidos offline pendientes...');
-            const resultado = await sincronizarPedidosOffline();
-            if (resultado.sincronizados > 0) {
-              console.log(`Se sincronizaron ${resultado.sincronizados} de ${resultado.total} pedidos offline`);
-            }
-          } catch (error) {
-            console.error('Error al sincronizar pedidos offline:', error);
-          }
-        }
-      }
-    };
-    
-    intentarSincronizacion();
-  }, [user, authLoading]);
   
   // Banner simple para checkout
   const CheckoutBanner = () => (
@@ -198,7 +173,7 @@ export default function CheckoutPage() {
             id_cliente: user.id_cliente
           };
           
-          // Intentamos primero crear el pedido a través de la API
+          // Intentamos crear el pedido a través de la API
           try {
             console.log("Intentando crear pedido con la API:", datosPedido);
             const nuevoPedido = await pedidoApiFast.create(datosPedido);
@@ -233,24 +208,9 @@ export default function CheckoutPage() {
             limpiarCarrito();
             setCheckoutSuccess(true);
           } catch (apiError) {
-            // Si la API falla, usamos el sistema offline como respaldo
-            console.error("Error al crear pedido con la API. Usando sistema offline:", apiError);
-            
-            // Guardar el pedido localmente con todos sus productos
-            const pedidoOffline = guardarPedidoOffline(
-              user.id_cliente,
-              items,
-              1,  // medio_pago_id para transferencia
-              2,  // id_estado_envio
-              2   // id_estado
-            );
-            
-            console.log("Pedido guardado localmente con sus productos:", pedidoOffline);
-            console.log(`El pedido contiene ${pedidoOffline.productos.length} productos que se sincronizarán cuando haya conexión`);
-            
-            // Mostrar éxito al usuario y limpiar carrito
-            limpiarCarrito();
-            setCheckoutSuccess(true);
+            // Manejar error al crear pedido
+            console.error("Error al crear pedido con la API:", apiError);
+            alert("No se pudo procesar el pedido. Por favor, inténtalo de nuevo más tarde.");
           }
         } catch (error: any) {
           console.error('Error general al procesar el pedido:', error);
