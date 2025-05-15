@@ -78,6 +78,25 @@ export interface Producto {
   categoria_id: number;
 }
 
+// Interfaces para pedidos
+export interface Pedido {
+  id_pedido?: number;
+  fecha: string;
+  medio_pago_id: number;
+  id_estado_envio: number;
+  id_estado: number;
+  id_cliente: number;
+}
+
+export interface PedidoProducto {
+  id_pedido_producto?: number;
+  id_pedido: number;
+  id_producto: number;
+  cantidad: number;
+  precio_unitario: number;
+  subtotal: number;
+}
+
 // Interfaz base para usuarios
 export interface UserBase {
   nombre: string;
@@ -473,6 +492,163 @@ export const testFastApiConnection = async (): Promise<boolean> => {
   } catch (error) {
     console.error('Error al conectar con FastAPI:', error);
     return false;
+  }
+};
+
+// API para pedidos usando FastAPI
+export const pedidoApiFast = {
+  getAll: async (): Promise<Pedido[]> => {
+    try {
+      const response = await apiFast.get('/pedidos');
+      return response.data || [];
+    } catch (error) {
+      console.error('Error al obtener pedidos desde FastAPI:', error);
+      throw error;
+    }
+  },
+  
+  getById: async (id: number): Promise<Pedido> => {
+    try {
+      const response = await apiFast.get(`/pedidos/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error al obtener pedido ${id} desde FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  getByCliente: async (idCliente: number): Promise<Pedido[]> => {
+    try {
+      const response = await apiFast.get(`/pedidos/cliente/${idCliente}`);
+      return response.data || [];
+    } catch (error) {
+      console.error(`Error al obtener pedidos del cliente ${idCliente} desde FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  create: async (pedido: Omit<Pedido, 'id_pedido'>): Promise<Pedido> => {
+    try {
+      const response = await apiFast.post('/pedidos', pedido);
+      return response.data.pedido;
+    } catch (error) {
+      console.error('Error al crear pedido en FastAPI:', error);
+      throw error;
+    }
+  },
+  
+  update: async (id: number, pedido: Partial<Pedido>): Promise<Pedido> => {
+    try {
+      const response = await apiFast.put(`/pedidos/${id}`, pedido);
+      return response.data.pedido;
+    } catch (error) {
+      console.error(`Error al actualizar pedido ${id} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  updateEstado: async (id: number, idEstado: number): Promise<Pedido> => {
+    try {
+      const response = await apiFast.patch(`/pedidos/${id}/estado`, { id_estado: idEstado });
+      return response.data.pedido;
+    } catch (error) {
+      console.error(`Error al actualizar estado del pedido ${id} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  updateEstadoEnvio: async (id: number, idEstadoEnvio: number): Promise<Pedido> => {
+    try {
+      const response = await apiFast.patch(`/pedidos/${id}/estado-envio`, { id_estado_envio: idEstadoEnvio });
+      return response.data.pedido;
+    } catch (error) {
+      console.error(`Error al actualizar estado de envío del pedido ${id} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  delete: async (id: number): Promise<void> => {
+    try {
+      await apiFast.delete(`/pedidos/${id}`);
+    } catch (error) {
+      console.error(`Error al eliminar pedido ${id} en FastAPI:`, error);
+      throw error;
+    }
+  }
+};
+
+// API para pedido_producto usando FastAPI
+export const pedidoProductoApiFast = {
+  getByPedido: async (idPedido: number): Promise<PedidoProducto[]> => {
+    try {
+      const response = await apiFast.get(`/pedido-producto/pedido/${idPedido}`);
+      return response.data || [];
+    } catch (error) {
+      console.error(`Error al obtener productos del pedido ${idPedido} desde FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  getByProducto: async (idProducto: number): Promise<PedidoProducto[]> => {
+    try {
+      const response = await apiFast.get(`/pedido-producto/producto/${idProducto}`);
+      return response.data || [];
+    } catch (error) {
+      console.error(`Error al obtener pedidos con el producto ${idProducto} desde FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  add: async (pedidoProducto: PedidoProducto): Promise<PedidoProducto> => {
+    try {
+      const response = await apiFast.post('/pedido-producto', pedidoProducto);
+      return response.data.pedido_producto;
+    } catch (error) {
+      console.error('Error al agregar producto al pedido en FastAPI:', error);
+      throw error;
+    }
+  },
+  
+  addBulk: async (idPedido: number, productos: PedidoProducto[]): Promise<PedidoProducto[]> => {
+    try {
+      const data = {
+        productos: productos
+      };
+      const response = await apiFast.post(`/pedido-producto/bulk/${idPedido}`, data);
+      return response.data.productos || [];
+    } catch (error) {
+      console.error(`Error al agregar múltiples productos al pedido ${idPedido} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  update: async (idPedido: number, idProducto: number, datos: Partial<PedidoProducto>): Promise<PedidoProducto> => {
+    try {
+      const response = await apiFast.put(`/pedido-producto/${idPedido}/${idProducto}`, datos);
+      return response.data.pedido_producto;
+    } catch (error) {
+      console.error(`Error al actualizar producto ${idProducto} en pedido ${idPedido} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  remove: async (idPedido: number, idProducto: number): Promise<void> => {
+    try {
+      await apiFast.delete(`/pedido-producto/${idPedido}/${idProducto}`);
+    } catch (error) {
+      console.error(`Error al eliminar producto ${idProducto} del pedido ${idPedido} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  getById: async (idPedidoProducto: number): Promise<PedidoProducto> => {
+    try {
+      const response = await apiFast.get(`/pedido-producto/${idPedidoProducto}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error al obtener detalle de pedido-producto ${idPedidoProducto} desde FastAPI:`, error);
+      throw error;
+    }
   }
 };
 
