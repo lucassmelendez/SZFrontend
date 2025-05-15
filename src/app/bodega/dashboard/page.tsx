@@ -1,24 +1,110 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado } from '@/lib/api';
+import { isEmpleado, productoApi, Producto } from '@/lib/api';
+import StockEditor from '@/components/bodega/StockEditor';
+import { FaSearch, FaChevronDown } from 'react-icons/fa';
+
+// Mapa de categorías
+const categoriasMap = {
+  0: 'Todas',
+  1: 'Paletas',
+  2: 'Bolsos',
+  3: 'Pelotas',
+  4: 'Mallas',
+  5: 'Mesas'
+};
 
 export default function BodegaDashboard() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [filteredProductos, setFilteredProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoria, setSelectedCategoria] = useState<number>(0);
+  const [showCategorias, setShowCategorias] = useState(false);
 
+  // Cerrar el menú de categorías cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showCategorias) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.categorias-menu')) {
+          setShowCategorias(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showCategorias]);
+
+  // Verificar autenticación y rol
   useEffect(() => {
     if (!isLoading) {
-      // Si no hay usuario o el usuario no es un bodeguero (rol 4)
       if (!user || !isEmpleado(user) || user.rol_id !== 4) {
         router.push('/');
       }
     }
   }, [user, isLoading, router]);
 
-  if (isLoading) {
+  // Cargar productos
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        const data = await productoApi.getAll();
+        // Ordenar productos por stock (ascendente) para mostrar primero los de bajo stock
+        const sortedProductos = data.sort((a, b) => a.stock - b.stock);
+        setProductos(sortedProductos);
+        setFilteredProductos(sortedProductos);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error al cargar productos:', err);
+        setError('Error al cargar los productos. Por favor, intenta de nuevo.');
+        setLoading(false);
+      }
+    };
+
+    fetchProductos();
+  }, []);
+
+  // Manejar búsqueda y filtrado de productos
+  useEffect(() => {
+    let filtered = [...productos];
+    
+    // Filtrar por categoría si no es "Todas" (0)
+    if (selectedCategoria !== 0) {
+      filtered = filtered.filter(producto => producto.categoria_id === selectedCategoria);
+    }
+    
+    // Filtrar por término de búsqueda
+    if (searchTerm.trim() !== '') {
+      const termLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(producto =>
+        producto.nombre.toLowerCase().includes(termLower)
+      );
+    }
+    
+    // Ordenar por stock
+    filtered = filtered.sort((a, b) => a.stock - b.stock);
+    setFilteredProductos(filtered);
+  }, [searchTerm, productos, selectedCategoria]);
+
+  // Manejar actualizaciones de stock
+  const handleStockUpdate = async (productoId: number, newStock: number) => {
+    const updatedProductos = productos.map(p =>
+      p.id_producto === productoId ? { ...p, stock: newStock } : p
+    ).sort((a, b) => a.stock - b.stock);
+    setProductos(updatedProductos);
+    
+    // La actualización de productos filtrados se maneja automáticamente por el efecto
+  };
+
+  if (isLoading || loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
@@ -26,101 +112,96 @@ export default function BodegaDashboard() {
     );
   }
 
-  // Si llegamos aquí, sabemos que el usuario es un bodeguero
+  // Calcula estadísticas (usar productos sin filtrar para las estadísticas totales)
+  const totalProductos = productos.length;
+  const bajoStock = productos.filter(p => p.stock < 10).length;
+  const sinStock = productos.filter(p => p.stock === 0).length;
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Panel de Bodega</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Panel de Bodega</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Estadísticas de Stock</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Estadísticas de Stock</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Productos en stock</span>
-              <span className="font-bold">2,356</span>
+              <span className="text-gray-600 dark:text-gray-300">Total de productos</span>
+              <span className="font-bold text-gray-800 dark:text-white">{totalProductos}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Productos bajo stock mínimo</span>
-              <span className="font-bold text-red-500">18</span>
+              <span className="text-gray-600 dark:text-gray-300">Productos bajo stock</span>
+              <span className="font-bold text-amber-500">{bajoStock}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Órdenes pendientes</span>
-              <span className="font-bold">12</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Acciones Rápidas</h2>
-          <div className="space-y-2">
-            <button className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
-              Ver inventario completo
-            </button>
-            <button className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
-              Recibir mercadería
-            </button>
-            <button className="w-full py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-md transition-colors">
-              Preparar pedidos
-            </button>
-          </div>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Notificaciones</h2>
-          <div className="space-y-3">
-            <div className="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md">
-              <p className="font-medium">Stock bajo: Zapatillas Running T45</p>
-              <p className="text-sm">Quedan solo 3 unidades</p>
-            </div>
-            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-md">
-              <p className="font-medium">Pedido pendiente #1045</p>
-              <p className="text-sm">Esperando confirmación desde hace 2 días</p>
-            </div>
-            <div className="p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md">
-              <p className="font-medium">Recepción programada</p>
-              <p className="text-sm">Mañana 10:00 AM - Proveedor Deportes XYZ</p>
+              <span className="text-gray-600 dark:text-gray-300">Productos sin stock</span>
+              <span className="font-bold text-red-500">{sinStock}</span>
             </div>
           </div>
         </div>
       </div>
-      
-      <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Productos con bajo stock</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock Actual</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock Mínimo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acción</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {[
-                { id: 1, nombre: 'Zapatillas Running T45', actual: 3, minimo: 10 },
-                { id: 2, nombre: 'Balón de Fútbol Pro', actual: 5, minimo: 15 },
-                { id: 3, nombre: 'Raqueta de Tenis Premium', actual: 2, minimo: 5 },
-                { id: 4, nombre: 'Set de Pesas 10kg', actual: 4, minimo: 8 },
-                { id: 5, nombre: 'Traje de Baño Competición', actual: 6, minimo: 12 }
-              ].map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{item.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.nombre}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">{item.actual}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{item.minimo}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs">
-                      Solicitar stock
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+      {error ? (
+        <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-6">
+          {error}
         </div>
-      </div>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Gestión de Stock</h2>
+            <div className="flex flex-col md:flex-row gap-4 items-center">
+              <div className="flex items-center gap-3">
+                <span className="text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">Filtrar:</span>
+                <div className="relative categorias-menu">
+                  <button
+                    onClick={() => setShowCategorias(!showCategorias)}
+                    className="flex items-center justify-between w-full md:w-48 px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    <span>{categoriasMap[selectedCategoria as keyof typeof categoriasMap]}</span>
+                    <FaChevronDown className={`ml-2 transition-transform ${showCategorias ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {showCategorias && (
+                    <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
+                      {Object.entries(categoriasMap).map(([id, nombre]) => (
+                        <button
+                          key={id}
+                          onClick={() => {
+                            setSelectedCategoria(Number(id));
+                            setShowCategorias(false);
+                          }}
+                          className={`w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 ${
+                            selectedCategoria === Number(id)
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                              : 'text-gray-800 dark:text-white'
+                          } ${id === '0' ? 'border-b border-gray-200 dark:border-gray-600' : ''}`}
+                        >
+                          {nombre}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Barra de búsqueda */}
+              <div className="relative">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Buscar productos..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full md:w-64 pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  />
+                  <FaSearch className="absolute left-3 text-gray-400" size={16} />
+                </div>
+              </div>
+            </div>
+          </div>
+          <StockEditor productos={filteredProductos} onStockUpdate={handleStockUpdate} />
+        </div>
+      )}
     </div>
   );
-} 
+}

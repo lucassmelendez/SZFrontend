@@ -1,0 +1,187 @@
+'use client';
+
+import { useState } from 'react';
+import { Producto, productoApi } from '@/lib/api';
+import { FaCheck, FaExclamationTriangle, FaMinus, FaPlus } from 'react-icons/fa';
+
+// Mapa de categorías
+const categoriasMap = {
+  1: 'Paletas',
+  2: 'Bolsos',
+  3: 'Pelotas',
+  4: 'Mallas',
+  5: 'Mesas'
+};
+
+interface StockEditorProps {
+  productos: Producto[];
+  onStockUpdate?: (productoId: number, newStock: number) => void;
+}
+
+export default function StockEditor({ productos, onStockUpdate }: StockEditorProps) {
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [tempStock, setTempStock] = useState<number | null>(null);
+
+  const handleStockEdit = (producto: Producto) => {
+    setEditingId(producto.id_producto);
+    setTempStock(producto.stock);
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleStockChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(event.target.value, 10);
+    if (!isNaN(value) && value >= 0) {
+      setTempStock(value);
+    }
+  };
+
+  const handleStockIncrement = () => {
+    if (tempStock !== null) {
+      setTempStock(tempStock + 1);
+    }
+  };
+
+  const handleStockDecrement = () => {
+    if (tempStock !== null && tempStock > 0) {
+      setTempStock(tempStock - 1);
+    }
+  };
+
+  const handleStockSave = async (producto: Producto) => {
+    if (tempStock === null) return;
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const updatedProducto = await productoApi.updateStock(producto.id_producto, tempStock);
+      
+      // Actualizar el estado local y mostrar mensaje de éxito
+      onStockUpdate?.(producto.id_producto, tempStock);
+      setSuccess(`Stock actualizado correctamente a ${tempStock} unidades`);
+      
+      // Limpiar el estado de edición después de un breve momento
+      setTimeout(() => {
+        setEditingId(null);
+        setTempStock(null);
+        setSuccess(null);
+      }, 2000);
+    } catch (err) {
+      setError('Error al actualizar el stock. Por favor, intenta de nuevo.');
+      console.error('Error al actualizar stock:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStockCancel = () => {
+    setEditingId(null);
+    setTempStock(null);
+    setError(null);
+    setSuccess(null);
+  };
+
+  return (
+    <div className="overflow-x-auto">
+      {success && (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md flex items-center space-x-2">
+          <FaCheck />
+          <span>{success}</span>
+        </div>
+      )}
+      
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead>
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock Actual</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acción</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          {productos.map((producto) => (
+            <tr key={producto.id_producto} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{producto.id_producto}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">{producto.nombre}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                {categoriasMap[producto.categoria_id as keyof typeof categoriasMap] || 'Sin categoría'}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                {editingId === producto.id_producto ? (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={handleStockDecrement}
+                      disabled={loading || tempStock === 0}
+                      className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50"
+                    >
+                      <FaMinus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    </button>
+                    <input
+                      type="number"
+                      min="0"
+                      value={tempStock ?? ''}
+                      onChange={handleStockChange}
+                      className="w-20 px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center"
+                    />
+                    <button
+                      onClick={handleStockIncrement}
+                      disabled={loading}
+                      className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50"
+                    >
+                      <FaPlus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    </button>
+                  </div>
+                ) : (
+                  <span className={producto.stock < 10 ? 'text-red-600 dark:text-red-400 font-medium' : ''}>
+                    {producto.stock}
+                  </span>
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                {editingId === producto.id_producto ? (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleStockSave(producto)}
+                      disabled={loading}
+                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FaCheck size={12} />
+                      <span>{loading ? 'Guardando...' : 'Guardar'}</span>
+                    </button>
+                    <button
+                      onClick={handleStockCancel}
+                      disabled={loading}
+                      className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-xs"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleStockEdit(producto)}
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs"
+                  >
+                    Editar stock
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {error && (
+        <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md flex items-center space-x-2">
+          <FaExclamationTriangle />
+          <span>{error}</span>
+        </div>
+      )}
+    </div>
+  );
+}
