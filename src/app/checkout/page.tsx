@@ -10,7 +10,7 @@ import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
-import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente } from '@/lib/api';
+import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast } from '@/lib/api';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -135,6 +135,8 @@ export default function CheckoutPage() {
     
     // Verificar si el usuario está autenticado
     if (!user) {
+      // En lugar de solo abrir el modal, mostrar mensaje específico
+      alert('Debes iniciar sesión o registrarte para continuar con la compra');
       openLoginModal();
       return;
     }
@@ -148,6 +150,9 @@ export default function CheckoutPage() {
     setLoading(true);
     
     try {
+      // Actualizar datos del cliente si se han modificado
+      const clienteActualizado = await actualizarDatosCliente(user.id_cliente);
+      
       // Si el método de pago es transferencia, crear pedido en la base de datos
       if (formData.metodoPago === 'transferencia') {
         // Crear el pedido con los valores específicos solicitados
@@ -191,6 +196,45 @@ export default function CheckoutPage() {
       alert('Hubo un error al procesar tu pedido. Por favor, intenta nuevamente.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para actualizar los datos del cliente si se han modificado
+  const actualizarDatosCliente = async (idCliente: number) => {
+    if (!user || !isCliente(user)) return null;
+    
+    // Verificar si hay cambios en los datos del cliente
+    const hayCambios = 
+      formData.telefono !== user.telefono?.toString() || 
+      formData.direccion !== user.direccion;
+    
+    if (!hayCambios) return user;
+    
+    try {
+      // Preparar datos a actualizar
+      const datosActualizados: any = {};
+      
+      // Solo incluir los campos que se hayan modificado o que falten
+      if (formData.telefono && formData.telefono !== user.telefono?.toString()) {
+        datosActualizados.telefono = formData.telefono;
+      }
+      
+      if (formData.direccion && formData.direccion !== user.direccion) {
+        datosActualizados.direccion = formData.direccion;
+      }
+      
+      // Si hay datos para actualizar, hacer la petición
+      if (Object.keys(datosActualizados).length > 0) {
+        const clienteActualizado = await clienteApiFast.update(idCliente, datosActualizados);
+        console.log('Datos del cliente actualizados:', clienteActualizado);
+        return clienteActualizado;
+      }
+      
+      return user;
+    } catch (error) {
+      console.error('Error al actualizar datos del cliente:', error);
+      // No interrumpir el flujo de compra por un error en la actualización de datos
+      return user;
     }
   };
 
