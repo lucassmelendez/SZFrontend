@@ -7,6 +7,10 @@ import Link from 'next/link';
 import { confirmarTransaccion, manejarTransaccionAbortada, manejarTimeout, WebpayTransactionResult } from '@/services/webpayService';
 import { useCart } from '@/contexts/CartContext';
 
+// URLs de WebPay - solo para referencia
+const WEBPAY_INTEGRATION_URL = 'https://webpay3gint.transbank.cl';
+const WEBPAY_PRODUCTION_URL = 'https://webpay3g.transbank.cl';
+
 export default function WebpayReturnPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,35 +27,76 @@ export default function WebpayReturnPage() {
         const TBK_ORDEN_COMPRA = searchParams.get('TBK_ORDEN_COMPRA');
         const TBK_ID_SESION = searchParams.get('TBK_ID_SESION');
 
+        // Log con información adicional sobre URLs
+        console.log('Procesando retorno de WebPay', { 
+          token_ws, 
+          TBK_TOKEN, 
+          TBK_ORDEN_COMPRA, 
+          TBK_ID_SESION,
+          webpayUrl: process.env.NODE_ENV === 'production' ? WEBPAY_PRODUCTION_URL : WEBPAY_INTEGRATION_URL,
+          currentUrl: typeof window !== 'undefined' ? window.location.href : 'SSR'
+        });
+
         let transactionResult: WebpayTransactionResult;
 
         // Procesar según el tipo de respuesta
         if (token_ws) {
+          console.log('Procesando flujo normal con token_ws');
           // Flujo normal (transacción confirmada)
-          transactionResult = await confirmarTransaccion(token_ws);
-          
-          // Si la transacción fue exitosa, limpiar el carrito
-          if (transactionResult.success) {
-            clearCart();
+          try {
+            transactionResult = await confirmarTransaccion(token_ws);
+            console.log('Resultado de confirmación:', transactionResult);
+            
+            // Si la transacción fue exitosa, limpiar el carrito
+            if (transactionResult.success) {
+              clearCart();
+            }
+          } catch (error) {
+            console.error('Error en confirmación de transacción:', error);
+            transactionResult = {
+              success: false,
+              error: 'Error al confirmar la transacción con WebPay'
+            };
           }
         } else if (TBK_TOKEN) {
+          console.log('Procesando flujo abortado con TBK_TOKEN');
           // Pago abortado por el usuario
-          transactionResult = await manejarTransaccionAbortada(
-            TBK_TOKEN,
-            TBK_ORDEN_COMPRA || '',
-            TBK_ID_SESION || ''
-          );
+          try {
+            transactionResult = await manejarTransaccionAbortada(
+              TBK_TOKEN,
+              TBK_ORDEN_COMPRA || '',
+              TBK_ID_SESION || ''
+            );
+            console.log('Resultado de transacción abortada:', transactionResult);
+          } catch (error) {
+            console.error('Error al manejar transacción abortada:', error);
+            transactionResult = {
+              success: false,
+              error: 'Error al procesar transacción abortada'
+            };
+          }
         } else if (TBK_ORDEN_COMPRA && TBK_ID_SESION) {
+          console.log('Procesando timeout con TBK_ORDEN_COMPRA y TBK_ID_SESION');
           // Timeout en el formulario de pago
-          transactionResult = await manejarTimeout(
-            TBK_ORDEN_COMPRA,
-            TBK_ID_SESION
-          );
+          try {
+            transactionResult = await manejarTimeout(
+              TBK_ORDEN_COMPRA,
+              TBK_ID_SESION
+            );
+            console.log('Resultado de timeout:', transactionResult);
+          } catch (error) {
+            console.error('Error al manejar timeout:', error);
+            transactionResult = {
+              success: false,
+              error: 'Error al procesar timeout'
+            };
+          }
         } else {
+          console.log('No se pudo determinar el tipo de respuesta');
           // Respuesta desconocida
           transactionResult = {
             success: false,
-            error: 'No se pudo determinar el estado de la transacción'
+            error: 'No se pudo determinar el estado de la transacción. Parámetros insuficientes.'
           };
         }
 
@@ -60,7 +105,7 @@ export default function WebpayReturnPage() {
         console.error('Error al procesar la transacción:', error);
         setResult({
           success: false,
-          error: 'Error al procesar la transacción'
+          error: 'Error al procesar la transacción: ' + (error instanceof Error ? error.message : 'Error desconocido')
         });
       } finally {
         setLoading(false);

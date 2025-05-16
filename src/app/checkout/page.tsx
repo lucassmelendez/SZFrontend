@@ -233,12 +233,19 @@ export default function CheckoutPage() {
             precio: item.producto.precio
           }));
           
+          console.log('Iniciando transacción WebPay con usuario ID:', user.id_cliente.toString());
+          
           // Iniciar transacción en WebPay
           const transaccion = await iniciarTransaccion(
             montoTotal,
             itemsParaWebpay,
             user.id_cliente.toString()
           );
+          
+          console.log('Transacción iniciada correctamente:', {
+            url: transaccion.url,
+            token: transaccion.token ? transaccion.token.substring(0, 10) + '...' : 'No hay token'
+          });
           
           // Crear formulario para redireccionar a WebPay
           const form = document.createElement('form');
@@ -252,6 +259,8 @@ export default function CheckoutPage() {
           
           form.appendChild(tokenInput);
           document.body.appendChild(form);
+          
+          console.log('Redirigiendo a WebPay...');
           
           // Enviar formulario para redireccionar a WebPay
           form.submit();
