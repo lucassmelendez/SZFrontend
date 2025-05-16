@@ -10,7 +10,8 @@ const categoriasMap = {
   2: 'Bolsos',
   3: 'Pelotas',
   4: 'Mallas',
-  5: 'Mesas'
+  5: 'Mesas',
+  6: 'Gomas'
 };
 
 interface StockEditorProps {
@@ -138,8 +139,13 @@ export default function StockEditor({ productos, onStockUpdate }: StockEditorPro
                       <FaPlus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                     </button>
                   </div>
-                ) : (
-                  <span className={producto.stock < 10 ? 'text-red-600 dark:text-red-400 font-medium' : ''}>
+                ) : (                  <span className={`font-medium ${
+                    producto.stock === 0
+                      ? 'text-red-500 dark:text-red-400'
+                      : producto.stock <= 5
+                      ? 'text-yellow-500 dark:text-yellow-400'
+                      : 'text-green-500 dark:text-green-400'
+                  }`}>
                     {producto.stock}
                   </span>
                 )}

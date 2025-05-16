@@ -4,9 +4,19 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { productoApi, Producto } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
-import { FaShoppingCart, FaCreditCard, FaCheckCircle, FaShieldAlt, FaTruck } from 'react-icons/fa';
+import { FaShoppingCart, FaCreditCard, FaTimesCircle, FaExclamationCircle, FaCheckCircle, FaShieldAlt, FaTruck } from 'react-icons/fa';
 import Image from 'next/image';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
+
+// Mapa de categorías
+const categoriasMap = {
+  1: 'Paletas',
+  2: 'Bolsos',
+  3: 'Pelotas',
+  4: 'Mallas',
+  5: 'Mesas',
+  6: 'Gomas'
+};
 
 interface ProductoDetailClientProps {
   id: string;
@@ -183,23 +193,37 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
               <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                 <span className="text-gray-500 dark:text-gray-400 text-sm block mb-1">Peso</span>
                 <div className="font-medium text-gray-800 dark:text-white">{producto.peso}</div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                <span className="text-gray-500 dark:text-gray-400 text-sm block mb-1">Stock</span>
+              </div>              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-gray-500 dark:text-gray-400 text-sm">Stock</span>
+                  {producto.stock <= 5 && producto.stock > 0 && (
+                    <span className="text-yellow-500 dark:text-yellow-400 text-sm font-medium">¡Últimas unidades!</span>
+                  )}
+                </div>
                 <div className="font-medium text-gray-800 dark:text-white">
-                  {producto.stock > 0 ? (
-                    <span className="flex items-center">
-                      <FaCheckCircle className="text-green-500 mr-1" size={14} />
+                  {producto.stock === 0 ? (
+                    <span className="text-red-500 flex items-center">
+                      <FaTimesCircle className="text-red-500 mr-1" size={14} />
+                      Agotado
+                    </span>
+                  ) : producto.stock <= 5 ? (
+                    <span className="text-yellow-500 flex items-center">
+                      <FaExclamationCircle className="text-yellow-500 mr-1" size={14} />
                       {producto.stock} unidades
                     </span>
                   ) : (
-                    <span className="text-red-500">Agotado</span>
+                    <span className="text-green-500 flex items-center">
+                      <FaCheckCircle className="text-green-500 mr-1" size={14} />
+                      {producto.stock} unidades
+                    </span>
                   )}
                 </div>
               </div>
               <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                 <span className="text-gray-500 dark:text-gray-400 text-sm block mb-1">Categoría</span>
-                <div className="font-medium text-gray-800 dark:text-white">Tenis de Mesa</div>
+                <div className="font-medium text-gray-800 dark:text-white">
+                  {categoriasMap[producto.categoria_id as keyof typeof categoriasMap] || 'Sin categoría'}
+                </div>
               </div>
             </div>
             
@@ -302,4 +326,4 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
       </div>
     </div>
   );
-} 
+}

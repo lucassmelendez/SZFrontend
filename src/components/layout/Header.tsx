@@ -17,7 +17,8 @@ const categorias = [
   { id: 2, nombre: 'Bolsos' },
   { id: 3, nombre: 'Pelotas' },
   { id: 4, nombre: 'Mallas' },
-  { id: 5, nombre: 'Mesas' }
+  { id: 5, nombre: 'Mesas' },
+  { id: 6, nombre: 'Gomas' }
 ];
 
 export default function Header() {

@@ -14,7 +14,8 @@ const categoriasMap = {
   2: 'Bolsos',
   3: 'Pelotas',
   4: 'Mallas',
-  5: 'Mesas'
+  5: 'Mesas',
+  6: 'Gomas'
 };
 
 export default function BodegaDashboard() {
@@ -114,7 +115,7 @@ export default function BodegaDashboard() {
 
   // Calcula estadísticas (usar productos sin filtrar para las estadísticas totales)
   const totalProductos = productos.length;
-  const bajoStock = productos.filter(p => p.stock < 10).length;
+  const bajoStock = productos.filter(p => p.stock <= 5).length;
   const sinStock = productos.filter(p => p.stock === 0).length;
 
   return (
