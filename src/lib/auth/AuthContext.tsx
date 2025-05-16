@@ -25,35 +25,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const token = localStorage.getItem('auth_token');
         const savedUserType = localStorage.getItem('user_type');
+        const savedUserData = localStorage.getItem('cliente_data') || localStorage.getItem('empleado_data');
         
-        // Actualizar el tipo de usuario si existe en localStorage
-        if (savedUserType === 'cliente' || savedUserType === 'empleado') {
-          setUserType(savedUserType);
-        }
-        
-        if (token) {
-          // Si es un token de empleado generado localmente
-          if (token.startsWith('empleado_session_')) {
-            // Recuperar datos del empleado desde localStorage si existe
-            const empleadoData = localStorage.getItem('empleado_data');
-            if (empleadoData) {
-              setUser(JSON.parse(empleadoData));
+        // Si tenemos datos guardados, intentar restaurar la sesión
+        if (token && savedUserType && savedUserData) {
+          try {
+            // Restaurar el tipo de usuario
+            setUserType(savedUserType as 'cliente' | 'empleado');
+            
+            // Restaurar los datos del usuario
+            const userData = JSON.parse(savedUserData);
+            setUser(userData);
+            
+            // Si es un token de sesión normal (no interno), verificar con el servidor
+            if (!token.startsWith('empleado_session_') && !token.startsWith('cliente_fastapi_')) {
+              try {
+                const response = await authApi.getProfile();
+                if (response.success) {
+                  // Actualizar con los datos más recientes del servidor
+                  setUser(response.data);
+                  // Actualizar datos en localStorage
+                  localStorage.setItem('cliente_data', JSON.stringify(response.data));
+                } else {
+                  // Si la verificación falla, limpiar la sesión
+                  throw new Error('Sesión inválida');
+                }
+              } catch (error) {
+                console.error('Error al verificar sesión con el servidor:', error);
+                throw error;
+              }
             }
-          } else {
-            // Es un token normal, obtener perfil del usuario
-            const response = await authApi.getProfile();
-            if (response.success) {
-              setUser(response.data);
-            } else {
-              localStorage.removeItem('auth_token');
-              localStorage.removeItem('user_type');
-            }
+          } catch (error) {
+            console.error('Error al restaurar sesión:', error);
+            // Limpiar datos inválidos
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_type');
+            localStorage.removeItem('cliente_data');
+            localStorage.removeItem('empleado_data');
+            setUser(null);
+            setUserType(null);
           }
         }
       } catch (error) {
         console.error('Error al verificar sesión:', error);
+        // Limpiar datos en caso de error
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_type');
+        localStorage.removeItem('cliente_data');
+        localStorage.removeItem('empleado_data');
+        setUser(null);
+        setUserType(null);
       } finally {
         setIsLoading(false);
       }
