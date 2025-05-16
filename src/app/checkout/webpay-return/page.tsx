@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaCheck, FaTimes, FaSpinner } from 'react-icons/fa';
 import Link from 'next/link';
@@ -11,7 +11,25 @@ import { useCarrito } from '@/lib/useCarrito';
 const WEBPAY_INTEGRATION_URL = 'https://webpay3gint.transbank.cl';
 const WEBPAY_PRODUCTION_URL = 'https://webpay3g.transbank.cl';
 
-export default function WebpayReturnPage() {
+// Componente cargador para mostrar durante la suspense
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-4">
+      <div className="text-center mb-8">
+        <FaSpinner className="animate-spin text-4xl text-blue-600 mx-auto mb-4" />
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+          Cargando...
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">
+          Estamos preparando tu resultado de pago, por favor espera...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Componente interno que utiliza useSearchParams
+function WebpayReturnContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -187,5 +205,14 @@ export default function WebpayReturnPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Componente principal que envuelve el contenido en Suspense
+export default function WebpayReturnPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <WebpayReturnContent />
+    </Suspense>
   );
 } 
