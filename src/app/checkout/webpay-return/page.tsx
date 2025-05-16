@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FaCheck, FaTimes, FaSpinner } from 'react-icons/fa';
 import Link from 'next/link';
 import { confirmarTransaccion, manejarTransaccionAbortada, manejarTimeout, WebpayTransactionResult } from '@/services/webpayService';
-import { useCart } from '@/contexts/CartContext';
+import { useCarrito } from '@/lib/useCarrito';
 
 // URLs de WebPay - solo para referencia
 const WEBPAY_INTEGRATION_URL = 'https://webpay3gint.transbank.cl';
@@ -16,7 +16,7 @@ export default function WebpayReturnPage() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<WebpayTransactionResult | null>(null);
-  const { clearCart } = useCart();
+  const { limpiarCarrito } = useCarrito();
 
   useEffect(() => {
     const processTransaction = async () => {
@@ -49,7 +49,7 @@ export default function WebpayReturnPage() {
             
             // Si la transacción fue exitosa, limpiar el carrito
             if (transactionResult.success) {
-              clearCart();
+              limpiarCarrito();
             }
           } catch (error) {
             console.error('Error en confirmación de transacción:', error);
@@ -113,7 +113,7 @@ export default function WebpayReturnPage() {
     };
 
     processTransaction();
-  }, [searchParams, clearCart]);
+  }, [searchParams, limpiarCarrito]);
 
   if (loading) {
     return (
