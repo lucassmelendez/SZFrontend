@@ -72,9 +72,14 @@ export default function ProductCard({ producto }: ProductCardProps) {
         <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2 flex-grow">{producto.descripcion}</p>
         
         <div className="flex justify-between items-center mb-4">
-          <span className="text-xl font-bold text-blue-700 dark:text-blue-400">${Math.round(producto.precio)}</span>
-          <span className={`text-sm px-2 py-1 rounded-full ${producto.stock > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
-            {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Sin stock'}
+          <span className="text-xl font-bold text-blue-700 dark:text-blue-400">${Math.round(producto.precio)}</span>          <span className={`text-sm px-2 py-1 rounded-full ${
+            producto.stock === 0
+              ? 'bg-red-100 text-red-500 dark:bg-red-900/30 dark:text-red-400'
+              : producto.stock <= 5
+              ? 'bg-yellow-100 text-yellow-500 dark:bg-yellow-900/30 dark:text-yellow-400'
+              : 'bg-green-100 text-green-500 dark:bg-green-900/30 dark:text-green-400'
+          }`}>
+            {producto.stock === 0 ? 'Sin stock' : `Stock: ${producto.stock}`}
           </span>
         </div>
         
