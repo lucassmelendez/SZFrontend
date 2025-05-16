@@ -1,13 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
 
 // Asegurarnos de usar la URL correcta del API
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// Cambiar la forma en que se construye la URL para evitar duplicar "/api"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+// Función para construir la URL correctamente
+const buildApiUrl = (path: string) => {
+  // Si la URL base ya termina con /api, no añadir otro /api
+  if (API_BASE_URL.endsWith('/api')) {
+    return `${API_BASE_URL}${path.startsWith('/') ? path : '/' + path}`;
+  } else {
+    return `${API_BASE_URL}/api${path.startsWith('/') ? path : '/' + path}`;
+  }
+};
 
 // URLs de WebPay - solo para referencia
 const WEBPAY_INTEGRATION_URL = 'https://webpay3gint.transbank.cl';
 const WEBPAY_PRODUCTION_URL = 'https://webpay3g.transbank.cl';
 
-console.log('API URL para WebPay service:', API_URL);
+console.log('API BASE URL para WebPay service:', API_BASE_URL);
 console.log('WebPay se redirigirá a:', process.env.NODE_ENV === 'production' ? WEBPAY_PRODUCTION_URL : WEBPAY_INTEGRATION_URL);
 
 export interface WebpayTransaction {
@@ -45,7 +56,11 @@ export const iniciarTransaccion = async (
       userId
     });
 
-    const response = await fetch(`${API_URL}/api/webpay/iniciar`, {
+    // Usar la función buildApiUrl para construir la URL correctamente
+    const apiUrl = buildApiUrl('/webpay/iniciar');
+    console.log('URL de API WebPay:', apiUrl);
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -58,12 +73,38 @@ export const iniciarTransaccion = async (
         items,
         userId,
       }),
+      // Añadir estas opciones para ayudar con CORS
+      credentials: 'include',
+      mode: 'cors',
+      redirect: 'follow'
     });
 
+    // Verificar tipo de respuesta
+    if (response.redirected) {
+      console.log('Redirección detectada, URL:', response.url);
+      return {
+        url: response.url,
+        token: sessionId // En caso de redirección, usar el sessionId como token alternativo
+      };
+    }
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Error en respuesta de la API WebPay:', errorData);
-      throw new Error(errorData.error || `Error en la API: ${response.status} ${response.statusText}`);
+      // Intentar obtener detalles del error como texto en caso de formato JSON inválido
+      let errorMessage;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || `Error en la API: ${response.status} ${response.statusText}`;
+      } catch (e) {
+        // Si no es JSON, intentar obtener como texto
+        try {
+          const errorText = await response.text();
+          errorMessage = `Error en la API (texto): ${response.status} ${response.statusText} - ${errorText}`;
+        } catch (textError) {
+          errorMessage = `Error en la API: ${response.status} ${response.statusText}`;
+        }
+      }
+      console.error('Error en respuesta de la API WebPay:', errorMessage);
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -89,7 +130,10 @@ export const confirmarTransaccion = async (token: string): Promise<WebpayTransac
   try {
     console.log('Confirmando transacción con token:', token);
 
-    const response = await fetch(`${API_URL}/api/webpay/confirmar`, {
+    // Usar la función buildApiUrl para construir la URL correctamente
+    const apiUrl = buildApiUrl('/webpay/confirmar');
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -115,7 +159,10 @@ export const manejarTransaccionAbortada = async (
   try {
     console.log('Manejando transacción abortada:', { token, orderCode, sessionId });
 
-    const response = await fetch(`${API_URL}/api/webpay/abortada`, {
+    // Usar la función buildApiUrl para construir la URL correctamente
+    const apiUrl = buildApiUrl('/webpay/abortada');
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -144,7 +191,10 @@ export const manejarTimeout = async (
   try {
     console.log('Manejando timeout:', { orderCode, sessionId });
 
-    const response = await fetch(`${API_URL}/api/webpay/timeout`, {
+    // Usar la función buildApiUrl para construir la URL correctamente
+    const apiUrl = buildApiUrl('/webpay/timeout');
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -236,34 +236,65 @@ export default function CheckoutPage() {
           console.log('Iniciando transacción WebPay con usuario ID:', user.id_cliente.toString());
           
           // Iniciar transacción en WebPay
-          const transaccion = await iniciarTransaccion(
-            montoTotal,
-            itemsParaWebpay,
-            user.id_cliente.toString()
-          );
-          
-          console.log('Transacción iniciada correctamente:', {
-            url: transaccion.url,
-            token: transaccion.token ? transaccion.token.substring(0, 10) + '...' : 'No hay token'
-          });
-          
-          // Crear formulario para redireccionar a WebPay
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = transaccion.url;
-          
-          const tokenInput = document.createElement('input');
-          tokenInput.type = 'hidden';
-          tokenInput.name = 'token_ws';
-          tokenInput.value = transaccion.token;
-          
-          form.appendChild(tokenInput);
-          document.body.appendChild(form);
-          
-          console.log('Redirigiendo a WebPay...');
-          
-          // Enviar formulario para redireccionar a WebPay
-          form.submit();
+          try {
+            const transaccion = await iniciarTransaccion(
+              montoTotal,
+              itemsParaWebpay,
+              user.id_cliente.toString()
+            );
+            
+            console.log('Transacción iniciada correctamente:', {
+              url: transaccion.url,
+              token: transaccion.token ? transaccion.token.substring(0, 10) + '...' : 'No hay token'
+            });
+            
+            // Métodos alternativos para la redirección
+            
+            // MÉTODO 1: Redirección directa
+            if (transaccion.url) {
+              // Si hay una URL de redirección, primero intentamos una redirección directa
+              console.log('Intentando redirección directa a WebPay');
+              window.location.href = transaccion.url;
+              return; // Salir para evitar ejecutar los otros métodos
+            }
+            
+            // MÉTODO 2: Usar un formulario (método recomendado por WebPay)
+            console.log('Usando formulario para redireccionar a WebPay');
+            
+            // Crear formulario para redireccionar a WebPay
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = transaccion.url;
+            
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = 'token_ws';
+            tokenInput.value = transaccion.token;
+            
+            form.appendChild(tokenInput);
+            document.body.appendChild(form);
+            
+            console.log('Redirigiendo a WebPay usando formulario...');
+            
+            // Enviar formulario para redireccionar a WebPay
+            form.submit();
+            
+          } catch (webpayError: any) {
+            console.error('Error específico en transacción WebPay:', webpayError);
+            
+            // Método alternativo para pruebas si hay problemas con WebPay
+            if (process.env.NODE_ENV !== 'production') {
+              alert(`Error con WebPay. En ambiente de desarrollo, simulando compra exitosa.`);
+              setTimeout(() => {
+                limpiarCarrito();
+                setCheckoutSuccess(true);
+                setLoading(false);
+              }, 2000);
+              return;
+            } else {
+              throw webpayError; // Relanzar el error en producción
+            }
+          }
         } catch (error: any) {
           console.error('Error al iniciar transacción con WebPay:', error);
           alert(`Error al iniciar transacción: ${error.message || 'Error desconocido'}`);
