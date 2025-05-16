@@ -249,29 +249,27 @@ export default function CheckoutPage() {
               token: transaccion.token ? transaccion.token.substring(0, 10) + '...' : 'No hay token'
             });
             
-            // Métodos alternativos para la redirección
-            
-            // MÉTODO 1: Redirección directa
-            if (transaccion.url) {
-              try {
-                console.log('Redirigiendo a página de formulario WebPay manual');
-                // Redirigir a la página con formulario dedicado
-                const webpayFormUrl = `/webpay-form?url=${encodeURIComponent(transaccion.url)}&token=${encodeURIComponent(transaccion.token)}`;
-                console.log('URL de formulario WebPay:', webpayFormUrl);
-                window.location.href = webpayFormUrl;
-                return;
-              } catch (formError) {
-                console.error('Error al redirigir a formulario WebPay:', formError);
-                // Si falla, intentar crear el formulario directamente
-                console.log('Intentando crear formulario WebPay directo como plan B');
-                createAndSubmitWebpayForm(transaccion.url, transaccion.token);
-                return;
-              }
+            // Redirección directa a WebPay
+            if (transaccion.url && transaccion.token) {
+              // Crear y enviar el formulario automáticamente
+              const form = document.createElement('form');
+              form.method = 'POST';
+              form.action = transaccion.url;
+              
+              const tokenInput = document.createElement('input');
+              tokenInput.type = 'hidden';
+              tokenInput.name = 'token_ws';
+              tokenInput.value = transaccion.token;
+              
+              form.appendChild(tokenInput);
+              document.body.appendChild(form);
+              form.submit();
+              return;
             }
             
             // Mostrar un mensaje si no se pudo redirigir
-            console.error('No se pudo redirigir a WebPay: URL no válida');
-            throw new Error('No se pudo redirigir a WebPay: URL no válida');
+            console.error('No se pudo redirigir a WebPay: URL o token no válidos');
+            throw new Error('No se pudo redirigir a WebPay: URL o token no válidos');
             
           } catch (webpayError: any) {
             console.error('Error específico en transacción WebPay:', webpayError);
