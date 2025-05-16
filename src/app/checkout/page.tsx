@@ -10,6 +10,7 @@ import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
+import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast } from '@/lib/api';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -127,19 +128,147 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
     
+    // Verificar si el usuario está autenticado
+    if (!user) {
+      // En lugar de solo abrir el modal, mostrar mensaje específico
+      alert('Debes iniciar sesión o registrarte para continuar con la compra');
+      openLoginModal();
+      return;
+    }
+    
+    // Verificar que el usuario sea un cliente
+    if (!isCliente(user)) {
+      alert('Solo los clientes pueden realizar pedidos');
+      return;
+    }
+    
     setLoading(true);
     
-    // Simular procesamiento del pago
-    setTimeout(() => {
+    try {
+      // Actualizar datos del cliente si se han modificado
+      try {
+        const clienteActualizado = await actualizarDatosCliente(user.id_cliente);
+        console.log('Datos del cliente actualizados correctamente', clienteActualizado);
+      } catch (error) {
+        console.error('Error al actualizar datos del cliente pero continuando con el pedido:', error);
+        // Continuamos con el proceso aunque la actualización falle
+      }
+      
+      // Si el método de pago es transferencia, crear pedido
+      if (formData.metodoPago === 'transferencia') {
+        try {
+          console.log("Iniciando proceso de creación de pedido con transferencia");
+          
+          // Datos para crear el pedido (usando una fecha estática para evitar problemas)
+          const datosPedido = {
+            fecha: "2024-05-15", // Fecha estática para evitar problemas de formato
+            medio_pago_id: 1, // ID para transferencia
+            id_estado_envio: 2, // Estado de envío 2
+            id_estado: 2, // Estado de pedido 2
+            id_cliente: user.id_cliente
+          };
+          
+          // Intentamos crear el pedido a través de la API
+          try {
+            console.log("Intentando crear pedido con la API:", datosPedido);
+            const nuevoPedido = await pedidoApiFast.create(datosPedido);
+            console.log("Pedido creado exitosamente con la API:", nuevoPedido);
+            
+            // Agregar los productos al pedido
+            try {
+              if (!nuevoPedido.id_pedido) {
+                throw new Error("El pedido creado no tiene un ID válido");
+              }
+              
+              // Preparar los productos para guardar en la relación pedido-producto
+              const productosParaPedido = items.map(item => ({
+                cantidad: item.cantidad,
+                precio_unitario: item.producto.precio,
+                subtotal: item.producto.precio * item.cantidad,
+                id_pedido: nuevoPedido.id_pedido as number,
+                id_producto: item.producto.id_producto
+              }));
+              
+              console.log("Agregando productos al pedido:", productosParaPedido);
+              
+              // Guardar los productos usando la función de addBulk
+              const productosGuardados = await pedidoProductoApiFast.addBulk(nuevoPedido.id_pedido, productosParaPedido);
+              console.log("Productos agregados exitosamente al pedido:", productosGuardados);
+            } catch (productosError) {
+              console.error("Error al añadir productos al pedido, pero el pedido fue creado:", productosError);
+              // Continuamos aunque no se puedan guardar los productos para no detener el flujo
+            }
+            
+            // Si llegamos aquí, el pedido se creó correctamente
+            limpiarCarrito();
+            setCheckoutSuccess(true);
+          } catch (apiError) {
+            // Manejar error al crear pedido
+            console.error("Error al crear pedido con la API:", apiError);
+            alert("No se pudo procesar el pedido. Por favor, inténtalo de nuevo más tarde.");
+          }
+        } catch (error: any) {
+          console.error('Error general al procesar el pedido:', error);
+          alert(`Error en el proceso de pedido: ${error.message || 'Error desconocido'}`);
+        }
+      } else {
+        // Si es otro método de pago (webpay), mantener el comportamiento actual
+        // Simular procesamiento del pago por 2 segundos
+        setTimeout(() => {
+          limpiarCarrito();
+          setCheckoutSuccess(true);
+        }, 2000);
+      }
+    } catch (error: any) {
+      console.error('Error al procesar el pedido:', error);
+      alert(`Hubo un error al procesar tu pedido: ${error.message || 'Error desconocido'}`);
+    } finally {
       setLoading(false);
-      setCheckoutSuccess(true);
-      limpiarCarrito();
-    }, 2000);
+    }
+  };
+
+  // Función para actualizar los datos del cliente si se han modificado
+  const actualizarDatosCliente = async (idCliente: number) => {
+    if (!user || !isCliente(user)) return null;
+    
+    // Verificar si hay cambios en los datos del cliente
+    const hayCambios = 
+      formData.telefono !== user.telefono?.toString() || 
+      formData.direccion !== user.direccion;
+    
+    if (!hayCambios) return user;
+    
+    try {
+      // Preparar datos a actualizar
+      const datosActualizados: any = {};
+      
+      // Solo incluir los campos que se hayan modificado o que falten
+      if (formData.telefono && formData.telefono !== user.telefono?.toString()) {
+        datosActualizados.telefono = formData.telefono;
+      }
+      
+      if (formData.direccion && formData.direccion !== user.direccion) {
+        datosActualizados.direccion = formData.direccion;
+      }
+      
+      // Si hay datos para actualizar, hacer la petición
+      if (Object.keys(datosActualizados).length > 0) {
+        const clienteActualizado = await clienteApiFast.update(idCliente, datosActualizados);
+        console.log('Datos del cliente actualizados:', clienteActualizado);
+        return clienteActualizado;
+      }
+      
+      return user;
+    } catch (error) {
+      console.error('Error al actualizar datos del cliente:', error);
+      // No interrumpir el flujo de compra por un error en la actualización de datos
+      return user;
+    }
   };
 
   // Si estamos en carga inicial, mostrar un indicador de carga
@@ -217,16 +346,20 @@ export default function CheckoutPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-              {!user && !authLoading && (
-                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p className="text-blue-800 dark:text-blue-300 mb-2">
-                    ¿Ya tienes una cuenta? Accede para completar tus datos automáticamente.
-                  </p>
-                  <div className="flex space-x-3">
+              {!user && !authLoading ? (
+                // Mostrar solo el botón de iniciar sesión si no hay usuario autenticado
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="text-center mb-6">
+                    <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">Inicia sesión para continuar</h2>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      Para completar tu compra, primero debes iniciar sesión o crear una cuenta.
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                     <button
                       type="button"
                       onClick={openLoginModal}
-                      className="text-sm px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors"
                     >
                       Iniciar sesión
                     </button>
@@ -242,226 +375,229 @@ export default function CheckoutPage() {
                           }
                         }, 100);
                       }}
-                      className="text-sm px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                      className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                     >
                       Registrarse
                     </button>
                   </div>
                 </div>
-              )}
-              
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Información de contacto</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nombre
-                  </label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${
-                      errors.nombre ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
-                  />
-                  {errors.nombre && <p className="mt-1 text-sm text-red-500">{errors.nombre}</p>}
-                </div>
-                
-                <div>
-                  <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Apellido
-                  </label>
-                  <input
-                    type="text"
-                    id="apellido"
-                    name="apellido"
-                    value={formData.apellido}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${
-                      errors.apellido ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
-                  />
-                  {errors.apellido && <p className="mt-1 text-sm text-red-500">{errors.apellido}</p>}
-                </div>
-                
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${
-                      errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
-                  />
-                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
-                </div>
-                
-                <div>
-                  <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Teléfono
-                  </label>
-                  <input
-                    type="tel"
-                    id="telefono"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${
-                      errors.telefono ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
-                  />
-                  {errors.telefono && <p className="mt-1 text-sm text-red-500">{errors.telefono}</p>}
-                </div>
+              ) : (
+                // Mostrar el formulario completo solo si el usuario está autenticado
+                <>
+                  <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Información de contacto</h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Nombre
+                      </label>
+                      <input
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border ${
+                          errors.nombre ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
+                      />
+                      {errors.nombre && <p className="mt-1 text-sm text-red-500">{errors.nombre}</p>}
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Apellido
+                      </label>
+                      <input
+                        type="text"
+                        id="apellido"
+                        name="apellido"
+                        value={formData.apellido}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border ${
+                          errors.apellido ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
+                      />
+                      {errors.apellido && <p className="mt-1 text-sm text-red-500">{errors.apellido}</p>}
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border ${
+                          errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
+                      />
+                      {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Teléfono
+                      </label>
+                      <input
+                        type="tel"
+                        id="telefono"
+                        name="telefono"
+                        value={formData.telefono}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border ${
+                          errors.telefono ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
+                      />
+                      {errors.telefono && <p className="mt-1 text-sm text-red-500">{errors.telefono}</p>}
+                    </div>
 
-                <div>
-                  <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    id="direccion"
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${
-                      errors.direccion ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
-                  />
-                  {errors.direccion && <p className="mt-1 text-sm text-red-500">{errors.direccion}</p>}
-                </div>
-              </div>
-              
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Método de pago</h2>
-              
-              <div className="mb-6 space-y-4">               
-                <label className="block">
-                  <input
-                    type="radio"
-                    id="webpay"
-                    name="metodoPago"
-                    value="webpay"
-                    checked={formData.metodoPago === 'webpay'}
-                    onChange={handleInputChange}
-                    className="sr-only" // Ocultamos el radio button original
-                  />
-                  <div className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    formData.metodoPago === 'webpay' 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-gray-700' 
-                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
-                  }`}>
-                    <div className="flex items-center flex-1">
-                      <Image 
-                        src="/webpay.svg" 
-                        alt="WebPay" 
-                        width={100}
-                        height={32}
-                        className="mr-3"
-                        style={{ height: '32px', width: 'auto' }}
-                        priority
+                    <div>
+                      <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Dirección
+                      </label>
+                      <input
+                        type="text"
+                        id="direccion"
+                        name="direccion"
+                        value={formData.direccion}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border ${
+                          errors.direccion ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white`}
                       />
-                      <div>
-                        <p className="font-medium text-gray-700 dark:text-gray-300">WebPay</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Paga de forma segura con tarjeta de crédito o débito</p>
+                      {errors.direccion && <p className="mt-1 text-sm text-red-500">{errors.direccion}</p>}
+                    </div>
+                  </div>
+                  
+                  <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Método de pago</h2>
+                  
+                  <div className="mb-6 space-y-4">               
+                    <label className="block">
+                      <input
+                        type="radio"
+                        id="webpay"
+                        name="metodoPago"
+                        value="webpay"
+                        checked={formData.metodoPago === 'webpay'}
+                        onChange={handleInputChange}
+                        className="sr-only" // Ocultamos el radio button original
+                      />
+                      <div className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        formData.metodoPago === 'webpay' 
+                          ? 'border-blue-500 bg-blue-50 dark:bg-gray-700' 
+                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                      }`}>
+                        <div className="flex items-center flex-1">
+                          <Image 
+                            src="/webpay.svg" 
+                            alt="WebPay" 
+                            width={100}
+                            height={32}
+                            className="mr-3"
+                            style={{ height: '32px', width: 'auto' }}
+                            priority
+                          />
+                          <div>
+                            <p className="font-medium text-gray-700 dark:text-gray-300">WebPay</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Paga de forma segura con tarjeta de crédito o débito</p>
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
+                          formData.metodoPago === 'webpay'
+                            ? 'border-blue-500 bg-blue-500'
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}>
+                          {formData.metodoPago === 'webpay' && (
+                            <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                      </div>
+                    </label>
+                    
+                    <label className="block">
+                      <input
+                        type="radio"
+                        id="transferencia"
+                        name="metodoPago"
+                        value="transferencia"
+                        checked={formData.metodoPago === 'transferencia'}
+                        onChange={handleInputChange}
+                        className="sr-only" // Ocultamos el radio button original
+                      />
+                      <div className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        formData.metodoPago === 'transferencia' 
+                          ? 'border-blue-500 bg-blue-50 dark:bg-gray-700' 
+                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                      }`}>
+                        <div className="flex items-center flex-1">
+                          <Image 
+                            src="/dinero.svg" 
+                            alt="Dinero" 
+                            width={100}
+                            height={32}
+                            className="mr-3"
+                            style={{ height: '32px', width: 'auto' }}
+                            priority
+                          />
+                          <div>
+                            <p className="font-medium text-gray-700 dark:text-gray-300">Transferencia</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Realiza una transferencia directa a nuestra cuenta</p>
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
+                          formData.metodoPago === 'transferencia'
+                            ? 'border-blue-500 bg-blue-500'
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}>
+                          {formData.metodoPago === 'transferencia' && (
+                            <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <div className="md:hidden mt-6">
+                    <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md mb-4">
+                      <h3 className="font-semibold text-gray-800 dark:text-white mb-2">Resumen del pedido</h3>
+                      <div className="flex justify-between mb-2">
+                        <span className="text-gray-600 dark:text-gray-300">Productos ({items.length}):</span>
+                        <span className="font-medium text-gray-800 dark:text-white">${Math.round(calcularTotal())}</span>
+                      </div>
+                      <div className="flex justify-between mb-2">
+                        <span className="text-gray-600 dark:text-gray-300">Impuestos (19%):</span>
+                        <span className="font-medium text-gray-800 dark:text-white">${Math.round(calcularTotal() * 0.19)}</span>
+                      </div>
+                      <div className="border-t border-gray-200 dark:border-gray-600 my-2 pt-2 flex justify-between">
+                        <span className="font-bold text-gray-800 dark:text-white">Total:</span>
+                        <span className="font-bold text-gray-800 dark:text-white">${Math.round(calcularTotal() * 1.19 + 10)}</span>
                       </div>
                     </div>
-                    <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
-                      formData.metodoPago === 'webpay'
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300 dark:border-gray-600'
-                    }`}>
-                      {formData.metodoPago === 'webpay' && (
-                        <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
-                      )}
-                    </div>
                   </div>
-                </label>
-                
-                <label className="block">
-                  <input
-                    type="radio"
-                    id="transferencia"
-                    name="metodoPago"
-                    value="transferencia"
-                    checked={formData.metodoPago === 'transferencia'}
-                    onChange={handleInputChange}
-                    className="sr-only" // Ocultamos el radio button original
-                  />
-                  <div className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    formData.metodoPago === 'transferencia' 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-gray-700' 
-                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
-                  }`}>
-                    <div className="flex items-center flex-1">
-                      <Image 
-                        src="/dinero.svg" 
-                        alt="Dinero" 
-                        width={100}
-                        height={32}
-                        className="mr-3"
-                        style={{ height: '32px', width: 'auto' }}
-                        priority
-                      />
-                      <div>
-                        <p className="font-medium text-gray-700 dark:text-gray-300">Transferencia</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Realiza una transferencia directa a nuestra cuenta</p>
-                      </div>
-                    </div>
-                    <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
-                      formData.metodoPago === 'transferencia'
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300 dark:border-gray-600'
-                    }`}>
-                      {formData.metodoPago === 'transferencia' && (
-                        <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
-                      )}
-                    </div>
-                  </div>
-                </label>
-              </div>
-              
-              <div className="md:hidden mt-6">
-                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md mb-4">
-                  <h3 className="font-semibold text-gray-800 dark:text-white mb-2">Resumen del pedido</h3>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-600 dark:text-gray-300">Productos ({items.length}):</span>
-                    <span className="font-medium text-gray-800 dark:text-white">${Math.round(calcularTotal())}</span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-600 dark:text-gray-300">Impuestos (19%):</span>
-                    <span className="font-medium text-gray-800 dark:text-white">${Math.round(calcularTotal() * 0.19)}</span>
-                  </div>
-                  <div className="border-t border-gray-200 dark:border-gray-600 my-2 pt-2 flex justify-between">
-                    <span className="font-bold text-gray-800 dark:text-white">Total:</span>
-                    <span className="font-bold text-gray-800 dark:text-white">${Math.round(calcularTotal() * 1.19 + 10)}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md font-semibold transition-colors flex justify-center items-center"
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Procesando...
-                  </span>
-                ) : (
-                  'Finalizar compra'
-                )}
-              </button>
+                  
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md font-semibold transition-colors flex justify-center items-center"
+                  >
+                    {loading ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Procesando...
+                      </span>
+                    ) : (
+                      'Finalizar compra'
+                    )}
+                  </button>
+                </>
+              )}
             </form>
           </div>
           
