@@ -11,6 +11,7 @@ import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast } from '@/lib/api';
+import { Suspense } from 'react';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -252,32 +253,25 @@ export default function CheckoutPage() {
             
             // MÉTODO 1: Redirección directa
             if (transaccion.url) {
-              // Si hay una URL de redirección, primero intentamos una redirección directa
-              console.log('Intentando redirección directa a WebPay');
-              window.location.href = transaccion.url;
-              return; // Salir para evitar ejecutar los otros métodos
+              try {
+                console.log('Redirigiendo a página de formulario WebPay manual');
+                // Redirigir a la página con formulario dedicado
+                const webpayFormUrl = `/webpay-form?url=${encodeURIComponent(transaccion.url)}&token=${encodeURIComponent(transaccion.token)}`;
+                console.log('URL de formulario WebPay:', webpayFormUrl);
+                window.location.href = webpayFormUrl;
+                return;
+              } catch (formError) {
+                console.error('Error al redirigir a formulario WebPay:', formError);
+                // Si falla, intentar crear el formulario directamente
+                console.log('Intentando crear formulario WebPay directo como plan B');
+                createAndSubmitWebpayForm(transaccion.url, transaccion.token);
+                return;
+              }
             }
             
-            // MÉTODO 2: Usar un formulario (método recomendado por WebPay)
-            console.log('Usando formulario para redireccionar a WebPay');
-            
-            // Crear formulario para redireccionar a WebPay
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = transaccion.url;
-            
-            const tokenInput = document.createElement('input');
-            tokenInput.type = 'hidden';
-            tokenInput.name = 'token_ws';
-            tokenInput.value = transaccion.token;
-            
-            form.appendChild(tokenInput);
-            document.body.appendChild(form);
-            
-            console.log('Redirigiendo a WebPay usando formulario...');
-            
-            // Enviar formulario para redireccionar a WebPay
-            form.submit();
+            // Mostrar un mensaje si no se pudo redirigir
+            console.error('No se pudo redirigir a WebPay: URL no válida');
+            throw new Error('No se pudo redirigir a WebPay: URL no válida');
             
           } catch (webpayError: any) {
             console.error('Error específico en transacción WebPay:', webpayError);
@@ -736,4 +730,65 @@ export default function CheckoutPage() {
       </div>
     </>
   );
+}
+
+// Función auxiliar para crear y enviar el formulario WebPay manualmente
+export function createAndSubmitWebpayForm(url, token) {
+  console.log('Creando formulario WebPay manualmente:', { url, token });
+  
+  // Crear el formulario
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = url;
+  form.style.display = 'block'; // Mostrar el formulario para debug
+  form.style.margin = '20px auto';
+  form.style.padding = '20px';
+  form.style.border = '1px solid #ccc';
+  form.style.borderRadius = '5px';
+  form.style.maxWidth = '500px';
+  
+  // Crear un título
+  const title = document.createElement('h2');
+  title.textContent = 'Redireccionando a WebPay...';
+  title.style.textAlign = 'center';
+  title.style.marginBottom = '20px';
+  form.appendChild(title);
+  
+  // Crear el input para el token
+  const tokenInput = document.createElement('input');
+  tokenInput.type = 'hidden';
+  tokenInput.name = 'token_ws';
+  tokenInput.value = token;
+  form.appendChild(tokenInput);
+  
+  // Añadir la información visible para el usuario
+  const info = document.createElement('p');
+  info.textContent = 'Serás redirigido automáticamente a la página de pago. Si no eres redirigido, haz clic en el botón a continuación.';
+  info.style.marginBottom = '20px';
+  form.appendChild(info);
+  
+  // Añadir un botón visible
+  const button = document.createElement('button');
+  button.type = 'submit';
+  button.textContent = 'Ir a WebPay';
+  button.style.backgroundColor = '#0070f3';
+  button.style.color = 'white';
+  button.style.border = 'none';
+  button.style.padding = '10px 20px';
+  button.style.borderRadius = '5px';
+  button.style.cursor = 'pointer';
+  button.style.width = '100%';
+  form.appendChild(button);
+  
+  // Limpiar el contenido existente y agregar el formulario
+  document.body.innerHTML = '';
+  document.body.appendChild(form);
+  
+  // Enviar el formulario automáticamente después de un breve retraso
+  setTimeout(() => {
+    console.log('Enviando formulario WebPay automaticamente...');
+    form.submit();
+  }, 1500);
+  
+  return form;
 }
