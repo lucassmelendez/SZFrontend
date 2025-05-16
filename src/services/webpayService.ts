@@ -1,16 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
 
-// Asegurarnos de usar la URL correcta del API
+// Asegurarnos de usar la URL correcta del API y siempre con HTTPS
 // Cambiar la forma en que se construye la URL para evitar duplicar "/api"
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-// Función para construir la URL correctamente
+// Función para construir la URL correctamente y garantizar HTTPS
 const buildApiUrl = (path: string) => {
+  // Asegurarnos de que usamos HTTPS en producción
+  let baseUrl = API_BASE_URL;
+  
+  // Si la URL comienza con http:// y no es localhost, cambiarla a https://
+  if (baseUrl.startsWith('http://') && !baseUrl.includes('localhost')) {
+    baseUrl = baseUrl.replace('http://', 'https://');
+  }
+  
   // Si la URL base ya termina con /api, no añadir otro /api
-  if (API_BASE_URL.endsWith('/api')) {
-    return `${API_BASE_URL}${path.startsWith('/') ? path : '/' + path}`;
+  if (baseUrl.endsWith('/api')) {
+    return `${baseUrl}${path.startsWith('/') ? path : '/' + path}`;
   } else {
-    return `${API_BASE_URL}/api${path.startsWith('/') ? path : '/' + path}`;
+    return `${baseUrl}/api${path.startsWith('/') ? path : '/' + path}`;
   }
 };
 
@@ -19,6 +27,7 @@ const WEBPAY_INTEGRATION_URL = 'https://webpay3gint.transbank.cl';
 const WEBPAY_PRODUCTION_URL = 'https://webpay3g.transbank.cl';
 
 console.log('API BASE URL para WebPay service:', API_BASE_URL);
+console.log('API URL corregida:', buildApiUrl('/webpay/iniciar').replace('/webpay/iniciar', ''));
 console.log('WebPay se redirigirá a:', process.env.NODE_ENV === 'production' ? WEBPAY_PRODUCTION_URL : WEBPAY_INTEGRATION_URL);
 
 export interface WebpayTransaction {
@@ -59,6 +68,12 @@ export const iniciarTransaccion = async (
     // Usar la función buildApiUrl para construir la URL correctamente
     const apiUrl = buildApiUrl('/webpay/iniciar');
     console.log('URL de API WebPay:', apiUrl);
+
+    // Verificar si hay posible problema de contenido mixto
+    if (window.location.protocol === 'https:' && apiUrl.startsWith('http:')) {
+      console.error('Error de contenido mixto detectado: No se puede hacer una solicitud HTTP desde un sitio HTTPS');
+      throw new Error('Error de seguridad: No se puede acceder al servidor de pagos. Contacta al administrador');
+    }
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -122,6 +137,15 @@ export const iniciarTransaccion = async (
     return data;
   } catch (error) {
     console.error('Error al iniciar transacción:', error);
+    
+    // Verificar si es un error de Mixed Content
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      if (window.location.protocol === 'https:') {
+        console.error('Es posible que haya un problema de contenido mixto (HTTP vs HTTPS)');
+        throw new Error('Error de seguridad: No se puede acceder al servidor de pagos por un problema de protocolos (HTTP/HTTPS)');
+      }
+    }
+    
     throw error;
   }
 };
