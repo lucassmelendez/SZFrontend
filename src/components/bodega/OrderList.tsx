@@ -32,19 +32,17 @@ export default function OrderList() {
     const interval = setInterval(fetchOrders, 30000);
     return () => clearInterval(interval);
   }, []);
-  
+
   const fetchOrders = async () => {
     try {
-      // Obtener todos los pedidos pendientes (estado 2)
       const pedidos = await pedidoApiFast.getAll();
-      const pedidosPendientes = pedidos.filter(pedido => pedido.id_estado === 1);
+      // Filtrar solo los pedidos pagados (id_estado === 1)
+      const pedidosPagados = pedidos.filter(pedido => pedido.id_estado === 1);
       
-      // Para cada pedido, obtener y procesar sus productos      
       const pedidosConProductos = await Promise.all(
-        pedidosPendientes.map(async (pedido: Pedido) => {
+        pedidosPagados.map(async (pedido: Pedido) => {
           if (!pedido.id_pedido) return null;
           
-          // Obtener productos del pedido
           const pedidoProductos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido);
           const productosConDetalles = await Promise.all(
             pedidoProductos.map(async (pp) => {
@@ -53,25 +51,21 @@ export default function OrderList() {
             })
           );
           
-          // Calcular total
           const total = productosConDetalles.reduce(
             (acc, curr) => acc + (curr.precio_unitario * curr.cantidad), 
             0
           );
 
           try {
-            // Obtener información del cliente
             const clienteData = await clienteApiFast.getById(pedido.id_cliente);
-            console.log("Cliente data:", clienteData); // Para debug
 
-            // Mapear estado de envío
+            // Mapeo de estados
             const estadosEnvio = {
               1: "Enviado",
               2: "Pendiente",
               3: "Recibido"
             };
 
-            // Mapear medio de pago
             const mediosPago = {
               1: "Transferencia",
               2: "Webpay"
@@ -98,7 +92,6 @@ export default function OrderList() {
         })
       );
 
-      // Filtrar cualquier pedido nulo y establecer la lista
       setOrders(pedidosConProductos.filter((p: OrderWithDetails | null): p is OrderWithDetails => p !== null));
       setError(null);
     } catch (err) {
@@ -108,6 +101,7 @@ export default function OrderList() {
       setLoading(false);
     }
   };
+
   const handleMarkAsReady = async (orderId: number) => {
     try {
       setUpdatingOrder(orderId);      // Actualizar la orden a id_estado_envio = 2 (Listo para envío)
@@ -121,14 +115,16 @@ export default function OrderList() {
     } finally {
       setUpdatingOrder(null);
     }
-  };
+  };  
+
   const handleMarkAsDispatched = async (orderId: number) => {
     try {
       setUpdatingOrder(orderId);
-      // Actualizar la orden a id_estado_envio = 1 (Enviado)
+      
+      // Actualizar a estado_envio = 1 (Enviado)
       await pedidoApiFast.updateEstadoEnvio(orderId, 1);
-      toast.success('Orden marcada como enviada');
-      // Recargar órdenes
+      
+      toast.success('¡Orden despachada con éxito!');
       await fetchOrders();
     } catch (err) {
       console.error('Error al actualizar la orden:', err);
@@ -186,7 +182,8 @@ export default function OrderList() {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                 {new Date(order.fecha).toLocaleString()}
-              </td>              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+              </td>              
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                 {order.cliente ? order.cliente.correo : 'N/A'}
               </td>
               <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
@@ -202,8 +199,12 @@ export default function OrderList() {
                 ${order.total.toLocaleString()}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                  Pendiente
+                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  order.id_estado === 1 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                }`}>
+                  {order.id_estado === 1 ? 'Pagado' : 'No pagado'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
@@ -213,22 +214,7 @@ export default function OrderList() {
                 {order.medio_pago}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                {order.id_estado_envio === 1 ? (
-                  <button
-                    onClick={() => handleMarkAsReady(order.id_pedido!)}
-                    disabled={updatingOrder === order.id_pedido}
-                    className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs transition-colors disabled:opacity-50"
-                  >
-                    {updatingOrder === order.id_pedido ? (
-                      <span className="flex items-center">
-                        <span className="animate-spin h-4 w-4 mr-1 border-2 border-white border-t-transparent rounded-full"></span>
-                        Procesando...
-                      </span>
-                    ) : (
-                      'Marcar como lista'
-                    )}
-                  </button>
-                ) : order.id_estado_envio === 2 ? (
+                {order.id_estado === 1 && order.id_estado_envio === 2 ? (
                   <button
                     onClick={() => handleMarkAsDispatched(order.id_pedido!)}
                     disabled={updatingOrder === order.id_pedido}
@@ -243,8 +229,13 @@ export default function OrderList() {
                       'Despachar'
                     )}
                   </button>
-                ) : (                  <span className="text-green-600 dark:text-green-400">
+                ) : order.id_estado_envio === 1 ? (
+                  <span className="text-green-600 dark:text-green-400 font-medium">
                     Enviado
+                  </span>
+                ) : (
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">
+                    No disponible
                   </span>
                 )}
               </td>
