@@ -592,10 +592,11 @@ export const pedidoApiFast = {
       throw error;
     }
   },
-  
-  updateEstado: async (id: number, idEstado: number): Promise<Pedido> => {
+    updateEstado: async (id: number, estado: 'accepted' | 'rejected'): Promise<Pedido> => {
     try {
-      const response = await apiFast.patch(`/pedidos/${id}/estado`, { id_estado: idEstado });
+      console.log(`Actualizando estado del pedido ${id} a ${estado}`);
+      const response = await apiFast.patch(`/pedidos/${id}/status`, estado);
+      console.log('Respuesta del servidor:', response.data);
       return response.data.pedido;
     } catch (error) {
       console.error(`Error al actualizar estado del pedido ${id} en FastAPI:`, error);

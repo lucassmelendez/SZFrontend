@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { isEmpleado, productoApi, Producto } from '@/lib/api';
 import StockEditor from '@/components/bodega/StockEditor';
 import { FaSearch, FaChevronDown } from 'react-icons/fa';
+import OrderList from '@/components/bodega/OrderList';
 
 // Mapa de categorías
 const categoriasMap = {
@@ -122,87 +123,98 @@ export default function BodegaDashboard() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Panel de Bodega</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {/* Total products card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Estadísticas de Stock</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Total de productos</span>
-              <span className="font-bold text-gray-800 dark:text-white">{totalProductos}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Productos bajo stock</span>
-              <span className="font-bold text-amber-500">{bajoStock}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Productos sin stock</span>
-              <span className="font-bold text-red-500">{sinStock}</span>
-            </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-300">Total de productos</span>
+            <span className="font-bold text-gray-800 dark:text-white">{totalProductos}</span>
           </div>
         </div>
+        
+        {/* Low stock products card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-300">Productos bajo stock</span>
+            <span className="font-bold text-amber-500">{bajoStock}</span>
+          </div>
+        </div>
+        
+        {/* Out of stock products card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-300">Productos sin stock</span>
+            <span className="font-bold text-red-500">{sinStock}</span>
+          </div>
+        </div>
+      </div>      {/* Order Management Panel */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Órdenes Pendientes</h2>
+        <OrderList />
       </div>
 
-      {error ? (
-        <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-6">
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-8">
           {error}
         </div>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Gestión de Stock</h2>
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="flex items-center gap-3">
-                <span className="text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">Filtrar:</span>
-                <div className="relative categorias-menu">
-                  <button
-                    onClick={() => setShowCategorias(!showCategorias)}
-                    className="flex items-center justify-between w-full md:w-48 px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <span>{categoriasMap[selectedCategoria as keyof typeof categoriasMap]}</span>
-                    <FaChevronDown className={`ml-2 transition-transform ${showCategorias ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  {showCategorias && (
-                    <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
-                      {Object.entries(categoriasMap).map(([id, nombre]) => (
-                        <button
-                          key={id}
-                          onClick={() => {
-                            setSelectedCategoria(Number(id));
-                            setShowCategorias(false);
-                          }}
-                          className={`w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                            selectedCategoria === Number(id)
-                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                              : 'text-gray-800 dark:text-white'
-                          } ${id === '0' ? 'border-b border-gray-200 dark:border-gray-600' : ''}`}
-                        >
-                          {nombre}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+      )}
 
-              {/* Barra de búsqueda */}
-              <div className="relative">
-                <div className="relative flex items-center">
-                  <input
-                    type="text"
-                    placeholder="Buscar productos..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full md:w-64 pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                  />
-                  <FaSearch className="absolute left-3 text-gray-400" size={16} />
-                </div>
+      {/* Stock Management Panel */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Gestión de Stock</h2>
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="flex items-center gap-3">
+              <span className="text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">Filtrar:</span>
+              <div className="relative categorias-menu">
+                <button
+                  onClick={() => setShowCategorias(!showCategorias)}
+                  className="flex items-center justify-between w-full md:w-48 px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <span>{categoriasMap[selectedCategoria as keyof typeof categoriasMap]}</span>
+                  <FaChevronDown className={`ml-2 transition-transform ${showCategorias ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showCategorias && (
+                  <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
+                    {Object.entries(categoriasMap).map(([id, nombre]) => (
+                      <button
+                        key={id}
+                        onClick={() => {
+                          setSelectedCategoria(Number(id));
+                          setShowCategorias(false);
+                        }}
+                        className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600
+                          ${selectedCategoria === Number(id) ? 'bg-gray-100 dark:bg-gray-600' : ''}`}
+                      >
+                        {nombre}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
+            
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar productos..."
+                className="w-full md:w-64 px-4 py-2 pl-10 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              />
+              <FaSearch className="absolute left-3 text-gray-400" />
+            </div>
           </div>
-          <StockEditor productos={filteredProductos} onStockUpdate={handleStockUpdate} />
         </div>
-      )}
+        
+        <StockEditor 
+          productos={filteredProductos}
+          onStockUpdate={handleStockUpdate}
+        />
+      </div>
     </div>
   );
 }

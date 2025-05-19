@@ -8,6 +8,7 @@ import { AuthProvider } from '@/lib/auth/AuthContext';
 import { LoginModalProvider } from '@/lib/auth/LoginModalContext';
 import AppProvider from './_app';
 import LoginModalWrapper from '@/components/auth/LoginModalWrapper';
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,6 +33,7 @@ export default function RootLayout({
                 <main className="flex-grow pb-12">{children}</main>
                 <Footer />
                 <LoginModalWrapper />
+                <Toaster />
               </AppProvider>
             </LoginModalProvider>
           </AuthProvider>
