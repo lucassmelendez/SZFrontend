@@ -378,11 +378,12 @@ export default function EmpleadosPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  RUT
+                  RUT <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="rut"
+                  required
                   placeholder="12345678-9"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
@@ -444,10 +445,10 @@ export default function EmpleadosPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="">Seleccione un rol</option>
-                  <option value="1">Empleado Regular</option>
                   <option value="2">Administrador</option>
-                  <option value="3">Bodeguero</option>
-                  <option value="4">Contador</option>
+                  <option value="3">Vendedor</option>
+                  <option value="4">Bodeguero</option>
+                  <option value="5">Contador</option>
                 </select>
               </div>
 
