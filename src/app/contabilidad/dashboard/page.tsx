@@ -133,7 +133,7 @@ export default function ContabilidadDashboard() {
     try {
       setUpdatingOrder(orderId);
       // Actualizar el estado del pedido a pagado (id_estado = 1)
-      const result = await pedidoApiFast.updateEstado(orderId, "accepted");
+      const result = await pedidoApiFast.update(orderId, { id_estado: 1 });
       console.log('Respuesta de actualización de estado:', result);
       toast.success('Pago aprobado correctamente');
       await fetchOrders();
