@@ -491,7 +491,9 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {pedidos.map((pedido) => {
+                {pedidos
+                  .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
+                  .map((pedido) => {
                   const estado = getEstadoPedido(pedido.id_estado, pedido.id_estado_envio);
                   return (
                     <tr key={pedido.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
