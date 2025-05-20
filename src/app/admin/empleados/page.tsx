@@ -28,8 +28,15 @@ interface EmpleadoUpdate {
   rol_id?: number;
 }
 
-interface Empleado extends EmpleadoBase {
+interface Empleado {
   id_empleado: number;
+  nombre: string;
+  apellido: string;
+  correo: string;
+  direccion: string;
+  telefono: string | number;
+  rol_id: number;
+  rut?: string;
   contrasena?: string;
   informe_id?: number;
 }
@@ -38,6 +45,13 @@ interface ApiErrorResponse {
   detail?: string;
   message?: string;
 }
+
+const roles: Record<number, string> = {
+  2: "Administrador",
+  3: "Vendedor",
+  4: "Bodeguero",
+  5: "Contador"
+};
 
 export default function EmpleadosPage() {
   const router = useRouter();
@@ -251,26 +265,37 @@ export default function EmpleadosPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Apellido</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">RUT</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dirección</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {empleados.map((empleado) => (
                 <tr key={empleado.id_empleado} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.id_empleado}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{empleado.nombre}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{empleado.apellido}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.rut}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.correo}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.direccion}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.telefono}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.rol_id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{empleado.id_empleado}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div>
+                      <div className="font-medium">{`${empleado.nombre} ${empleado.apellido}`}</div>
+                      <div className="text-xs text-gray-500">{empleado.rut || 'Sin RUT'}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{empleado.correo}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{empleado.telefono}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      empleado.rol_id === 2 
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                        : empleado.rol_id === 3
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                        : empleado.rol_id === 4
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                    }`}>
+                      {roles[empleado.rol_id] || "Desconocido"}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEdit(empleado.id_empleado)}
