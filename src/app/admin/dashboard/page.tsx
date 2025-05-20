@@ -3,7 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, empleadoApiFast, apiFast, pedidoApiFast, Pedido } from '@/lib/api';
+import { 
+  isEmpleado, 
+  empleadoApiFast, 
+  apiFast, 
+  pedidoApiFast, 
+  pedidoProductoApiFast, 
+  Pedido,
+  productoApi
+} from '@/lib/api';
 import { AxiosError } from 'axios';
 import { FiUsers, FiPackage, FiShoppingCart } from 'react-icons/fi';
 
@@ -28,6 +36,13 @@ interface Cliente {
 interface PedidoConDetalles extends Omit<Pedido, 'cliente'> {
   total: number;
   cliente: Cliente;
+  productos: Array<{
+    id_producto: number;
+    nombre: string;
+    cantidad: number;
+    precio_unitario: number;
+    subtotal: number;
+  }>;
 }
 
 interface Estadisticas {
@@ -127,30 +142,85 @@ export default function AdminDashboard() {
 
         // Obtener pedidos recientes
         const pedidosResponse = await pedidoApiFast.getAll();
+        console.log('Pedidos obtenidos del servidor:', pedidosResponse);
+        
+        // Procesamos cada pedido para obtener más detalles
         const pedidosConDetalles = await Promise.all(
           pedidosResponse.map(async (pedido) => {
+            // Obtenemos los productos del pedido
+            const idPedido = pedido.id_pedido || 0;
+            console.log(`Obteniendo productos para pedido ${idPedido}`);
+            
+            const pedidoProductos = await pedidoProductoApiFast.getByPedido(idPedido);
+            console.log(`Productos obtenidos para pedido ${idPedido}:`, pedidoProductos);
+            
+            // Obtener información de productos utilizando productoApi (NO apiFast)
+            const productosConDetalles = await Promise.all(
+              pedidoProductos.map(async (pp) => {
+                try {
+                  // Usar productoApi que sabemos que funciona
+                  const producto = await productoApi.getById(pp.id_producto);
+                  console.log(`Producto ${pp.id_producto} obtenido correctamente con nombre:`, producto.nombre);
+                  
+                  return { 
+                    ...pp, 
+                    nombre: producto.nombre || `Producto #${pp.id_producto}`,
+                    subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
+                  };
+                } catch (err) {
+                  console.error(`Error al obtener producto ${pp.id_producto}:`, err);
+                  return { 
+                    ...pp, 
+                    nombre: `Producto #${pp.id_producto}`,
+                    subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
+                  };
+                }
+              })
+            );
+            
+            // Calculamos el total sumando los subtotales
+            const total = productosConDetalles.reduce(
+              (acc, curr) => acc + (curr.subtotal || curr.precio_unitario * curr.cantidad), 
+              0
+            );
+            console.log(`Total calculado para pedido ${idPedido}:`, total);
+            
+            // Obtenemos los datos del cliente
             const clienteResponse = await apiFast.get(`/clientes/${pedido.id_cliente}`);
             const cliente = clienteResponse.data as Cliente;
-            return {
+            
+            const pedidoConDetalles = {
               ...pedido,
-              total: 0, // El total se calculará en el backend
+              total: total || 0,
+              productos: productosConDetalles,
               cliente
             };
+            
+            console.log(`Pedido ${idPedido} procesado:`, pedidoConDetalles);
+            return pedidoConDetalles;
           })
         );
+        
         setPedidos(pedidosConDetalles);
+        console.log('Todos los pedidos procesados:', pedidosConDetalles);
 
         // Obtener total de clientes
         const clientesResponse = await apiFast.get('/clientes');
         const totalClientes = clientesResponse.data.length;
 
         // Calcular estadísticas básicas
-        const ventasTotales = pedidosConDetalles.reduce((sum, pedido) => sum + pedido.total, 0);
+        const ventasTotales = pedidosConDetalles.reduce((sum, pedido) => sum + (pedido.total || 0), 0);
         const ordenesPendientes = pedidosConDetalles.filter(
           pedido => pedido.id_estado_envio === 2
         ).length;
 
         setEstadisticas({
+          ventas_totales: ventasTotales,
+          total_clientes: totalClientes,
+          ordenes_pendientes: ordenesPendientes
+        });
+        
+        console.log('Estadísticas calculadas:', {
           ventas_totales: ventasTotales,
           total_clientes: totalClientes,
           ordenes_pendientes: ordenesPendientes
@@ -510,6 +580,7 @@ export default function AdminDashboard() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Productos</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Pago</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Envío</th>
@@ -535,6 +606,22 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {new Date(pedido.fecha).toLocaleDateString('es-CL')}
                       </td>
+                      <td className="px-6 py-4 text-sm">
+                        {pedido.productos && pedido.productos.length > 0 ? (
+                          <div className="max-h-32 overflow-y-auto">
+                            <ul className="space-y-1">
+                              {pedido.productos.map(producto => (
+                                <li key={producto.id_producto} className="text-xs flex justify-between">
+                                  <span className="font-medium">{producto.nombre} x{producto.cantidad}</span>
+                                  <span className="text-gray-500 ml-2">{formatCurrency(producto.subtotal || 0)}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 italic">Sin productos</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {formatCurrency(pedido.total)}
                       </td>
@@ -555,19 +642,15 @@ export default function AdminDashboard() {
                             ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
                             : estado.color === 'blue'
                             ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                            : estado.color === 'purple'
+                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
                         }`}>
                           {estado.texto}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          pedido.medio_pago_id === 1 || pedido.medio_pago_id === 2
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
-                        }`}>
-                          {mediosPago[pedido.medio_pago_id] || "Desconocido"}
-                        </span>
+                        {mediosPago[pedido.medio_pago_id] || "Desconocido"}
                       </td>
                     </tr>
                   );

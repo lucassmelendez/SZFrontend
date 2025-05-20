@@ -122,18 +122,30 @@ export default function EmpleadosPage() {
       // Preparar los datos para la actualización
       const updateFields: Record<string, any> = {};
       
-      // Solo incluir campos que realmente han cambiado
-      if (updatedData.nombre !== selectedEmpleado.nombre) updateFields.nombre = updatedData.nombre;
-      if (updatedData.apellido !== selectedEmpleado.apellido) updateFields.apellido = updatedData.apellido;
-      if (updatedData.correo !== selectedEmpleado.correo) updateFields.correo = updatedData.correo;
-      if (updatedData.direccion !== selectedEmpleado.direccion) updateFields.direccion = updatedData.direccion;
-      if (updatedData.telefono !== selectedEmpleado.telefono) updateFields.telefono = updatedData.telefono;
-      if (updatedData.rol_id !== selectedEmpleado.rol_id) updateFields.rol_id = updatedData.rol_id;
-      if (updatedData.rut !== selectedEmpleado.rut) updateFields.rut = updatedData.rut;
+      // Solo incluir campos que realmente han cambiado y no estén vacíos
+      if (updatedData.nombre && updatedData.nombre !== selectedEmpleado.nombre) 
+        updateFields.nombre = updatedData.nombre;
+      if (updatedData.apellido && updatedData.apellido !== selectedEmpleado.apellido) 
+        updateFields.apellido = updatedData.apellido;
+      if (updatedData.correo && updatedData.correo !== selectedEmpleado.correo) 
+        updateFields.correo = updatedData.correo;
+      if (updatedData.direccion && updatedData.direccion !== selectedEmpleado.direccion) 
+        updateFields.direccion = updatedData.direccion;
+      if (updatedData.telefono && updatedData.telefono !== selectedEmpleado.telefono) 
+        updateFields.telefono = updatedData.telefono;
+      if (updatedData.rol_id && updatedData.rol_id !== selectedEmpleado.rol_id) 
+        updateFields.rol_id = updatedData.rol_id;
+      if (updatedData.rut && updatedData.rut !== selectedEmpleado.rut) 
+        updateFields.rut = updatedData.rut;
 
-      // Verificar si hay campos para actualizar
+      // Si no hay campos modificados, incluir al menos todos los campos requeridos
       if (Object.keys(updateFields).length === 0) {
-        throw new Error('No se han realizado cambios en los datos');
+        updateFields.nombre = updatedData.nombre;
+        updateFields.apellido = updatedData.apellido;
+        updateFields.correo = updatedData.correo;
+        updateFields.direccion = updatedData.direccion;
+        updateFields.telefono = updatedData.telefono;
+        updateFields.rol_id = updatedData.rol_id;
       }
 
       // Log the data being sent
@@ -141,6 +153,11 @@ export default function EmpleadosPage() {
         id: selectedEmpleado.id_empleado,
         data: updateFields
       });
+
+      // Asegurarse de que rol_id sea un número
+      if (updateFields.rol_id) {
+        updateFields.rol_id = Number(updateFields.rol_id);
+      }
 
       // Update the employee using the API
       const updatedEmpleado = await empleadoApiFast.update(selectedEmpleado.id_empleado, updateFields);
@@ -541,7 +558,20 @@ export default function EmpleadosPage() {
       {isEditModalOpen && selectedEmpleado && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-xl">
+            <button
+              onClick={() => setIsEditModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             <h2 className="text-xl font-bold mb-4 dark:text-gray-100">Editar Empleado</h2>
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
             <form onSubmit={async (e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
@@ -565,21 +595,53 @@ export default function EmpleadosPage() {
                 return;
               }
 
-              const updateData: EmpleadoBase = {
-                nombre: nombre.trim(),
-                apellido: apellido.trim(),
-                correo: correo.trim(),
-                direccion: direccion.trim(),
-                telefono: telefono.trim(),
-                rol_id,
-                rut: rut.trim()
-              };
-
+              // Enviar directamente al API, sin usar handleUpdate
               try {
-                await handleUpdate(updateData);
+                setError(null);
+                
+                const updateData = {
+                  nombre: nombre.trim(),
+                  apellido: apellido.trim(),
+                  correo: correo.trim(),
+                  direccion: direccion.trim(),
+                  telefono: telefono.trim(),
+                  rol_id: Number(rol_id),
+                  rut: rut.trim()
+                };
+                
+                // Log the data being sent
+                console.log('Datos a enviar:', {
+                  id: selectedEmpleado?.id_empleado,
+                  data: updateData
+                });
+                
+                const updatedEmpleado = await empleadoApiFast.update(
+                  selectedEmpleado.id_empleado,
+                  updateData
+                );
+                
+                // Log the response
+                console.log('Respuesta del servidor:', updatedEmpleado);
+
+                // Update local state
+                setEmpleados(prev => 
+                  prev.map(emp => emp.id_empleado === selectedEmpleado.id_empleado ? updatedEmpleado : emp)
+                );
+
+                // Close modal and clear selection
+                setIsEditModalOpen(false);
+                setSelectedEmpleado(null);
               } catch (err) {
-                // El error ya se maneja en handleUpdate
-                console.error('Error en el formulario:', err);
+                console.error('Error detallado:', err);
+                if (axios.isAxiosError(err)) {
+                  const axiosError = err as AxiosError<ApiErrorResponse>;
+                  const errorMessage = axiosError.response?.data?.detail || 
+                                     axiosError.response?.data?.message || 
+                                     'Error al actualizar el empleado';
+                  setError(errorMessage);
+                } else {
+                  setError('Error al actualizar el empleado');
+                }
               }
             }}>
               <div className="space-y-4">
@@ -588,7 +650,7 @@ export default function EmpleadosPage() {
                   <input
                     name="nombre"
                     defaultValue={selectedEmpleado.nombre}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
@@ -597,7 +659,7 @@ export default function EmpleadosPage() {
                   <input
                     name="apellido"
                     defaultValue={selectedEmpleado.apellido}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
@@ -606,7 +668,7 @@ export default function EmpleadosPage() {
                   <input
                     name="rut"
                     defaultValue={selectedEmpleado.rut}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                   />
                 </div>
                 <div>
@@ -615,7 +677,7 @@ export default function EmpleadosPage() {
                     name="correo"
                     type="email"
                     defaultValue={selectedEmpleado.correo}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
@@ -624,7 +686,7 @@ export default function EmpleadosPage() {
                   <input
                     name="direccion"
                     defaultValue={selectedEmpleado.direccion}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
@@ -633,19 +695,23 @@ export default function EmpleadosPage() {
                   <input
                     name="telefono"
                     defaultValue={selectedEmpleado.telefono}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Rol ID</label>
-                  <input
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
+                  <select
                     name="rol_id"
-                    type="number"
                     defaultValue={selectedEmpleado.rol_id}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
-                  />
+                  >
+                    <option value="2">Administrador</option>
+                    <option value="3">Vendedor</option>
+                    <option value="4">Bodeguero</option>
+                    <option value="5">Contador</option>
+                  </select>
                 </div>
               </div>
               <div className="mt-6 flex justify-end space-x-3">

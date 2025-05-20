@@ -518,11 +518,58 @@ export const empleadoApiFast = {
   
   update: async (id: number, empleado: Partial<Empleado>): Promise<Empleado> => {
     try {
-      const response = await apiFast.put(`/empleados/${id}`, empleado);
-      return response.data.empleado;
-    } catch (error) {
+      console.log(`Actualizando empleado ${id} con datos:`, empleado);
+      
+      // En lugar de enviar un objeto, enviamos los campos como parámetros URL
+      // para que coincida con la manera en que el backend espera recibirlos
+      const params = new URLSearchParams();
+      
+      if (empleado.nombre) params.append('nombre', empleado.nombre);
+      if (empleado.apellido) params.append('apellido', empleado.apellido);
+      if (empleado.correo) params.append('correo', empleado.correo);
+      if (empleado.direccion) params.append('direccion', empleado.direccion);
+      if (empleado.telefono) params.append('telefono', String(empleado.telefono));
+      if (empleado.rol_id) params.append('rol_id', String(empleado.rol_id));
+      if (empleado.rut) params.append('rut', empleado.rut);
+      
+      console.log('Parámetros a enviar:', params.toString());
+      
+      // Hacer la petición PUT al servidor con los parámetros en la URL
+      const response = await apiFast.put(`/empleados/${id}?${params.toString()}`);
+      
+      if (response.data && response.data.empleado) {
+        console.log('Respuesta exitosa:', response.data);
+        return response.data.empleado;
+      }
+      
+      throw new Error(`Respuesta inesperada: ${JSON.stringify(response.data)}`);
+    } catch (error: any) {
       console.error(`Error al actualizar empleado ${id} en FastAPI:`, error);
-      throw error;
+      
+      let mensajeError = error.message || 'Error desconocido';
+      
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 400) {
+          mensajeError = `Error 400: ${data?.detail || 'Datos inválidos'}`;
+        } else if (status === 404) {
+          mensajeError = `Error 404: No se encontró el empleado con ID ${id}`;
+        } else if (status === 422) {
+          if (Array.isArray(data?.detail)) {
+            mensajeError = `Error de validación: ${data.detail.map((item: any) => item.msg).join(', ')}`;
+          } else {
+            mensajeError = `Error de validación: ${data?.detail || 'Formato incorrecto'}`;
+          }
+        } else {
+          mensajeError = `Error ${status}: ${data?.detail || error.message}`;
+        }
+        
+        console.error(`Detalles del error HTTP (${status}):`, data);
+      }
+      
+      throw new Error(mensajeError);
     }
   },
   

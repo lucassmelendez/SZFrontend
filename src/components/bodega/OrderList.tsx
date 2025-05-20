@@ -67,9 +67,10 @@ export default function OrderList() {
 
             // Mapeo de estados
             const estadosEnvio = {
-              1: "Enviado",
+              1: "Preparado",
               2: "Pendiente",
-              3: "Recibido"
+              3: "Entregado",
+              4: "Despachado"
             };
 
             const mediosPago = {
@@ -226,7 +227,11 @@ export default function OrderList() {
                     ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                     : order.id_estado_envio === 2
                     ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                    : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                    : order.id_estado_envio === 3
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                    : order.id_estado_envio === 4
+                    ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
                 }`}>
                   {order.estado_envio}
                 </span>
@@ -332,7 +337,11 @@ export default function OrderList() {
                       ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                       : order.id_estado_envio === 2
                       ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                      : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                      : order.id_estado_envio === 3
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : order.id_estado_envio === 4
+                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
                   }`}>
                     {order.estado_envio}
                   </span>
