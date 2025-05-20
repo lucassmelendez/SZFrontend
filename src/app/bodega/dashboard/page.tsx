@@ -123,9 +123,9 @@ export default function BodegaDashboard() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Panel de Bodega</h1>
       
-      {/* Statistics Cards */}
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        {/* Total products card */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center">
             <span className="text-gray-600 dark:text-gray-300">Total de productos</span>
@@ -133,7 +133,7 @@ export default function BodegaDashboard() {
           </div>
         </div>
         
-        {/* Low stock products card */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center">
             <span className="text-gray-600 dark:text-gray-300">Productos bajo stock</span>
@@ -141,27 +141,27 @@ export default function BodegaDashboard() {
           </div>
         </div>
         
-        {/* Out of stock products card */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center">
             <span className="text-gray-600 dark:text-gray-300">Productos sin stock</span>
             <span className="font-bold text-red-500">{sinStock}</span>
           </div>
         </div>
-      </div>      {/* Order Management Panel */}
+      </div>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Órdenes Pendientes</h2>
         <OrderList />
       </div>
 
-      {/* Error Display */}
+      
       {error && (
         <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-8">
           {error}
         </div>
       )}
 
-      {/* Stock Management Panel */}
+      
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Gestión de Stock</h2>
