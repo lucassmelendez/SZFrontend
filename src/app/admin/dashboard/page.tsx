@@ -332,27 +332,16 @@ export default function AdminDashboard() {
           </div>
         </div>
         
-        {/* Gestión de Productos */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Gestión de Productos</h2>
-          <div className="space-y-2">            <button 
-              onClick={() => router.push('/admin/inventario')}
-              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
-              Ver inventario
-            </button>
-            <button className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
-              Añadir producto
-            </button>
-            <button className="w-full py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-md transition-colors">
-              Actualizar precios
-            </button>
-          </div>
-        </div>
-        
         {/* Gestión de Usuarios */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Gestión de Usuarios</h2>
           <div className="space-y-2">
+            <button
+              onClick={() => router.push('/admin/empleados')}
+              className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors"
+            >
+              Gestionar empleados
+            </button>
             <button
               onClick={() => router.push('/admin/clientes')}
               className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
@@ -360,10 +349,10 @@ export default function AdminDashboard() {
               Ver clientes
             </button>
             <button
-              onClick={() => router.push('/admin/empleados')}
-              className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors"
+              onClick={() => router.push('/admin/inventario')}
+              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
             >
-              Ver empleados
+              Ver inventario
             </button>
           </div>
         </div>
