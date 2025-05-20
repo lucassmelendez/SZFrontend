@@ -437,13 +437,82 @@ export const empleadoApiFast = {
     }
   },
   
-  create: async (empleado: Omit<Empleado, 'id_empleado'>): Promise<Empleado> => {
+  create: async (empleado: any): Promise<Empleado> => {
     try {
-      const response = await apiFast.post('/empleados', empleado);
+      // Log de los datos recibidos
+      console.log('Datos del empleado a crear:', empleado);
+
+      // Asegurarse de que los campos requeridos estén presentes
+      if (!empleado.nombre || !empleado.apellido || !empleado.correo || 
+          !empleado.rut || !empleado.contrasena || !empleado.rol_id) {
+        throw new Error('Faltan campos requeridos');
+      }
+
+      // Formatear el RUT (eliminar espacios y asegurar que tiene guión)
+      let rutFormateado = empleado.rut.trim().replace(/\s/g, '');
+      // Si el RUT no tiene guión y tiene al menos 7 caracteres, insertamos el guión
+      if (!rutFormateado.includes('-') && rutFormateado.length >= 7) {
+        rutFormateado = rutFormateado.slice(0, -1) + '-' + rutFormateado.slice(-1);
+      }
+
+      // Preparar los datos con exactamente los mismos nombres de campo que espera el backend
+      const datosEmpleado = {
+        nombre: empleado.nombre.trim(),
+        apellido: empleado.apellido.trim(),
+        correo: empleado.correo.trim(),
+        rut: rutFormateado,
+        contrasena: empleado.contrasena,
+        rol_id: Number(empleado.rol_id),
+        direccion: empleado.direccion?.trim() || 'N/A',
+        telefono: empleado.telefono?.trim() || 'N/A'
+      };
+
+      console.log('Datos a enviar:', datosEmpleado);
+
+      // Enviar simplemente como JSON, siguiendo el mismo patrón del endpoint de clientes
+      const response = await apiFast.post('/empleados', datosEmpleado);
+      
+      if (!response.data || !response.data.empleado) {
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      console.log('Respuesta exitosa del servidor:', response.data);
       return response.data.empleado;
-    } catch (error) {
-      console.error('Error al crear empleado en FastAPI:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Error detallado al crear empleado:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers,
+        message: error.message
+      });
+
+      // Mejorar el mensaje de error para el usuario
+      if (error.response?.status === 422) {
+        try {
+          const detailMessage = error.response.data?.detail;
+          if (Array.isArray(detailMessage)) {
+            // FastAPI suele enviar un array de errores de validación
+            const errorMessages = detailMessage.map(item => 
+              `Campo '${item.loc[1]}': ${item.msg}`
+            ).join(', ');
+            throw new Error(`Error de validación: ${errorMessages}`);
+          } else if (typeof detailMessage === 'string') {
+            throw new Error(detailMessage);
+          } else if (typeof error.response.data === 'object') {
+            // Intentar extraer mensaje de error de otras estructuras posibles
+            throw new Error(JSON.stringify(error.response.data));
+          }
+        } catch (parseError) {
+          console.error('Error al parsear mensaje de error:', parseError);
+        }
+        
+        // Si no podemos extraer detalles específicos
+        throw new Error(`Error de validación (422): ${error.response?.data?.detail || 'Verifica el formato de los datos'}`);
+      }
+      
+      // Para otros tipos de errores
+      throw new Error(`Error al crear empleado: ${error.message || 'Error desconocido'}`);
     }
   },
   

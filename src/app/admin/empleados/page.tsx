@@ -188,33 +188,98 @@ export default function EmpleadosPage() {
     setError(null);
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
-    const formValues = {
-      nombre: formData.get('nombre') as string,
-      apellido: formData.get('apellido') as string,
-      correo: formData.get('correo') as string,
-      contrasena: formData.get('contrasena') as string,
-      direccion: formData.get('direccion') as string,
-      telefono: formData.get('telefono') as string,
-      rol_id: parseInt(formData.get('rol_id') as string),
-      rut: formData.get('rut') as string || ''
-    };
-
     try {
-      const nuevoEmpleado = await empleadoApiFast.create(formValues);
-      setEmpleados(prev => [...prev, nuevoEmpleado]);
-      setIsAddModalOpen(false);
-      setError(null);
-      setFieldErrors({});
-    } catch (err) {
-      console.error('Error al crear empleado:', err);
-      if (axios.isAxiosError(err)) {
-        const axiosError = err as AxiosError<ApiErrorResponse>;
-        setError(axiosError.response?.data?.detail || 'Error al crear el empleado');
-      } else {
-        setError('Error inesperado al crear el empleado');
+      // Obtener los valores directamente de los inputs
+      const target = e.currentTarget;
+      const formValues = {
+        nombre: String(target.nombre.value).trim(),
+        apellido: String(target.apellido.value).trim(),
+        rut: String(target.rut.value).trim(),
+        correo: String(target.correo.value).trim(),
+        contrasena: String(target.contrasena.value),
+        direccion: String(target.direccion.value).trim() || 'N/A',
+        telefono: String(target.telefono.value).trim() || 'N/A',
+        rol_id: Number(target.rol_id.value)
+      };
+
+      // Validación básica
+      if (!formValues.nombre || !formValues.apellido || !formValues.rut || 
+          !formValues.correo || !formValues.contrasena || !formValues.rol_id) {
+        setError('Todos los campos marcados con * son obligatorios');
+        setIsSubmitting(false);
+        return;
       }
-    } finally {
+
+      // Validar formato de correo
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formValues.correo)) {
+        setError('El formato del correo electrónico no es válido');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Formateo de RUT (similar al backend)
+      let rutFormateado = formValues.rut.replace(/\s/g, '').replace(/\./g, '');
+      // Si el RUT no tiene guión y tiene al menos 2 caracteres, insertamos el guión
+      if (!rutFormateado.includes('-') && rutFormateado.length >= 2) {
+        rutFormateado = rutFormateado.slice(0, -1) + '-' + rutFormateado.slice(-1);
+      }
+      
+      // Validar formato de RUT después de formatear (formato básico: xxxxxxxx-x)
+      const rutRegex = /^\d{7,8}-[\dkK]$/;
+      if (!rutRegex.test(rutFormateado)) {
+        setError('El formato del RUT no es válido (ejemplo: 12345678-9)');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validar rol_id
+      if (![2, 3, 4, 5].includes(formValues.rol_id)) {
+        setError('El rol seleccionado no es válido');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Log de los datos que se van a enviar
+      console.log('Datos del empleado a crear:', {
+        ...formValues,
+        rut: rutFormateado // Usar el RUT formateado
+      });
+
+      // Crear el empleado usando la API
+      const nuevoEmpleado = await empleadoApiFast.create({
+        ...formValues,
+        rut: rutFormateado, // Usar el RUT formateado
+        direccion: formValues.direccion === '' ? 'N/A' : formValues.direccion,
+        telefono: formValues.telefono === '' ? 'N/A' : formValues.telefono
+      });
+
+      console.log('Empleado creado:', nuevoEmpleado);
+      setIsAddModalOpen(false);
+      
+      // Mostrar mensaje de éxito
+      alert('Empleado creado con éxito');
+      
+      // Recargar la página para mostrar el nuevo empleado
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error detallado al crear empleado:', error);
+      
+      let mensajeError = 'Error al crear el empleado';
+      
+      // Extraer mensaje de error detallado si existe
+      if (error.message) {
+        mensajeError = error.message;
+      }
+      
+      // Si es un error de validación (422) o conflicto (409), mostrar el detalle
+      if (error.response) {
+        if (error.response.data && error.response.data.detail) {
+          mensajeError = error.response.data.detail;
+        }
+      }
+      
+      setError(mensajeError);
       setIsSubmitting(false);
     }
   };
