@@ -455,7 +455,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => router.push('/admin/inventario')}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors flex items-center justify-center gap-2"
             >
               <FiPackage className="w-5 h-5" />
               Ver inventario
