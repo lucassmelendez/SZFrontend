@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { empleadoApiFast, apiFast } from '@/lib/api';
-import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosError } from 'axios';
 
@@ -45,7 +45,11 @@ export default function EmpleadosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedEmpleado, setSelectedEmpleado] = useState<Empleado | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   useEffect(() => {
     const fetchEmpleados = async () => {
       try {
@@ -165,6 +169,42 @@ export default function EmpleadosPage() {
     }
   };
 
+  const handleCreateEmpleado = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.currentTarget);
+    const formValues = {
+      nombre: formData.get('nombre') as string,
+      apellido: formData.get('apellido') as string,
+      correo: formData.get('correo') as string,
+      contrasena: formData.get('contrasena') as string,
+      direccion: formData.get('direccion') as string,
+      telefono: formData.get('telefono') as string,
+      rol_id: parseInt(formData.get('rol_id') as string),
+      rut: formData.get('rut') as string || ''
+    };
+
+    try {
+      const nuevoEmpleado = await empleadoApiFast.create(formValues);
+      setEmpleados(prev => [...prev, nuevoEmpleado]);
+      setIsAddModalOpen(false);
+      setError(null);
+      setFieldErrors({});
+    } catch (err) {
+      console.error('Error al crear empleado:', err);
+      if (axios.isAxiosError(err)) {
+        const axiosError = err as AxiosError<ApiErrorResponse>;
+        setError(axiosError.response?.data?.detail || 'Error al crear el empleado');
+      } else {
+        setError('Error inesperado al crear el empleado');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Cargando...</div>;
   }
@@ -187,12 +227,21 @@ export default function EmpleadosPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestión de Empleados</h1>
-        <button 
-          onClick={() => router.back()}
-          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
-        >
-          Volver
-        </button>
+        <div className="flex gap-4">
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
+          >
+            <FiPlus className="w-5 h-5" />
+            Añadir Empleado
+          </button>
+          <button 
+            onClick={() => router.back()}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+          >
+            Volver
+          </button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
@@ -244,6 +293,129 @@ export default function EmpleadosPage() {
           </table>
         </div>
       </div>
+
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">Agregar Nuevo Empleado</h2>
+            <form onSubmit={handleCreateEmpleado} className="space-y-4">
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <span className="block sm:inline">{error}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+                <input
+                  type="text"
+                  name="nombre"
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Apellido</label>
+                <input
+                  type="text"
+                  name="apellido"
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">RUT (opcional)</label>
+                <input
+                  type="text"
+                  name="rut"
+                  placeholder="12345678-9"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo</label>
+                <input
+                  type="email"
+                  name="correo"
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña</label>
+                <input
+                  type="password"
+                  name="contrasena"
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
+                <input
+                  type="text"
+                  name="direccion"
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+                <input
+                  type="tel"
+                  name="telefono"
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
+                <select
+                  name="rol_id"
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                >
+                  <option value="">Seleccione un rol</option>
+                  <option value="1">Empleado Regular</option>
+                  <option value="2">Administrador</option>
+                  <option value="3">Bodeguero</option>
+                  <option value="4">Contador</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    setError(null);
+                    setFieldErrors({});
+                  }}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition-colors ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isSubmitting ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {isEditModalOpen && selectedEmpleado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">

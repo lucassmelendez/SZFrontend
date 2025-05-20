@@ -365,12 +365,6 @@ export default function AdminDashboard() {
             >
               Ver empleados
             </button>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="w-full py-2 px-4 bg-pink-600 hover:bg-pink-700 text-white rounded-md transition-colors"
-            >
-              Añadir empleado
-            </button>
           </div>
         </div>
       </div>
