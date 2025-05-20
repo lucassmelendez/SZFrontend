@@ -3,7 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, empleadoApiFast, apiFast, pedidoApiFast, Pedido, pedidoProductoApiFast } from '@/lib/api';
+import { 
+  isEmpleado, 
+  empleadoApiFast, 
+  apiFast, 
+  pedidoApiFast, 
+  pedidoProductoApiFast, 
+  Pedido,
+  productoApi
+} from '@/lib/api';
 import { AxiosError } from 'axios';
 import { FiUsers, FiPackage, FiShoppingCart } from 'react-icons/fi';
 
@@ -146,8 +154,32 @@ export default function AdminDashboard() {
             const pedidoProductos = await pedidoProductoApiFast.getByPedido(idPedido);
             console.log(`Productos obtenidos para pedido ${idPedido}:`, pedidoProductos);
             
-            // Calculamos el total sumando los subtotales de cada producto
-            const total = pedidoProductos.reduce(
+            // Obtener información de productos utilizando productoApi (NO apiFast)
+            const productosConDetalles = await Promise.all(
+              pedidoProductos.map(async (pp) => {
+                try {
+                  // Usar productoApi que sabemos que funciona
+                  const producto = await productoApi.getById(pp.id_producto);
+                  console.log(`Producto ${pp.id_producto} obtenido correctamente con nombre:`, producto.nombre);
+                  
+                  return { 
+                    ...pp, 
+                    nombre: producto.nombre || `Producto #${pp.id_producto}`,
+                    subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
+                  };
+                } catch (err) {
+                  console.error(`Error al obtener producto ${pp.id_producto}:`, err);
+                  return { 
+                    ...pp, 
+                    nombre: `Producto #${pp.id_producto}`,
+                    subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
+                  };
+                }
+              })
+            );
+            
+            // Calculamos el total sumando los subtotales
+            const total = productosConDetalles.reduce(
               (acc, curr) => acc + (curr.subtotal || curr.precio_unitario * curr.cantidad), 
               0
             );
@@ -157,34 +189,10 @@ export default function AdminDashboard() {
             const clienteResponse = await apiFast.get(`/clientes/${pedido.id_cliente}`);
             const cliente = clienteResponse.data as Cliente;
             
-            // Obtenemos nombres de productos para mostrar en el detalle
-            const productosConNombres = await Promise.all(
-              pedidoProductos.map(async (pp) => {
-                try {
-                  const productoResponse = await apiFast.get(`/productos/${pp.id_producto}`);
-                  const productoData = productoResponse.data;
-                  console.log(`Producto ${pp.id_producto} obtenido:`, productoData);
-                  
-                  return { 
-                    ...pp, 
-                    nombre: productoData.nombre || 'Producto desconocido',
-                    subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
-                  };
-                } catch (err) {
-                  console.error(`Error al obtener producto ${pp.id_producto}:`, err);
-                  return { 
-                    ...pp, 
-                    nombre: 'Producto desconocido',
-                    subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
-                  };
-                }
-              })
-            );
-            
             const pedidoConDetalles = {
               ...pedido,
               total: total || 0,
-              productos: productosConNombres,
+              productos: productosConDetalles,
               cliente
             };
             
