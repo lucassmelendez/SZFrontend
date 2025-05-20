@@ -242,7 +242,7 @@ export default function AdminClientes() {
                           ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                           : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
                       }`}>
-                        {cliente.id_rol === 1 ? 'Cliente Regular' : 'Cliente VIP'}
+                        {cliente.id_rol === 1 ? 'Cliente' : 'Cliente VIP'}
                       </span>
                     </td>
                   </tr>
