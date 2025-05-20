@@ -13,7 +13,7 @@ import {
   productoApi
 } from '@/lib/api';
 import { AxiosError } from 'axios';
-import { FiUsers, FiPackage, FiShoppingCart } from 'react-icons/fi';
+import { FiUsers, FiPackage, FiShoppingCart, FiDownload } from 'react-icons/fi';
 
 interface ApiErrorResponse {
   detail?: string | Array<{
@@ -490,6 +490,86 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const generateFinancialReport = () => {
+    // Crear un archivo CSV que se pueda abrir con Excel
+    const fecha = new Date().toLocaleDateString('es-CL');
+    const hora = new Date().toLocaleTimeString('es-CL');
+    
+    // Encabezados del CSV
+    let csvContent = 'INFORME FINANCIERO - SPINZONE\n';
+    csvContent += 'Generado el:,' + fecha + ' ' + hora + '\n\n';
+    
+    // Sección de resumen
+    csvContent += 'RESUMEN DE VENTAS\n';
+    csvContent += 'Concepto,Valor\n';
+    csvContent += 'Ventas totales,' + estadisticas.ventas_totales + '\n';
+    csvContent += 'Total de clientes,' + estadisticas.total_clientes + '\n';
+    csvContent += 'Órdenes pendientes,' + estadisticas.ordenes_pendientes + '\n\n';
+    
+    // Sección de pedidos
+    csvContent += 'DETALLE DE PEDIDOS RECIENTES\n';
+    csvContent += 'ID Pedido,Cliente,Correo,Fecha,Estado Pago,Estado Envío,Medio de Pago,Monto Total\n';
+    
+    // Detalles de los pedidos
+    pedidos
+      .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
+      .forEach((pedido) => {
+        const fechaPedido = new Date(pedido.fecha).toLocaleDateString('es-CL');
+        csvContent += `${pedido.id_pedido || ''},`;
+        csvContent += `"${pedido.cliente.nombre} ${pedido.cliente.apellido}",`;
+        csvContent += `${pedido.cliente.correo},`;
+        csvContent += `${fechaPedido},`;
+        csvContent += `${getEstadoPago(pedido.id_estado).texto},`;
+        csvContent += `${getEstadoPedido(pedido.id_estado, pedido.id_estado_envio).texto},`;
+        csvContent += `${mediosPago[pedido.medio_pago_id] || "Desconocido"},`;
+        csvContent += `${pedido.total}\n`;
+      });
+    
+    // Agregar una sección de productos
+    csvContent += '\nDETALLE DE PRODUCTOS POR PEDIDO\n';
+    csvContent += 'ID Pedido,Producto,Cantidad,Precio Unitario,Subtotal\n';
+    
+    // Detalles de productos por pedido
+    pedidos
+      .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
+      .forEach((pedido) => {
+        pedido.productos.forEach(producto => {
+          csvContent += `${pedido.id_pedido || ''},`;
+          csvContent += `"${producto.nombre}",`;
+          csvContent += `${producto.cantidad},`;
+          csvContent += `${producto.precio_unitario},`;
+          csvContent += `${producto.subtotal || producto.precio_unitario * producto.cantidad}\n`;
+        });
+      });
+
+    // Función para manejar caracteres especiales en CSV
+    const escapeCSV = (text: string | number | undefined): string | number | undefined => {
+      if (typeof text !== 'string') return text;
+      // Si contiene comas, comillas o saltos de línea, envolver en comillas
+      if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    };
+    
+    // Crear el blob con el contenido CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    // Crear un enlace para descargar
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `informe_financiero_spinzone_${fecha.replace(/\//g, '-')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Limpiar
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Panel de Administración</h1>
@@ -520,6 +600,13 @@ export default function AdminDashboard() {
                 <span className="font-bold text-amber-600 dark:text-amber-400">{estadisticas.ordenes_pendientes}</span>
               </div>
             </div>
+            <button
+              onClick={generateFinancialReport}
+              className="mt-4 w-full bg-purple-600 hover:bg-purple-700 transition-colors text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2"
+            >
+              <FiDownload className="text-white" />
+              <span>Descargar Informe Financiero</span>
+            </button>
           </div>
         </div>
         
