@@ -106,7 +106,7 @@ export default function ContabilidadDashboard() {
                 correo: clienteData.correo,
                 nombre: clienteData.nombre,
                 apellido: clienteData.apellido,
-                telefono: String(clienteData.telefono), // Convert to string
+                telefono: String(clienteData.telefono),
                 direccion: clienteData.direccion
               } : undefined
             };
@@ -181,7 +181,6 @@ export default function ContabilidadDashboard() {
         </div>
       )}
 
-      {/* Filtros y búsqueda */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex gap-4">
@@ -310,7 +309,6 @@ export default function ContabilidadDashboard() {
                     </p>
                   </div>
 
-                  {/* Acciones */}
                   <div className="flex flex-col justify-center items-center gap-2">
                     {order.medio_pago_id === 1 && order.id_estado !== 1 && (
                       <button
