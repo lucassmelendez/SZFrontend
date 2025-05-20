@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useRouter } from 'next/navigation';
-import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle, FaBoxOpen } from 'react-icons/fa';
 import Link from 'next/link';
-import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast } from '@/lib/api';
+import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast, pedidoApiFast } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 // Interfaz para los pedidos
@@ -118,10 +118,6 @@ export default function PerfilPage() {
     }
   };
 
-  if (!user) {
-    return null;
-  }
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -170,6 +166,17 @@ export default function PerfilPage() {
       setError(error.response?.data?.message || 'Error al actualizar el perfil');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleConfirmarRecepcion = async (pedidoId: number) => {
+    try {
+      await pedidoApiFast.updateEstadoEnvio(pedidoId, 3);
+      // Recargar los pedidos después de actualizar
+      cargarPedidos();
+    } catch (error) {
+      console.error('Error al confirmar recepción:', error);
+      setError('Error al confirmar la recepción del pedido');
     }
   };
 
@@ -445,16 +452,13 @@ export default function PerfilPage() {
   // Función para renderizar pedidos según el estado seleccionado
   const renderPedidosPorEstado = (estado: string) => {
     const pedidosFiltrados = pedidos.filter(pedido => pedido.estado === estado);
-    const estadoLabel = estado === 'En proceso' ? 'en proceso' : 
-                      estado === 'Entregado' ? 'entregados' : 'cancelados';
+    const estadoLabel = estado === 'En proceso' ? 'en proceso' : 'entregados';
     
     // Colores según estado
-    const statusColor = estado === 'En proceso' ? 'yellow' : 
-                      estado === 'Entregado' ? 'green' : 'red';
+    const statusColor = estado === 'En proceso' ? 'yellow' : 'green';
                       
     // Iconos según estado
-    const StatusIcon = estado === 'En proceso' ? FaTruck : 
-                      estado === 'Entregado' ? FaCheckCircle : FaTimesCircle;
+    const StatusIcon = estado === 'En proceso' ? FaTruck : FaCheckCircle;
     
     return (
       <div className="space-y-6">
@@ -482,8 +486,7 @@ export default function PerfilPage() {
             </h3>
             <p className="mt-1 text-gray-500 dark:text-gray-400">
               {estado === 'En proceso' ? 'Tus pedidos en proceso aparecerán aquí' : 
-               estado === 'Entregado' ? 'Tus pedidos entregados aparecerán aquí' : 
-               'Tus pedidos cancelados aparecerán aquí'}
+               'Tus pedidos entregados aparecerán aquí'}
             </p>
           </div>
         ) : (
@@ -547,9 +550,20 @@ export default function PerfilPage() {
                       <FaMoneyBillWave className="mr-2 text-green-600 dark:text-green-400" />
                       <span className="font-medium">Total del pedido</span>
                     </div>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">
-                      ${pedido.total.toLocaleString('es-CL')}
-                    </p>
+                    <div className="flex items-center space-x-4">
+                      {pedido.id_estado_envio === 1 && (
+                        <button
+                          onClick={() => handleConfirmarRecepcion(pedido.id_pedido!)}
+                          className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                        >
+                          <FaBoxOpen className="mr-2" />
+                          Confirmar Recepción
+                        </button>
+                      )}
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        ${pedido.total.toLocaleString('es-CL')}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
