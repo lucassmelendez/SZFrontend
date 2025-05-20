@@ -86,6 +86,13 @@ export interface Pedido {
   id_estado_envio: number;
   id_estado: number;
   id_cliente: number;
+  cliente?: {
+    correo: string;
+    nombre: string;
+    apellido: string;
+    telefono: string;
+    direccion: string;
+  };
 }
 
 export interface PedidoProducto {
@@ -605,7 +612,7 @@ export const pedidoApiFast = {
   },
   updateEstadoEnvio: async (id: number, idEstadoEnvio: number): Promise<Pedido> => {
     try {
-      const response = await apiFast.patch(`/pedidos/${id}/estado-envio`, { estado_envio: idEstadoEnvio });
+      const response = await apiFast.patch(`/pedidos/${id}/estado-envio`, idEstadoEnvio);
       return response.data.pedido;
     } catch (error) {
       console.error(`Error al actualizar estado de envío del pedido ${id} en FastAPI:`, error);
