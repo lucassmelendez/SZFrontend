@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { isEmpleado, productoApi, Producto, api } from '@/lib/api';
+import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiArrowLeft } from 'react-icons/fi';
 
 const categoriasMap: { [key: string]: string } = {
   '1': 'Paletas',
@@ -137,27 +138,32 @@ export default function AdminInventario() {
         <h1 className="text-3xl font-bold">Inventario</h1>
         <button 
           onClick={() => router.push('/admin/dashboard')}
-          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors"
+          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
         >
+          <FiArrowLeft className="w-5 h-5" />
           Volver
         </button>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="p-4">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <div className="relative flex-1">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar producto..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
               />
+            </div>
+            <div className="relative flex-1">
+              <FiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <select 
                 value={categoriaSeleccionada}
                 onChange={handleCategoriaChange}
-                className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
               >
                 <option value="">Todas las categorías</option>
                 {Object.entries(categoriasMap).map(([id, nombre]) => (
@@ -167,215 +173,86 @@ export default function AdminInventario() {
             </div>
           </div>
 
-          <div className="overflow-x-auto ring-1 ring-gray-200 dark:ring-gray-700 rounded-lg">
+          <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-700">
-                  <th className="group px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <span>ID</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="group px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <span>Producto</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="group px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <span>Descripción</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="group px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <span>Marca</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="group px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <span>Categoría</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="group px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <span>Peso (kg)</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="group px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <span>Stock</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="group px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <span>Precio</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Acciones
-                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Descripción</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Marca</th>
+                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
+                  <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peso</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Precio</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={9} className="px-6 py-8 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Cargando productos...</p>
-                      </div>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {productos.map((producto) => (
+                  <tr key={producto.id_producto} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">#{producto.id_producto}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <div className="font-medium">{producto.nombre}</div>
+                      <div className="text-xs text-gray-500 md:hidden">{producto.descripcion}</div>
                     </td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td colSpan={9} className="px-6 py-8 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="text-red-500 dark:text-red-400 mb-2">
-                          <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                        </div>
-                        <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
-                        <button 
-                          onClick={() => {
-                            setSearchTerm('');
-                            setCategoriaSeleccionada('');
-                            setPagina(1);
-                          }}
-                          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                        >
-                          Reintentar
-                        </button>
-                      </div>
+                    <td className="hidden md:table-cell px-4 py-3 text-sm text-gray-500">{producto.descripcion}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">{producto.marca}</td>
+                    <td className="hidden sm:table-cell px-4 py-3 whitespace-nowrap text-sm">{categoriasMap[producto.categoria_id]}</td>
+                    <td className="hidden lg:table-cell px-4 py-3 whitespace-nowrap text-sm">{producto.peso} kg</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        producto.stock > 10 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          : producto.stock > 0
+                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        {producto.stock}
+                      </span>
                     </td>
-                  </tr>
-                ) : productos.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="px-6 py-8 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="text-gray-400 dark:text-gray-500 mb-2">
-                          <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                          </svg>
-                        </div>
-                        <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No se encontraron productos</p>
-                        <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Intenta con otros criterios de búsqueda</p>
-                      </div>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      ${producto.precio.toLocaleString('es-CL')}
                     </td>
-                  </tr>
-                ) : (
-                  productos.map((producto) => (
-                    <tr 
-                      key={producto.id_producto} 
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        PRD-{producto.id_producto.toString().padStart(4, '0')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 font-medium">
-                        {producto.nombre}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        {producto.descripcion}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                        {producto.marca}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                          {categoriasMap[String(producto.categoria_id)] || 'Sin categoría'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                        {producto.peso}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 text-sm rounded-full ${
-                          producto.stock > 10
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                            : producto.stock > 0
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                        }`}>
-                          {producto.stock}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        ${producto.precio.toLocaleString('es-CL')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        <button 
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <div className="flex items-center gap-2">
+                        <button
                           onClick={() => handleEditarProducto(producto.id_producto)}
-                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                         >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
+                          <FiEdit2 className="w-5 h-5" />
                         </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                        <button
+                          onClick={() => handleEliminarProducto(producto.id_producto)}
+                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <FiTrash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          <div className="mt-4 flex justify-between items-center">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Mostrando {((pagina - 1) * productosPorPagina) + 1}-{Math.min(pagina * productosPorPagina, totalProductos)} de {totalProductos} productos
+          {/* Paginación */}
+          <div className="flex justify-between items-center mt-4">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              Mostrando {((pagina - 1) * productosPorPagina) + 1} a {Math.min(pagina * productosPorPagina, totalProductos)} de {totalProductos} productos
             </div>
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => setPagina(p => Math.max(1, p - 1))}
                 disabled={pagina === 1}
-                className="px-3 py-1 border rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
               >
                 Anterior
               </button>
-              <button 
+              <button
                 onClick={() => setPagina(p => p + 1)}
                 disabled={pagina * productosPorPagina >= totalProductos}
-                className="px-3 py-1 border rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
               >
                 Siguiente
               </button>
