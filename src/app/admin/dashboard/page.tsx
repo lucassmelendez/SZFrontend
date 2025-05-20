@@ -612,7 +612,7 @@ export default function AdminDashboard() {
         
         {/* Gestión de Usuarios */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col">
-          <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
+          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <FiUsers className="w-6 h-6" />
             Gestión
           </h2>
