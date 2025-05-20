@@ -617,9 +617,6 @@ export default function AdminDashboard() {
                                 </li>
                               ))}
                             </ul>
-                            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 text-xs font-bold">
-                              Total: {formatCurrency(pedido.total)}
-                            </div>
                           </div>
                         ) : (
                           <span className="text-gray-400 italic">Sin productos</span>
