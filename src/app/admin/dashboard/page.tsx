@@ -166,19 +166,16 @@ export default function AdminDashboard() {
   };
 
   const getEstadoPedido = (id_estado: number, id_estado_envio: number) => {
-    if (id_estado === 1) {
-      switch (id_estado_envio) {
-        case 1:
-          return { texto: 'Enviado', color: 'green' };
-        case 2:
-          return { texto: 'Pendiente', color: 'yellow' };
-        case 3:
-          return { texto: 'Entregado', color: 'blue' };
-        default:
-          return { texto: 'Desconocido', color: 'gray' };
-      }
+    switch (id_estado_envio) {
+      case 1:
+        return { texto: 'Enviado', color: 'green' };
+      case 2:
+        return { texto: 'Pendiente', color: 'yellow' };
+      case 3:
+        return { texto: 'Entregado', color: 'blue' };
+      default:
+        return { texto: 'Pendiente', color: 'yellow' };
     }
-    return { texto: 'Cancelado', color: 'red' };
   };
 
   const validateField = (name: string, value: string): string => {
