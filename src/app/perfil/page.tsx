@@ -90,8 +90,7 @@ export default function PerfilPage() {
             const productos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido!);
             return {
               ...pedido,
-              estado: pedido.id_estado === 1 ? 'En proceso' : 
-                      pedido.id_estado === 2 ? 'Entregado' : 'Cancelado',
+              estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
               productos: productos.map(prod => ({
                 nombre: prod.nombre || 'Producto',
                 cantidad: prod.cantidad,
@@ -103,8 +102,7 @@ export default function PerfilPage() {
             console.error(`Error al obtener productos del pedido ${pedido.id_pedido}:`, error);
             return {
               ...pedido,
-              estado: pedido.id_estado === 1 ? 'En proceso' : 
-                      pedido.id_estado === 2 ? 'Entregado' : 'Cancelado',
+              estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
               productos: [],
               total: 0
             };
@@ -631,23 +629,6 @@ export default function PerfilPage() {
               }`} />
               Entregados
             </button>
-
-            <button
-              onClick={() => {
-                setActiveTab('pedidos-cancelados');
-                cargarPedidos();
-              }}
-              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                activeTab === 'pedidos-cancelados'
-                  ? 'bg-red-50 text-red-700 dark:bg-red-900/50 dark:text-red-300'
-                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-              }`}
-            >
-              <FaTimesCircle className={`mr-3 h-5 w-5 ${
-                activeTab === 'pedidos-cancelados' ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'
-              }`} />
-              Cancelados
-            </button>
           </nav>
         </div>
 
@@ -668,7 +649,6 @@ export default function PerfilPage() {
             {activeTab === 'info' && (isEditing ? renderEditForm() : renderUserInfo())}
             {activeTab === 'pedidos-proceso' && renderPedidosPorEstado('En proceso')}
             {activeTab === 'pedidos-entregados' && renderPedidosPorEstado('Entregado')}
-            {activeTab === 'pedidos-cancelados' && renderPedidosPorEstado('Cancelado')}
           </div>
         </div>
       </div>
