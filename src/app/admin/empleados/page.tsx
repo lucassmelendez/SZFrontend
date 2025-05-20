@@ -265,6 +265,7 @@ export default function EmpleadosPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">RUT</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dirección</th>
@@ -277,20 +278,22 @@ export default function EmpleadosPage() {
                 <tr key={empleado.id_empleado} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{empleado.id_empleado}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div>
-                      <div className="font-medium">{`${empleado.nombre} ${empleado.apellido}`}</div>
-                      <div className="text-xs text-gray-500">{empleado.rut || 'Sin RUT'}</div>
-                    </div>
+                    <div className="font-medium">{`${empleado.nombre} ${empleado.apellido}`}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {empleado.rut ? empleado.rut : 
+                      <span className="text-gray-400 italic">No proporcionado</span>
+                    }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{empleado.correo}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {empleado.telefono ? empleado.telefono : 
-                      <span className="text-gray-400 italic">No proporcionado</span>
+                      <span className="text-gray-400 italic">N/A</span>
                     }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {empleado.direccion ? empleado.direccion : 
-                      <span className="text-gray-400 italic">No proporcionada</span>
+                      <span className="text-gray-400 italic">N/A</span>
                     }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
