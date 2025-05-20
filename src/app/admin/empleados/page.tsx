@@ -28,8 +28,15 @@ interface EmpleadoUpdate {
   rol_id?: number;
 }
 
-interface Empleado extends EmpleadoBase {
+interface Empleado {
   id_empleado: number;
+  nombre: string;
+  apellido: string;
+  correo: string;
+  direccion: string;
+  telefono: string | number;
+  rol_id: number;
+  rut?: string;
   contrasena?: string;
   informe_id?: number;
 }
@@ -38,6 +45,13 @@ interface ApiErrorResponse {
   detail?: string;
   message?: string;
 }
+
+const roles: Record<number, string> = {
+  2: "Administrador",
+  3: "Vendedor",
+  4: "Bodeguero",
+  5: "Contador"
+};
 
 export default function EmpleadosPage() {
   const router = useRouter();
@@ -174,33 +188,98 @@ export default function EmpleadosPage() {
     setError(null);
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
-    const formValues = {
-      nombre: formData.get('nombre') as string,
-      apellido: formData.get('apellido') as string,
-      correo: formData.get('correo') as string,
-      contrasena: formData.get('contrasena') as string,
-      direccion: formData.get('direccion') as string,
-      telefono: formData.get('telefono') as string,
-      rol_id: parseInt(formData.get('rol_id') as string),
-      rut: formData.get('rut') as string || ''
-    };
-
     try {
-      const nuevoEmpleado = await empleadoApiFast.create(formValues);
-      setEmpleados(prev => [...prev, nuevoEmpleado]);
-      setIsAddModalOpen(false);
-      setError(null);
-      setFieldErrors({});
-    } catch (err) {
-      console.error('Error al crear empleado:', err);
-      if (axios.isAxiosError(err)) {
-        const axiosError = err as AxiosError<ApiErrorResponse>;
-        setError(axiosError.response?.data?.detail || 'Error al crear el empleado');
-      } else {
-        setError('Error inesperado al crear el empleado');
+      // Obtener los valores directamente de los inputs
+      const target = e.currentTarget;
+      const formValues = {
+        nombre: String(target.nombre.value).trim(),
+        apellido: String(target.apellido.value).trim(),
+        rut: String(target.rut.value).trim(),
+        correo: String(target.correo.value).trim(),
+        contrasena: String(target.contrasena.value),
+        direccion: String(target.direccion.value).trim() || 'N/A',
+        telefono: String(target.telefono.value).trim() || 'N/A',
+        rol_id: Number(target.rol_id.value)
+      };
+
+      // Validación básica
+      if (!formValues.nombre || !formValues.apellido || !formValues.rut || 
+          !formValues.correo || !formValues.contrasena || !formValues.rol_id) {
+        setError('Todos los campos marcados con * son obligatorios');
+        setIsSubmitting(false);
+        return;
       }
-    } finally {
+
+      // Validar formato de correo
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formValues.correo)) {
+        setError('El formato del correo electrónico no es válido');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Formateo de RUT (similar al backend)
+      let rutFormateado = formValues.rut.replace(/\s/g, '').replace(/\./g, '');
+      // Si el RUT no tiene guión y tiene al menos 2 caracteres, insertamos el guión
+      if (!rutFormateado.includes('-') && rutFormateado.length >= 2) {
+        rutFormateado = rutFormateado.slice(0, -1) + '-' + rutFormateado.slice(-1);
+      }
+      
+      // Validar formato de RUT después de formatear (formato básico: xxxxxxxx-x)
+      const rutRegex = /^\d{7,8}-[\dkK]$/;
+      if (!rutRegex.test(rutFormateado)) {
+        setError('El formato del RUT no es válido (ejemplo: 12345678-9)');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validar rol_id
+      if (![2, 3, 4, 5].includes(formValues.rol_id)) {
+        setError('El rol seleccionado no es válido');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Log de los datos que se van a enviar
+      console.log('Datos del empleado a crear:', {
+        ...formValues,
+        rut: rutFormateado // Usar el RUT formateado
+      });
+
+      // Crear el empleado usando la API
+      const nuevoEmpleado = await empleadoApiFast.create({
+        ...formValues,
+        rut: rutFormateado, // Usar el RUT formateado
+        direccion: formValues.direccion === '' ? 'N/A' : formValues.direccion,
+        telefono: formValues.telefono === '' ? 'N/A' : formValues.telefono
+      });
+
+      console.log('Empleado creado:', nuevoEmpleado);
+      setIsAddModalOpen(false);
+      
+      // Mostrar mensaje de éxito
+      alert('Empleado creado con éxito');
+      
+      // Recargar la página para mostrar el nuevo empleado
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error detallado al crear empleado:', error);
+      
+      let mensajeError = 'Error al crear el empleado';
+      
+      // Extraer mensaje de error detallado si existe
+      if (error.message) {
+        mensajeError = error.message;
+      }
+      
+      // Si es un error de validación (422) o conflicto (409), mostrar el detalle
+      if (error.response) {
+        if (error.response.data && error.response.data.detail) {
+          mensajeError = error.response.data.detail;
+        }
+      }
+      
+      setError(mensajeError);
       setIsSubmitting(false);
     }
   };
@@ -251,26 +330,50 @@ export default function EmpleadosPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Apellido</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">RUT</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dirección</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dirección</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {empleados.map((empleado) => (
                 <tr key={empleado.id_empleado} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.id_empleado}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{empleado.nombre}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{empleado.apellido}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.rut}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.correo}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.direccion}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.telefono}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{empleado.rol_id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{empleado.id_empleado}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="font-medium">{`${empleado.nombre} ${empleado.apellido}`}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {empleado.rut ? empleado.rut : 
+                      <span className="text-gray-400 italic">No proporcionado</span>
+                    }
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{empleado.correo}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {empleado.telefono ? empleado.telefono : 
+                      <span className="text-gray-400 italic">N/A</span>
+                    }
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {empleado.direccion ? empleado.direccion : 
+                      <span className="text-gray-400 italic">N/A</span>
+                    }
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      empleado.rol_id === 2 
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                        : empleado.rol_id === 3
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                        : empleado.rol_id === 4
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                    }`}>
+                      {roles[empleado.rol_id] || "Desconocido"}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEdit(empleado.id_empleado)}
@@ -340,11 +443,12 @@ export default function EmpleadosPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  RUT
+                  RUT <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="rut"
+                  required
                   placeholder="12345678-9"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
@@ -406,10 +510,10 @@ export default function EmpleadosPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="">Seleccione un rol</option>
-                  <option value="1">Empleado Regular</option>
                   <option value="2">Administrador</option>
-                  <option value="3">Bodeguero</option>
-                  <option value="4">Contador</option>
+                  <option value="3">Vendedor</option>
+                  <option value="4">Bodeguero</option>
+                  <option value="5">Contador</option>
                 </select>
               </div>
 
