@@ -125,7 +125,7 @@ export default function AdminDashboard() {
         // Calcular estadísticas básicas
         const ventasTotales = pedidosConDetalles.reduce((sum, pedido) => sum + pedido.total, 0);
         const ordenesPendientes = pedidosConDetalles.filter(
-          pedido => pedido.id_estado === 1 && pedido.id_estado_envio === 2
+          pedido => pedido.id_estado_envio === 2
         ).length;
 
         setEstadisticas({
