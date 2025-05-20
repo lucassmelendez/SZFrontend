@@ -13,8 +13,8 @@ import { Toaster } from 'react-hot-toast';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'SpinZone - Tienda de Deportes',
-  description: 'La mejor tienda de artículos deportivos en línea',
+  title: 'SpinZone - Tienda de Tenis de Mesa',
+  description: 'Tenis de Mesa, Tenis de Mesa, Tenis de Mesa',
 };
 
 export default function RootLayout({
