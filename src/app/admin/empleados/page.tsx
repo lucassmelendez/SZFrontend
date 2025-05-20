@@ -142,6 +142,11 @@ export default function EmpleadosPage() {
         data: updateFields
       });
 
+      // Asegurarse de que rol_id sea un número
+      if (updateFields.rol_id) {
+        updateFields.rol_id = Number(updateFields.rol_id);
+      }
+
       // Update the employee using the API
       const updatedEmpleado = await empleadoApiFast.update(selectedEmpleado.id_empleado, updateFields);
 
@@ -541,7 +546,20 @@ export default function EmpleadosPage() {
       {isEditModalOpen && selectedEmpleado && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-xl">
+            <button
+              onClick={() => setIsEditModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             <h2 className="text-xl font-bold mb-4 dark:text-gray-100">Editar Empleado</h2>
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
             <form onSubmit={async (e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
@@ -588,7 +606,7 @@ export default function EmpleadosPage() {
                   <input
                     name="nombre"
                     defaultValue={selectedEmpleado.nombre}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
@@ -597,7 +615,7 @@ export default function EmpleadosPage() {
                   <input
                     name="apellido"
                     defaultValue={selectedEmpleado.apellido}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
@@ -606,7 +624,7 @@ export default function EmpleadosPage() {
                   <input
                     name="rut"
                     defaultValue={selectedEmpleado.rut}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                   />
                 </div>
                 <div>
@@ -615,7 +633,7 @@ export default function EmpleadosPage() {
                     name="correo"
                     type="email"
                     defaultValue={selectedEmpleado.correo}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
@@ -624,7 +642,7 @@ export default function EmpleadosPage() {
                   <input
                     name="direccion"
                     defaultValue={selectedEmpleado.direccion}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
@@ -633,19 +651,23 @@ export default function EmpleadosPage() {
                   <input
                     name="telefono"
                     defaultValue={selectedEmpleado.telefono}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Rol ID</label>
-                  <input
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
+                  <select
                     name="rol_id"
-                    type="number"
                     defaultValue={selectedEmpleado.rol_id}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
                     required
-                  />
+                  >
+                    <option value="2">Administrador</option>
+                    <option value="3">Vendedor</option>
+                    <option value="4">Bodeguero</option>
+                    <option value="5">Contador</option>
+                  </select>
                 </div>
               </div>
               <div className="mt-6 flex justify-end space-x-3">

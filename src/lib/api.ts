@@ -518,10 +518,31 @@ export const empleadoApiFast = {
   
   update: async (id: number, empleado: Partial<Empleado>): Promise<Empleado> => {
     try {
-      const response = await apiFast.put(`/empleados/${id}`, empleado);
+      console.log(`Actualizando empleado ${id} con datos:`, empleado);
+      
+      // Asegurarse de que rol_id sea número si existe
+      const datosActualizados = { ...empleado };
+      if (datosActualizados.rol_id) {
+        datosActualizados.rol_id = Number(datosActualizados.rol_id);
+      }
+      
+      const response = await apiFast.put(`/empleados/${id}`, datosActualizados);
+      
+      if (!response.data || !response.data.empleado) {
+        throw new Error(`Error en la respuesta del servidor: ${JSON.stringify(response.data)}`);
+      }
+      
       return response.data.empleado;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error al actualizar empleado ${id} en FastAPI:`, error);
+      
+      // Mejorar el mensaje de error
+      if (error.response?.status === 400) {
+        const errorDetail = error.response.data?.detail || 'Datos inválidos';
+        console.error(`Error 400 al actualizar empleado: ${errorDetail}`);
+        throw new Error(`Error al actualizar: ${errorDetail}`);
+      }
+      
       throw error;
     }
   },
