@@ -407,7 +407,7 @@ export default function AdminDashboard() {
             <FiShoppingCart className="w-6 h-6" />
             Estadísticas
           </h2>
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-300">Ventas totales</span>
@@ -433,29 +433,38 @@ export default function AdminDashboard() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <FiUsers className="w-6 h-6" />
-            Gestión de Usuarios
+            Gestión
           </h2>
           <div className="space-y-4">
             <button
               onClick={() => router.push('/admin/empleados')}
-              className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 p-4 rounded-lg transition-colors flex items-center justify-between"
             >
-              <FiUsers className="w-5 h-5" />
-              Gestionar empleados
+              <div className="flex items-center gap-2">
+                <FiUsers className="w-5 h-5 text-white" />
+                <span className="text-white">Gestionar empleados</span>
+              </div>
+              <span className="text-white font-medium">→</span>
             </button>
             <button
               onClick={() => router.push('/admin/clientes')}
-              className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-purple-600 hover:bg-purple-700 p-4 rounded-lg transition-colors flex items-center justify-between"
             >
-              <FiUsers className="w-5 h-5" />
-              Ver clientes
+              <div className="flex items-center gap-2">
+                <FiUsers className="w-5 h-5 text-white" />
+                <span className="text-white">Ver clientes</span>
+              </div>
+              <span className="text-white font-medium">→</span>
             </button>
             <button
               onClick={() => router.push('/admin/inventario')}
-              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-green-600 hover:bg-green-700 p-4 rounded-lg transition-colors flex items-center justify-between"
             >
-              <FiPackage className="w-5 h-5" />
-              Ver inventario
+              <div className="flex items-center gap-2">
+                <FiPackage className="w-5 h-5 text-white" />
+                <span className="text-white">Ver inventario</span>
+              </div>
+              <span className="text-white font-medium">→</span>
             </button>
           </div>
         </div>
