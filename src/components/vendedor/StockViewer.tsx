@@ -22,33 +22,65 @@ export default function StockViewer({ productos }: StockViewerProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoria, setSelectedCategoria] = useState<number>(0);
   const [showCategorias, setShowCategorias] = useState(false);
+  // Estados de stock
+  const stockStates = {
+    all: 'Todos',
+    out: 'Sin Stock',
+    low: 'Stock Bajo',
+    available: 'Disponible'
+  };
+
+  const [selectedStockState, setSelectedStockState] = useState<keyof typeof stockStates>('all');
 
   // Filtrar productos
   const filteredProductos = productos.filter(producto => {
     const matchesSearch = producto.nombre.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategoria = selectedCategoria === 0 || producto.categoria_id === selectedCategoria;
-    return matchesSearch && matchesCategoria;
+    
+    // Filtro por estado de stock
+    const matchesStockState = selectedStockState === 'all' ||
+      (selectedStockState === 'out' && producto.stock === 0) ||
+      (selectedStockState === 'low' && producto.stock > 0 && producto.stock <= 5) ||
+      (selectedStockState === 'available' && producto.stock > 5);
+
+    return matchesSearch && matchesCategoria && matchesStockState;
   });
 
   return (
-    <div>
-      {/* Barra de búsqueda y filtros */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
+    <div>      {/* Barra de búsqueda y filtros */}
+      <div className="flex flex-col md:flex-row gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+        {/* Barra de búsqueda */}
         <div className="relative flex-1">
           <input
             type="text"
             placeholder="Buscar productos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="w-full pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600"
           />
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
         
+        {/* Filtro de Estado de Stock */}
+        <div className="relative">
+          <select
+            value={selectedStockState}
+            onChange={(e) => setSelectedStockState(e.target.value as keyof typeof stockStates)}
+            className="w-full md:w-auto px-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white cursor-pointer transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+          >
+            {Object.entries(stockStates).map(([key, value]) => (
+              <option key={key} value={key} className="py-2">
+                {value}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filtro de Categorías */}
         <div className="relative">
           <button
             onClick={() => setShowCategorias(!showCategorias)}
-            className="w-full md:w-auto px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white flex items-center justify-between"
+            className="w-full md:w-auto px-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white flex items-center justify-between gap-2 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600"
           >
             <span>
               {selectedCategoria === 0 ? 'Todas las categorías' : categoriasMap[selectedCategoria as keyof typeof categoriasMap]}

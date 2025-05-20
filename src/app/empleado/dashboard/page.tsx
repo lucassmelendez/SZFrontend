@@ -53,6 +53,12 @@ export default function EmpleadoDashboard() {
       <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-8">
         Panel de Vendedor
       </h1>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+            Pedidos Listos para Despacho/Entrega
+          </h2>
+          <OrderList />
+        </div>
 
       <div className="grid gap-8">
         {/* Sección de Inventario */}
@@ -64,12 +70,6 @@ export default function EmpleadoDashboard() {
         </div>
 
         {/* Sección de Pedidos */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-            Pedidos Listos para Despacho/Entrega
-          </h2>
-          <OrderList />
-        </div>
       </div>
     </div>
   );
