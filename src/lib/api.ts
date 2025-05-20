@@ -520,30 +520,56 @@ export const empleadoApiFast = {
     try {
       console.log(`Actualizando empleado ${id} con datos:`, empleado);
       
-      // Asegurarse de que rol_id sea número si existe
-      const datosActualizados = { ...empleado };
-      if (datosActualizados.rol_id) {
-        datosActualizados.rol_id = Number(datosActualizados.rol_id);
+      // En lugar de enviar un objeto, enviamos los campos como parámetros URL
+      // para que coincida con la manera en que el backend espera recibirlos
+      const params = new URLSearchParams();
+      
+      if (empleado.nombre) params.append('nombre', empleado.nombre);
+      if (empleado.apellido) params.append('apellido', empleado.apellido);
+      if (empleado.correo) params.append('correo', empleado.correo);
+      if (empleado.direccion) params.append('direccion', empleado.direccion);
+      if (empleado.telefono) params.append('telefono', String(empleado.telefono));
+      if (empleado.rol_id) params.append('rol_id', String(empleado.rol_id));
+      if (empleado.rut) params.append('rut', empleado.rut);
+      
+      console.log('Parámetros a enviar:', params.toString());
+      
+      // Hacer la petición PUT al servidor con los parámetros en la URL
+      const response = await apiFast.put(`/empleados/${id}?${params.toString()}`);
+      
+      if (response.data && response.data.empleado) {
+        console.log('Respuesta exitosa:', response.data);
+        return response.data.empleado;
       }
       
-      const response = await apiFast.put(`/empleados/${id}`, datosActualizados);
-      
-      if (!response.data || !response.data.empleado) {
-        throw new Error(`Error en la respuesta del servidor: ${JSON.stringify(response.data)}`);
-      }
-      
-      return response.data.empleado;
+      throw new Error(`Respuesta inesperada: ${JSON.stringify(response.data)}`);
     } catch (error: any) {
       console.error(`Error al actualizar empleado ${id} en FastAPI:`, error);
       
-      // Mejorar el mensaje de error
-      if (error.response?.status === 400) {
-        const errorDetail = error.response.data?.detail || 'Datos inválidos';
-        console.error(`Error 400 al actualizar empleado: ${errorDetail}`);
-        throw new Error(`Error al actualizar: ${errorDetail}`);
+      let mensajeError = error.message || 'Error desconocido';
+      
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 400) {
+          mensajeError = `Error 400: ${data?.detail || 'Datos inválidos'}`;
+        } else if (status === 404) {
+          mensajeError = `Error 404: No se encontró el empleado con ID ${id}`;
+        } else if (status === 422) {
+          if (Array.isArray(data?.detail)) {
+            mensajeError = `Error de validación: ${data.detail.map((item: any) => item.msg).join(', ')}`;
+          } else {
+            mensajeError = `Error de validación: ${data?.detail || 'Formato incorrecto'}`;
+          }
+        } else {
+          mensajeError = `Error ${status}: ${data?.detail || error.message}`;
+        }
+        
+        console.error(`Detalles del error HTTP (${status}):`, data);
       }
       
-      throw error;
+      throw new Error(mensajeError);
     }
   },
   

@@ -122,18 +122,30 @@ export default function EmpleadosPage() {
       // Preparar los datos para la actualización
       const updateFields: Record<string, any> = {};
       
-      // Solo incluir campos que realmente han cambiado
-      if (updatedData.nombre !== selectedEmpleado.nombre) updateFields.nombre = updatedData.nombre;
-      if (updatedData.apellido !== selectedEmpleado.apellido) updateFields.apellido = updatedData.apellido;
-      if (updatedData.correo !== selectedEmpleado.correo) updateFields.correo = updatedData.correo;
-      if (updatedData.direccion !== selectedEmpleado.direccion) updateFields.direccion = updatedData.direccion;
-      if (updatedData.telefono !== selectedEmpleado.telefono) updateFields.telefono = updatedData.telefono;
-      if (updatedData.rol_id !== selectedEmpleado.rol_id) updateFields.rol_id = updatedData.rol_id;
-      if (updatedData.rut !== selectedEmpleado.rut) updateFields.rut = updatedData.rut;
+      // Solo incluir campos que realmente han cambiado y no estén vacíos
+      if (updatedData.nombre && updatedData.nombre !== selectedEmpleado.nombre) 
+        updateFields.nombre = updatedData.nombre;
+      if (updatedData.apellido && updatedData.apellido !== selectedEmpleado.apellido) 
+        updateFields.apellido = updatedData.apellido;
+      if (updatedData.correo && updatedData.correo !== selectedEmpleado.correo) 
+        updateFields.correo = updatedData.correo;
+      if (updatedData.direccion && updatedData.direccion !== selectedEmpleado.direccion) 
+        updateFields.direccion = updatedData.direccion;
+      if (updatedData.telefono && updatedData.telefono !== selectedEmpleado.telefono) 
+        updateFields.telefono = updatedData.telefono;
+      if (updatedData.rol_id && updatedData.rol_id !== selectedEmpleado.rol_id) 
+        updateFields.rol_id = updatedData.rol_id;
+      if (updatedData.rut && updatedData.rut !== selectedEmpleado.rut) 
+        updateFields.rut = updatedData.rut;
 
-      // Verificar si hay campos para actualizar
+      // Si no hay campos modificados, incluir al menos todos los campos requeridos
       if (Object.keys(updateFields).length === 0) {
-        throw new Error('No se han realizado cambios en los datos');
+        updateFields.nombre = updatedData.nombre;
+        updateFields.apellido = updatedData.apellido;
+        updateFields.correo = updatedData.correo;
+        updateFields.direccion = updatedData.direccion;
+        updateFields.telefono = updatedData.telefono;
+        updateFields.rol_id = updatedData.rol_id;
       }
 
       // Log the data being sent
@@ -583,21 +595,53 @@ export default function EmpleadosPage() {
                 return;
               }
 
-              const updateData: EmpleadoBase = {
-                nombre: nombre.trim(),
-                apellido: apellido.trim(),
-                correo: correo.trim(),
-                direccion: direccion.trim(),
-                telefono: telefono.trim(),
-                rol_id,
-                rut: rut.trim()
-              };
-
+              // Enviar directamente al API, sin usar handleUpdate
               try {
-                await handleUpdate(updateData);
+                setError(null);
+                
+                const updateData = {
+                  nombre: nombre.trim(),
+                  apellido: apellido.trim(),
+                  correo: correo.trim(),
+                  direccion: direccion.trim(),
+                  telefono: telefono.trim(),
+                  rol_id: Number(rol_id),
+                  rut: rut.trim()
+                };
+                
+                // Log the data being sent
+                console.log('Datos a enviar:', {
+                  id: selectedEmpleado?.id_empleado,
+                  data: updateData
+                });
+                
+                const updatedEmpleado = await empleadoApiFast.update(
+                  selectedEmpleado.id_empleado,
+                  updateData
+                );
+                
+                // Log the response
+                console.log('Respuesta del servidor:', updatedEmpleado);
+
+                // Update local state
+                setEmpleados(prev => 
+                  prev.map(emp => emp.id_empleado === selectedEmpleado.id_empleado ? updatedEmpleado : emp)
+                );
+
+                // Close modal and clear selection
+                setIsEditModalOpen(false);
+                setSelectedEmpleado(null);
               } catch (err) {
-                // El error ya se maneja en handleUpdate
-                console.error('Error en el formulario:', err);
+                console.error('Error detallado:', err);
+                if (axios.isAxiosError(err)) {
+                  const axiosError = err as AxiosError<ApiErrorResponse>;
+                  const errorMessage = axiosError.response?.data?.detail || 
+                                     axiosError.response?.data?.message || 
+                                     'Error al actualizar el empleado';
+                  setError(errorMessage);
+                } else {
+                  setError('Error al actualizar el empleado');
+                }
               }
             }}>
               <div className="space-y-4">
