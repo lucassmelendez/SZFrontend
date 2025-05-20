@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, empleadoApiFast } from '@/lib/api';
+import { isEmpleado, empleadoApiFast, apiFast } from '@/lib/api';
 import { AxiosError } from 'axios';
+import { FiUsers, FiPackage, FiShoppingCart } from 'react-icons/fi';
 
 interface ApiErrorResponse {
   detail?: string | Array<{
@@ -16,8 +17,21 @@ interface ApiErrorResponse {
   message?: string;
 }
 
-interface FieldError {
-  [key: string]: string;
+interface Pedido {
+  id_pedido: number;
+  fecha: string;
+  total: number;
+  estado: string;
+  cliente: {
+    nombre: string;
+    apellido: string;
+  };
+}
+
+interface Estadisticas {
+  ventas_totales: number;
+  clientes_nuevos: number;
+  ordenes_pendientes: number;
 }
 
 const validateEmployeeData = (data: {
@@ -73,10 +87,63 @@ const validateEmployeeData = (data: {
 export default function AdminDashboard() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [estadisticas, setEstadisticas] = useState<Estadisticas>({
+    ventas_totales: 0,
+    clientes_nuevos: 0,
+    ordenes_pendientes: 0
+  });
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldError>({});
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Obtener pedidos recientes
+        const pedidosResponse = await apiFast.get('/pedidos/recientes');
+        setPedidos(pedidosResponse.data);
+
+        // Obtener estadísticas
+        const statsResponse = await apiFast.get('/estadisticas');
+        setEstadisticas(statsResponse.data);
+      } catch (err) {
+        console.error('Error al cargar datos:', err);
+        setError('Error al cargar los datos del dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && (!user || !isEmpleado(user) || user.rol_id !== 2)) {
+      router.push('/');
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP'
+    }).format(amount);
+  };
+
   const validateField = (name: string, value: string): string => {
     switch (name) {
       case 'correo':
@@ -146,7 +213,7 @@ export default function AdminDashboard() {
     };
 
     // Validate all fields before submitting
-    const newFieldErrors: FieldError = {};
+    const newFieldErrors: { [key: string]: string } = {};
     Object.entries(formValues).forEach(([key, value]) => {
       const error = validateField(key, value);
       if (error) {
@@ -265,20 +332,6 @@ export default function AdminDashboard() {
     }
   };
 
-  useEffect(() => {
-    if (!isLoading && (!user || !isEmpleado(user) || user.rol_id !== 2)) {
-      router.push('/');
-    }
-  }, [user, isLoading, router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   const renderField = (
     name: string, 
     label: string, 
@@ -313,45 +366,61 @@ export default function AdminDashboard() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Panel de Administración</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Estadísticas */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Estadísticas</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Ventas totales</span>
-              <span className="font-bold">$24,568</span>
+          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <FiShoppingCart className="w-6 h-6" />
+            Estadísticas
+          </h2>
+          <div className="space-y-6">
+            <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-300">Ventas totales</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400">{formatCurrency(estadisticas.ventas_totales)}</span>
+              </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Clientes nuevos</span>
-              <span className="font-bold">156</span>
+            <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-300">Clientes nuevos</span>
+                <span className="font-bold text-green-600 dark:text-green-400">{estadisticas.clientes_nuevos}</span>
+              </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-300">Órdenes pendientes</span>
-              <span className="font-bold">23</span>
+            <div className="bg-amber-50 dark:bg-amber-900/30 p-4 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-300">Órdenes pendientes</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400">{estadisticas.ordenes_pendientes}</span>
+              </div>
             </div>
           </div>
         </div>
         
         {/* Gestión de Usuarios */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Gestión de Usuarios</h2>
-          <div className="space-y-2">
+          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <FiUsers className="w-6 h-6" />
+            Gestión de Usuarios
+          </h2>
+          <div className="space-y-4">
             <button
               onClick={() => router.push('/admin/empleados')}
-              className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors"
+              className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors flex items-center justify-center gap-2"
             >
+              <FiUsers className="w-5 h-5" />
               Gestionar empleados
             </button>
             <button
               onClick={() => router.push('/admin/clientes')}
-              className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
+              className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors flex items-center justify-center gap-2"
             >
+              <FiUsers className="w-5 h-5" />
               Ver clientes
             </button>
             <button
               onClick={() => router.push('/admin/inventario')}
-              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center justify-center gap-2"
             >
+              <FiPackage className="w-5 h-5" />
               Ver inventario
             </button>
           </div>
@@ -360,35 +429,54 @@ export default function AdminDashboard() {
       
       {/* Órdenes Recientes */}
       <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Órdenes Recientes</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {[1, 2, 3, 4, 5].map((_, index) => (
-                <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#ORD-{1000 + index}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">Cliente Ejemplo</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{new Date().toLocaleDateString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">${Math.floor(Math.random() * 1000)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      Completada
-                    </span>
-                  </td>
+        <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+          <FiShoppingCart className="w-6 h-6" />
+          Órdenes Recientes
+        </h2>
+        {error ? (
+          <div className="text-red-600 text-center py-4">{error}</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {pedidos.map((pedido) => (
+                  <tr key={pedido.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{pedido.id_pedido}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {pedido.cliente.nombre} {pedido.cliente.apellido}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {new Date(pedido.fecha).toLocaleDateString('es-CL')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {formatCurrency(pedido.total)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        pedido.estado === 'completado' 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          : pedido.estado === 'pendiente'
+                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        {pedido.estado.charAt(0).toUpperCase() + pedido.estado.slice(1)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Modal para agregar empleado */}
