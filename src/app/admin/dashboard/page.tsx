@@ -580,11 +580,11 @@ export default function AdminDashboard() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Productos</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Pago</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Envío</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Medio de Pago</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Productos</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -605,6 +605,25 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {new Date(pedido.fecha).toLocaleDateString('es-CL')}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {pedido.productos && pedido.productos.length > 0 ? (
+                          <div className="max-h-32 overflow-y-auto">
+                            <ul className="space-y-1">
+                              {pedido.productos.map(producto => (
+                                <li key={producto.id_producto} className="text-xs flex justify-between">
+                                  <span className="font-medium">{producto.nombre} x{producto.cantidad}</span>
+                                  <span className="text-gray-500 ml-2">{formatCurrency(producto.subtotal || 0)}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 text-xs font-bold">
+                              Total: {formatCurrency(pedido.total)}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 italic">Sin productos</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {formatCurrency(pedido.total)}
@@ -635,25 +654,6 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {mediosPago[pedido.medio_pago_id] || "Desconocido"}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {pedido.productos && pedido.productos.length > 0 ? (
-                          <div className="max-h-32 overflow-y-auto">
-                            <ul className="space-y-1">
-                              {pedido.productos.map(producto => (
-                                <li key={producto.id_producto} className="text-xs flex justify-between">
-                                  <span className="font-medium">{producto.nombre} x{producto.cantidad}</span>
-                                  <span className="text-gray-500 ml-2">{formatCurrency(producto.subtotal || 0)}</span>
-                                </li>
-                              ))}
-                            </ul>
-                            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 text-xs font-bold">
-                              Total: {formatCurrency(pedido.total)}
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 italic">Sin productos</span>
-                        )}
                       </td>
                     </tr>
                   );
