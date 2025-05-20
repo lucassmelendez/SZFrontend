@@ -32,7 +32,7 @@ interface PedidoConDetalles extends Omit<Pedido, 'cliente'> {
 
 interface Estadisticas {
   ventas_totales: number;
-  clientes_nuevos: number;
+  total_clientes: number;
   ordenes_pendientes: number;
 }
 
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
   const [pedidos, setPedidos] = useState<PedidoConDetalles[]>([]);
   const [estadisticas, setEstadisticas] = useState<Estadisticas>({
     ventas_totales: 0,
-    clientes_nuevos: 0,
+    total_clientes: 0,
     ordenes_pendientes: 0
   });
   const [loading, setLoading] = useState(true);
@@ -122,6 +122,10 @@ export default function AdminDashboard() {
         );
         setPedidos(pedidosConDetalles);
 
+        // Obtener total de clientes
+        const clientesResponse = await apiFast.get('/clientes');
+        const totalClientes = clientesResponse.data.length;
+
         // Calcular estadísticas básicas
         const ventasTotales = pedidosConDetalles.reduce((sum, pedido) => sum + pedido.total, 0);
         const ordenesPendientes = pedidosConDetalles.filter(
@@ -130,7 +134,7 @@ export default function AdminDashboard() {
 
         setEstadisticas({
           ventas_totales: ventasTotales,
-          clientes_nuevos: 0, // Este dato debería venir de la API
+          total_clientes: totalClientes,
           ordenes_pendientes: ordenesPendientes
         });
       } catch (err) {
@@ -416,8 +420,8 @@ export default function AdminDashboard() {
             </div>
             <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-300">Clientes nuevos</span>
-                <span className="font-bold text-green-600 dark:text-green-400">{estadisticas.clientes_nuevos}</span>
+                <span className="text-gray-600 dark:text-gray-300">Total de clientes</span>
+                <span className="font-bold text-green-600 dark:text-green-400">{estadisticas.total_clientes}</span>
               </div>
             </div>
             <div className="bg-amber-50 dark:bg-amber-900/30 p-4 rounded-lg">
