@@ -165,52 +165,55 @@ export default function OrderList() {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead>
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Productos</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Pago</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Envío</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Medio Pago</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-          {orders.filter((order): order is OrderWithDetails => order.id_pedido != null).map((order) => (
-            <tr key={order.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-white">
-                #{order.id_pedido}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                {new Date(order.fecha).toLocaleString()}
-              </td>              
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                {order.cliente ? (
-                  <div>
-                    <div className="font-medium">{`${order.cliente.nombre} ${order.cliente.apellido}`}</div>
-                    <div className="text-xs text-gray-500">{order.cliente.correo}</div>
-                    <div className="text-xs text-gray-500">{order.cliente.telefono}</div>
-                  </div>
-                ) : 'N/A'}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                <ul className="list-disc list-inside">
-                  {order.productos.map((producto: PedidoProducto & { nombre: string }) => (
-                    <li key={producto.id_producto}>
-                      {producto.nombre} x{producto.cantidad}
-                    </li>
-                  ))}
-                </ul>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-white">
-                ${order.total.toLocaleString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
+    <>
+      {/* Versión móvil */}
+      <div className="md:hidden space-y-4">
+        {orders.filter((order): order is OrderWithDetails => order.id_pedido != null).map((order) => (
+          <div key={order.id_pedido} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            {/* Encabezado del pedido */}
+            <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-semibold text-gray-800 dark:text-white">
+                  Pedido #{order.id_pedido}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {new Date(order.fecha).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Información del cliente */}
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cliente</h3>
+              {order.cliente ? (
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="font-medium">{`${order.cliente.nombre} ${order.cliente.apellido}`}</p>
+                  <p>{order.cliente.correo}</p>
+                  <p>{order.cliente.telefono}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">N/A</p>
+              )}
+            </div>
+
+            {/* Productos */}
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Productos</h3>
+              <ul className="space-y-1">
+                {order.productos.map((producto: PedidoProducto & { nombre: string }) => (
+                  <li key={producto.id_producto} className="text-sm text-gray-600 dark:text-gray-400">
+                    {producto.nombre} x{producto.cantidad}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-2 text-sm font-medium text-gray-800 dark:text-white">
+                Total: ${order.total.toLocaleString()}
+              </div>
+            </div>
+
+            {/* Estados y acciones */}
+            <div className="px-4 py-3 space-y-3">
+              <div className="flex flex-wrap gap-2">
                 <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                   order.id_estado === 1 
                     ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
@@ -218,8 +221,6 @@ export default function OrderList() {
                 }`}>
                   {order.id_estado === 1 ? 'Pagado' : 'No pagado'}
                 </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
                 <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                   order.id_estado_envio === 1 
                     ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
@@ -229,8 +230,6 @@ export default function OrderList() {
                 }`}>
                   {order.estado_envio}
                 </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
                 <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                   order.medio_pago === 'Transferencia' || order.medio_pago === 'Webpay'
                     ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
@@ -238,17 +237,19 @@ export default function OrderList() {
                 }`}>
                   {order.medio_pago}
                 </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+              </div>
+
+              {/* Botón de acción */}
+              <div className="mt-3">
                 {order.id_estado === 1 && order.id_estado_envio === 2 ? (
                   <button
                     onClick={() => handleMarkAsDispatched(order.id_pedido!)}
                     disabled={updatingOrder === order.id_pedido}
-                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs transition-colors disabled:opacity-50"
+                    className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors disabled:opacity-50"
                   >
                     {updatingOrder === order.id_pedido ? (
-                      <span className="flex items-center">
-                        <span className="animate-spin h-4 w-4 mr-1 border-2 border-white border-t-transparent rounded-full"></span>
+                      <span className="flex items-center justify-center">
+                        <span className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></span>
                         Procesando...
                       </span>
                     ) : (
@@ -256,19 +257,126 @@ export default function OrderList() {
                     )}
                   </button>
                 ) : order.id_estado_envio === 1 ? (
-                  <span className="text-green-600 dark:text-green-400 font-medium">
+                  <span className="block text-center text-green-600 dark:text-green-400 font-medium">
                     Enviado
                   </span>
                 ) : (
-                  <span className="text-gray-600 dark:text-gray-400 font-medium">
+                  <span className="block text-center text-gray-600 dark:text-gray-400 font-medium">
                     No disponible
                   </span>
                 )}
-              </td>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Versión web */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Productos</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Pago</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Envío</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Medio Pago</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {orders.filter((order): order is OrderWithDetails => order.id_pedido != null).map((order) => (
+              <tr key={order.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-white">
+                  #{order.id_pedido}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                  {new Date(order.fecha).toLocaleString()}
+                </td>              
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                  {order.cliente ? (
+                    <div>
+                      <div className="font-medium">{`${order.cliente.nombre} ${order.cliente.apellido}`}</div>
+                      <div className="text-xs text-gray-500">{order.cliente.correo}</div>
+                      <div className="text-xs text-gray-500">{order.cliente.telefono}</div>
+                    </div>
+                  ) : 'N/A'}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                  <ul className="list-disc list-inside">
+                    {order.productos.map((producto: PedidoProducto & { nombre: string }) => (
+                      <li key={producto.id_producto}>
+                        {producto.nombre} x{producto.cantidad}
+                      </li>
+                    ))}
+                  </ul>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-white">
+                  ${order.total.toLocaleString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    order.id_estado === 1 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                  }`}>
+                    {order.id_estado === 1 ? 'Pagado' : 'No pagado'}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    order.id_estado_envio === 1 
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                      : order.id_estado_envio === 2
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                  }`}>
+                    {order.estado_envio}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    order.medio_pago === 'Transferencia' || order.medio_pago === 'Webpay'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                  }`}>
+                    {order.medio_pago}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                  {order.id_estado === 1 && order.id_estado_envio === 2 ? (
+                    <button
+                      onClick={() => handleMarkAsDispatched(order.id_pedido!)}
+                      disabled={updatingOrder === order.id_pedido}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs transition-colors disabled:opacity-50"
+                    >
+                      {updatingOrder === order.id_pedido ? (
+                        <span className="flex items-center">
+                          <span className="animate-spin h-4 w-4 mr-1 border-2 border-white border-t-transparent rounded-full"></span>
+                          Procesando...
+                        </span>
+                      ) : (
+                        'Despachar'
+                      )}
+                    </button>
+                  ) : order.id_estado_envio === 1 ? (
+                    <span className="text-green-600 dark:text-green-400 font-medium">
+                      Enviado
+                    </span>
+                  ) : (
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">
+                      No disponible
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

@@ -88,100 +88,197 @@ export default function StockEditor({ productos, onStockUpdate }: StockEditorPro
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div>
       {success && (
         <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md flex items-center space-x-2">
           <FaCheck />
           <span>{success}</span>
         </div>
       )}
-      
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead>
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock Actual</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acción</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-          {productos.map((producto) => (
-            <tr key={producto.id_producto} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{producto.id_producto}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">{producto.nombre}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                {categoriasMap[producto.categoria_id as keyof typeof categoriasMap] || 'Sin categoría'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                {editingId === producto.id_producto ? (
-                  <div className="flex items-center space-x-2">
+
+      {/* Versión móvil */}
+      <div className="md:hidden space-y-4">
+        {productos.map((producto) => (
+          <div key={producto.id_producto} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            {/* Encabezado del producto */}
+            <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-semibold text-gray-800 dark:text-white">
+                  {producto.nombre}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  ID: #{producto.id_producto}
+                </span>
+              </div>
+            </div>
+
+            {/* Información del producto */}
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Categoría: {categoriasMap[producto.categoria_id as keyof typeof categoriasMap] || 'Sin categoría'}
+                </span>
+                <span className={`text-sm font-medium ${
+                  producto.stock === 0
+                    ? 'text-red-500 dark:text-red-400'
+                    : producto.stock <= 5
+                    ? 'text-yellow-500 dark:text-yellow-400'
+                    : 'text-green-500 dark:text-green-400'
+                }`}>
+                  Stock: {producto.stock}
+                </span>
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="px-4 py-3">
+              {editingId === producto.id_producto ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
                     <button
                       onClick={handleStockDecrement}
                       disabled={loading || tempStock === 0}
-                      className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50"
+                      className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50"
                     >
-                      <FaMinus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      <FaMinus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                     </button>
                     <input
                       type="number"
                       min="0"
                       value={tempStock ?? ''}
                       onChange={handleStockChange}
-                      className="w-20 px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center"
+                      className="w-24 px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center text-lg"
                     />
                     <button
                       onClick={handleStockIncrement}
                       disabled={loading}
-                      className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50"
+                      className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50"
                     >
-                      <FaPlus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      <FaPlus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                     </button>
                   </div>
-                ) : (                  <span className={`font-medium ${
-                    producto.stock === 0
-                      ? 'text-red-500 dark:text-red-400'
-                      : producto.stock <= 5
-                      ? 'text-yellow-500 dark:text-yellow-400'
-                      : 'text-green-500 dark:text-green-400'
-                  }`}>
-                    {producto.stock}
-                  </span>
-                )}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                {editingId === producto.id_producto ? (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex space-x-2">
                     <button
                       onClick={() => handleStockSave(producto)}
                       disabled={loading}
-                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <FaCheck size={12} />
+                      <FaCheck size={14} />
                       <span>{loading ? 'Guardando...' : 'Guardar'}</span>
                     </button>
                     <button
                       onClick={handleStockCancel}
                       disabled={loading}
-                      className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-xs"
+                      className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm"
                     >
                       Cancelar
                     </button>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => handleStockEdit(producto)}
-                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs"
-                  >
-                    Editar stock
-                  </button>
-                )}
-              </td>
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleStockEdit(producto)}
+                  className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
+                >
+                  Editar stock
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Versión web */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock Actual</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acción</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {productos.map((producto) => (
+              <tr key={producto.id_producto} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{producto.id_producto}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{producto.nombre}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                  {categoriasMap[producto.categoria_id as keyof typeof categoriasMap] || 'Sin categoría'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {editingId === producto.id_producto ? (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={handleStockDecrement}
+                        disabled={loading || tempStock === 0}
+                        className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50"
+                      >
+                        <FaMinus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        value={tempStock ?? ''}
+                        onChange={handleStockChange}
+                        className="w-20 px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center"
+                      />
+                      <button
+                        onClick={handleStockIncrement}
+                        disabled={loading}
+                        className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50"
+                      >
+                        <FaPlus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      </button>
+                    </div>
+                  ) : (
+                    <span className={`font-medium ${
+                      producto.stock === 0
+                        ? 'text-red-500 dark:text-red-400'
+                        : producto.stock <= 5
+                        ? 'text-yellow-500 dark:text-yellow-400'
+                        : 'text-green-500 dark:text-green-400'
+                    }`}>
+                      {producto.stock}
+                    </span>
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {editingId === producto.id_producto ? (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleStockSave(producto)}
+                        disabled={loading}
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <FaCheck size={12} />
+                        <span>{loading ? 'Guardando...' : 'Guardar'}</span>
+                      </button>
+                      <button
+                        onClick={handleStockCancel}
+                        disabled={loading}
+                        className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-xs"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleStockEdit(producto)}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs"
+                    >
+                      Editar stock
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {error && (
         <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md flex items-center space-x-2">
           <FaExclamationTriangle />
