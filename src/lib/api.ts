@@ -86,6 +86,13 @@ export interface Pedido {
   id_estado_envio: number;
   id_estado: number;
   id_cliente: number;
+  cliente?: {
+    correo: string;
+    nombre: string;
+    apellido: string;
+    telefono: string;
+    direccion: string;
+  };
 }
 
 export interface PedidoProducto {

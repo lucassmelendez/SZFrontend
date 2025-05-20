@@ -36,12 +36,15 @@ export default function OrderList() {
   const fetchOrders = async () => {
     try {
       const pedidos = await pedidoApiFast.getAll();
+      console.log('Pedidos obtenidos:', pedidos);
       // Filtrar solo los pedidos pagados (id_estado === 1)
       const pedidosPagados = pedidos.filter(pedido => pedido.id_estado === 1);
+      console.log('Pedidos pagados:', pedidosPagados);
       
       const pedidosConProductos = await Promise.all(
         pedidosPagados.map(async (pedido: Pedido) => {
           if (!pedido.id_pedido) return null;
+          console.log('Procesando pedido:', pedido);
           
           const pedidoProductos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido);
           const productosConDetalles = await Promise.all(
@@ -57,7 +60,10 @@ export default function OrderList() {
           );
 
           try {
-            const clienteData = await clienteApiFast.getById(pedido.id_cliente);
+            console.log('Obteniendo datos del cliente para pedido:', pedido.id_pedido, 'ID Cliente:', pedido.id_cliente);
+            // Si el cliente ya viene en la respuesta, usarlo directamente
+            const clienteData = pedido.cliente || await clienteApiFast.getById(pedido.id_cliente);
+            console.log('Datos del cliente obtenidos:', clienteData);
 
             // Mapeo de estados
             const estadosEnvio = {
@@ -184,7 +190,13 @@ export default function OrderList() {
                 {new Date(order.fecha).toLocaleString()}
               </td>              
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                {order.cliente ? order.cliente.correo : 'N/A'}
+                {order.cliente ? (
+                  <div>
+                    <div className="font-medium">{`${order.cliente.nombre} ${order.cliente.apellido}`}</div>
+                    <div className="text-xs text-gray-500">{order.cliente.correo}</div>
+                    <div className="text-xs text-gray-500">{order.cliente.telefono}</div>
+                  </div>
+                ) : 'N/A'}
               </td>
               <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                 <ul className="list-disc list-inside">
