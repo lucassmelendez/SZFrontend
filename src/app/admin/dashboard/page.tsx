@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, empleadoApiFast, apiFast } from '@/lib/api';
+import { isEmpleado, empleadoApiFast, apiFast, pedidoApiFast, Pedido } from '@/lib/api';
 import { AxiosError } from 'axios';
 import { FiUsers, FiPackage, FiShoppingCart } from 'react-icons/fi';
 
@@ -17,15 +17,17 @@ interface ApiErrorResponse {
   message?: string;
 }
 
-interface Pedido {
-  id_pedido: number;
-  fecha: string;
+interface Cliente {
+  nombre: string;
+  apellido: string;
+  correo: string;
+  telefono: string;
+  direccion: string;
+}
+
+interface PedidoConDetalles extends Omit<Pedido, 'cliente'> {
   total: number;
-  estado: string;
-  cliente: {
-    nombre: string;
-    apellido: string;
-  };
+  cliente: Cliente;
 }
 
 interface Estadisticas {
@@ -87,7 +89,7 @@ const validateEmployeeData = (data: {
 export default function AdminDashboard() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [pedidos, setPedidos] = useState<PedidoConDetalles[]>([]);
   const [estadisticas, setEstadisticas] = useState<Estadisticas>({
     ventas_totales: 0,
     clientes_nuevos: 0,
@@ -106,12 +108,31 @@ export default function AdminDashboard() {
         setError(null);
 
         // Obtener pedidos recientes
-        const pedidosResponse = await apiFast.get('/pedidos/recientes');
-        setPedidos(pedidosResponse.data);
+        const pedidosResponse = await pedidoApiFast.getAll();
+        const pedidosConDetalles = await Promise.all(
+          pedidosResponse.map(async (pedido) => {
+            const clienteResponse = await apiFast.get(`/clientes/${pedido.id_cliente}`);
+            const cliente = clienteResponse.data as Cliente;
+            return {
+              ...pedido,
+              total: 0, // El total se calculará en el backend
+              cliente
+            };
+          })
+        );
+        setPedidos(pedidosConDetalles);
 
-        // Obtener estadísticas
-        const statsResponse = await apiFast.get('/estadisticas');
-        setEstadisticas(statsResponse.data);
+        // Calcular estadísticas básicas
+        const ventasTotales = pedidosConDetalles.reduce((sum, pedido) => sum + pedido.total, 0);
+        const ordenesPendientes = pedidosConDetalles.filter(
+          pedido => pedido.id_estado === 1 && pedido.id_estado_envio === 2
+        ).length;
+
+        setEstadisticas({
+          ventas_totales: ventasTotales,
+          clientes_nuevos: 0, // Este dato debería venir de la API
+          ordenes_pendientes: ordenesPendientes
+        });
       } catch (err) {
         console.error('Error al cargar datos:', err);
         setError('Error al cargar los datos del dashboard');
@@ -142,6 +163,22 @@ export default function AdminDashboard() {
       style: 'currency',
       currency: 'CLP'
     }).format(amount);
+  };
+
+  const getEstadoPedido = (id_estado: number, id_estado_envio: number) => {
+    if (id_estado === 1) {
+      switch (id_estado_envio) {
+        case 1:
+          return { texto: 'Enviado', color: 'green' };
+        case 2:
+          return { texto: 'Pendiente', color: 'yellow' };
+        case 3:
+          return { texto: 'Entregado', color: 'blue' };
+        default:
+          return { texto: 'Desconocido', color: 'gray' };
+      }
+    }
+    return { texto: 'Cancelado', color: 'red' };
   };
 
   const validateField = (name: string, value: string): string => {
@@ -448,31 +485,40 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {pedidos.map((pedido) => (
-                  <tr key={pedido.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{pedido.id_pedido}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {pedido.cliente.nombre} {pedido.cliente.apellido}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {new Date(pedido.fecha).toLocaleDateString('es-CL')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {formatCurrency(pedido.total)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        pedido.estado === 'completado' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                          : pedido.estado === 'pendiente'
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                      }`}>
-                        {pedido.estado.charAt(0).toUpperCase() + pedido.estado.slice(1)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {pedidos.map((pedido) => {
+                  const estado = getEstadoPedido(pedido.id_estado, pedido.id_estado_envio);
+                  return (
+                    <tr key={pedido.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{pedido.id_pedido}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div>
+                          <div className="font-medium">{`${pedido.cliente.nombre} ${pedido.cliente.apellido}`}</div>
+                          <div className="text-xs text-gray-500">{pedido.cliente.correo}</div>
+                          <div className="text-xs text-gray-500">{pedido.cliente.telefono}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {new Date(pedido.fecha).toLocaleDateString('es-CL')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {formatCurrency(pedido.total)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          estado.color === 'green' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : estado.color === 'yellow'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            : estado.color === 'blue'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                        }`}>
+                          {estado.texto}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
