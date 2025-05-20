@@ -267,6 +267,7 @@ export default function EmpleadosPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dirección</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
               </tr>
@@ -282,7 +283,16 @@ export default function EmpleadosPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{empleado.correo}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{empleado.telefono}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {empleado.telefono ? empleado.telefono : 
+                      <span className="text-gray-400 italic">No proporcionado</span>
+                    }
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {empleado.direccion ? empleado.direccion : 
+                      <span className="text-gray-400 italic">No proporcionada</span>
+                    }
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       empleado.rol_id === 2 
