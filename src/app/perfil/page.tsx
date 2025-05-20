@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useRouter } from 'next/navigation';
-import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle, FaBoxOpen } from 'react-icons/fa';
 import Link from 'next/link';
-import { authApi } from '@/lib/api';
+import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast, pedidoApiFast, productoApi } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
+import toast from 'react-hot-toast';
 
 // Interfaz para los pedidos
 interface Pedido {
@@ -15,6 +16,10 @@ interface Pedido {
   estado: string;
   total: number;
   productos?: PedidoProducto[];
+  id_estado: number;
+  id_estado_envio: number;
+  medio_pago_id: number;
+  id_cliente: number;
 }
 
 interface PedidoProducto {
@@ -29,12 +34,12 @@ export default function PerfilPage() {
   const { openLoginModal } = useLoginModal();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    nombre: user?.nombre || '',
-    apellido: user?.apellido || '',
-    email: user?.correo || '',
-    telefono: user?.telefono?.toString() || '',
-    direccion: user?.direccion || '',
-    rut: user?.rut || '',
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    rut: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -45,6 +50,7 @@ export default function PerfilPage() {
   const [activeTab, setActiveTab] = useState('info');
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loadingPedidos, setLoadingPedidos] = useState(false);
+  const [isUserLoading, setIsUserLoading] = useState(true);
 
   // Proteger la ruta si no hay usuario autenticado
   useEffect(() => {
@@ -69,82 +75,71 @@ export default function PerfilPage() {
         cargarPedidos();
       }
     }
+    setIsUserLoading(false);
   }, [user, router, openLoginModal, activeTab]);
 
   // Función para cargar los pedidos del usuario
   const cargarPedidos = async () => {
-    if (!user) return;
+    if (!user || !isCliente(user)) return;
     
     setLoadingPedidos(true);
     try {
-      // Aquí se implementaría la llamada a la API para obtener los pedidos
-      // Por ahora, usamos datos de ejemplo relacionados con tenis de mesa
-      const datosDePedidosEjemplo: Pedido[] = [
-        {
-          id_pedido: 1001,
-          fecha: '2023-11-15',
-          estado: 'Entregado',
-          total: 45990,
-          productos: [
-            { nombre: 'Paleta Profesional Butterfly', cantidad: 1, precio: 45990 }
-          ]
-        },
-        {
-          id_pedido: 1002,
-          fecha: '2023-12-05',
-          estado: 'En proceso',
-          total: 37980,
-          productos: [
-            { nombre: 'Pelotas Training 3 estrellas (Pack 6)', cantidad: 2, precio: 12990 },
-            { nombre: 'Cinta de protección para paleta', cantidad: 1, precio: 11990 }
-          ]
-        },
-        {
-          id_pedido: 1003,
-          fecha: '2024-01-20',
-          estado: 'Cancelado',
-          total: 129990,
-          productos: [
-            { nombre: 'Mesa Plegable Competición Stiga', cantidad: 1, precio: 129990 }
-          ]
-        },
-        {
-          id_pedido: 1004,
-          fecha: '2024-02-15',
-          estado: 'Entregado',
-          total: 78980,
-          productos: [
-            { nombre: 'Paleta Donic Waldner Carbon', cantidad: 1, precio: 52990 },
-            { nombre: 'Goma Yasaka Mark V', cantidad: 2, precio: 12995 }
-          ]
-        },
-        {
-          id_pedido: 1005,
-          fecha: '2024-03-10',
-          estado: 'En proceso',
-          total: 69980,
-          productos: [
-            { nombre: 'Red Profesional Joola', cantidad: 1, precio: 34990 },
-            { nombre: 'Zapatillas Butterfly Lezoline', cantidad: 1, precio: 34990 }
-          ]
-        }
-      ];
+      const pedidosCliente = await authApi.getPedidosCliente(user.id_cliente);
       
-      // Simulamos un retraso en la respuesta
-      setTimeout(() => {
-        setPedidos(datosDePedidosEjemplo);
-        setLoadingPedidos(false);
-      }, 800);
+      // Obtener los productos para cada pedido
+      const pedidosConProductos = await Promise.all(
+        pedidosCliente.map(async (pedido) => {
+          try {
+            const productos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido!);
+            
+            // Obtener los detalles de cada producto
+            const productosConDetalles = await Promise.all(
+              productos.map(async (prod) => {
+                try {
+                  const producto = await productoApi.getById(prod.id_producto);
+                  return {
+                    ...prod,
+                    nombre: producto.nombre
+                  };
+                } catch (error) {
+                  console.error(`Error al obtener detalles del producto ${prod.id_producto}:`, error);
+                  return {
+                    ...prod,
+                    nombre: 'Producto no disponible'
+                  };
+                }
+              })
+            );
+
+            return {
+              ...pedido,
+              estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
+              productos: productosConDetalles.map(prod => ({
+                nombre: prod.nombre,
+                cantidad: prod.cantidad,
+                precio: prod.precio_unitario
+              })),
+              total: productosConDetalles.reduce((sum, prod) => sum + (prod.precio_unitario * prod.cantidad), 0)
+            };
+          } catch (error) {
+            console.error(`Error al obtener productos del pedido ${pedido.id_pedido}:`, error);
+            return {
+              ...pedido,
+              estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
+              productos: [],
+              total: 0
+            };
+          }
+        })
+      );
       
+      setPedidos(pedidosConProductos);
+      setLoadingPedidos(false);
     } catch (error) {
       console.error('Error al cargar pedidos:', error);
       setLoadingPedidos(false);
     }
   };
-
-  if (!user) {
-    return null;
-  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -195,6 +190,43 @@ export default function PerfilPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleConfirmarRecepcion = async (pedidoId: number) => {
+    toast((t) => (
+      <div className="flex flex-col items-center">
+        <p className="mb-4">¿Estás seguro que deseas confirmar la recepción de este pedido?</p>
+        <div className="flex gap-2">
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            onClick={() => {
+              toast.dismiss(t.id);
+              toast.promise(
+                (async () => {
+                  await pedidoApiFast.updateEstadoEnvio(pedidoId, 3);
+                  await cargarPedidos();
+                })(),
+                {
+                  loading: 'Confirmando recepción...',
+                  success: '¡Pedido recepcionado correctamente!',
+                  error: 'Error al confirmar la recepción del pedido'
+                }
+              );
+            }}
+          >
+            Confirmar
+          </button>
+          <button
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+    });
   };
 
   const renderUserInfo = () => (
@@ -469,16 +501,13 @@ export default function PerfilPage() {
   // Función para renderizar pedidos según el estado seleccionado
   const renderPedidosPorEstado = (estado: string) => {
     const pedidosFiltrados = pedidos.filter(pedido => pedido.estado === estado);
-    const estadoLabel = estado === 'En proceso' ? 'en proceso' : 
-                      estado === 'Entregado' ? 'entregados' : 'cancelados';
+    const estadoLabel = estado === 'En proceso' ? 'en proceso' : 'entregados';
     
     // Colores según estado
-    const statusColor = estado === 'En proceso' ? 'yellow' : 
-                      estado === 'Entregado' ? 'green' : 'red';
+    const statusColor = estado === 'En proceso' ? 'yellow' : 'green';
                       
     // Iconos según estado
-    const StatusIcon = estado === 'En proceso' ? FaTruck : 
-                      estado === 'Entregado' ? FaCheckCircle : FaTimesCircle;
+    const StatusIcon = estado === 'En proceso' ? FaTruck : FaCheckCircle;
     
     return (
       <div className="space-y-6">
@@ -506,8 +535,7 @@ export default function PerfilPage() {
             </h3>
             <p className="mt-1 text-gray-500 dark:text-gray-400">
               {estado === 'En proceso' ? 'Tus pedidos en proceso aparecerán aquí' : 
-               estado === 'Entregado' ? 'Tus pedidos entregados aparecerán aquí' : 
-               'Tus pedidos cancelados aparecerán aquí'}
+               'Tus pedidos entregados aparecerán aquí'}
             </p>
           </div>
         ) : (
@@ -571,9 +599,20 @@ export default function PerfilPage() {
                       <FaMoneyBillWave className="mr-2 text-green-600 dark:text-green-400" />
                       <span className="font-medium">Total del pedido</span>
                     </div>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">
-                      ${pedido.total.toLocaleString('es-CL')}
-                    </p>
+                    <div className="flex items-center space-x-4">
+                      {pedido.id_estado_envio === 1 && (
+                        <button
+                          onClick={() => handleConfirmarRecepcion(pedido.id_pedido!)}
+                          className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                        >
+                          <FaBoxOpen className="mr-2" />
+                          Confirmar Recepción
+                        </button>
+                      )}
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        ${pedido.total.toLocaleString('es-CL')}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -583,6 +622,18 @@ export default function PerfilPage() {
       </div>
     );
   };
+
+  if (isUserLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -653,23 +704,6 @@ export default function PerfilPage() {
               }`} />
               Entregados
             </button>
-
-            <button
-              onClick={() => {
-                setActiveTab('pedidos-cancelados');
-                cargarPedidos();
-              }}
-              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                activeTab === 'pedidos-cancelados'
-                  ? 'bg-red-50 text-red-700 dark:bg-red-900/50 dark:text-red-300'
-                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-              }`}
-            >
-              <FaTimesCircle className={`mr-3 h-5 w-5 ${
-                activeTab === 'pedidos-cancelados' ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'
-              }`} />
-              Cancelados
-            </button>
           </nav>
         </div>
 
@@ -690,7 +724,6 @@ export default function PerfilPage() {
             {activeTab === 'info' && (isEditing ? renderEditForm() : renderUserInfo())}
             {activeTab === 'pedidos-proceso' && renderPedidosPorEstado('En proceso')}
             {activeTab === 'pedidos-entregados' && renderPedidosPorEstado('Entregado')}
-            {activeTab === 'pedidos-cancelados' && renderPedidosPorEstado('Cancelado')}
           </div>
         </div>
       </div>
