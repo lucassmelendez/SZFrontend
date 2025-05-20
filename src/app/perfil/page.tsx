@@ -7,6 +7,7 @@ import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCa
 import Link from 'next/link';
 import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast, pedidoApiFast, productoApi } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
+import toast from 'react-hot-toast';
 
 // Interfaz para los pedidos
 interface Pedido {
@@ -192,14 +193,17 @@ export default function PerfilPage() {
   };
 
   const handleConfirmarRecepcion = async (pedidoId: number) => {
-    try {
-      await pedidoApiFast.updateEstadoEnvio(pedidoId, 3);
-      // Recargar los pedidos después de actualizar
-      cargarPedidos();
-    } catch (error) {
-      console.error('Error al confirmar recepción:', error);
-      setError('Error al confirmar la recepción del pedido');
-    }
+    toast.promise(
+      (async () => {
+        await pedidoApiFast.updateEstadoEnvio(pedidoId, 3);
+        await cargarPedidos();
+      })(),
+      {
+        loading: 'Confirmando recepción...',
+        success: '¡Pedido recepcionado correctamente!',
+        error: 'Error al confirmar la recepción del pedido'
+      }
+    );
   };
 
   const renderUserInfo = () => (
