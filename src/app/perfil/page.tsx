@@ -5,7 +5,7 @@ import { useAuth } from '../../lib/auth/AuthContext';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle, FaBoxOpen } from 'react-icons/fa';
 import Link from 'next/link';
-import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast, pedidoApiFast } from '@/lib/api';
+import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast, pedidoApiFast, productoApi } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 // Interfaz para los pedidos
@@ -33,12 +33,12 @@ export default function PerfilPage() {
   const { openLoginModal } = useLoginModal();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    nombre: user?.nombre || '',
-    apellido: user?.apellido || '',
-    email: user?.correo || '',
-    telefono: user?.telefono?.toString() || '',
-    direccion: user?.direccion || '',
-    rut: user?.rut || '',
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    rut: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -49,6 +49,7 @@ export default function PerfilPage() {
   const [activeTab, setActiveTab] = useState('info');
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loadingPedidos, setLoadingPedidos] = useState(false);
+  const [isUserLoading, setIsUserLoading] = useState(true);
 
   // Proteger la ruta si no hay usuario autenticado
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function PerfilPage() {
         cargarPedidos();
       }
     }
+    setIsUserLoading(false);
   }, [user, router, openLoginModal, activeTab]);
 
   // Función para cargar los pedidos del usuario
@@ -88,15 +90,35 @@ export default function PerfilPage() {
         pedidosCliente.map(async (pedido) => {
           try {
             const productos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido!);
+            
+            // Obtener los detalles de cada producto
+            const productosConDetalles = await Promise.all(
+              productos.map(async (prod) => {
+                try {
+                  const producto = await productoApi.getById(prod.id_producto);
+                  return {
+                    ...prod,
+                    nombre: producto.nombre
+                  };
+                } catch (error) {
+                  console.error(`Error al obtener detalles del producto ${prod.id_producto}:`, error);
+                  return {
+                    ...prod,
+                    nombre: 'Producto no disponible'
+                  };
+                }
+              })
+            );
+
             return {
               ...pedido,
               estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
-              productos: productos.map(prod => ({
-                nombre: prod.nombre || 'Producto',
+              productos: productosConDetalles.map(prod => ({
+                nombre: prod.nombre,
                 cantidad: prod.cantidad,
                 precio: prod.precio_unitario
               })),
-              total: productos.reduce((sum, prod) => sum + (prod.precio_unitario * prod.cantidad), 0)
+              total: productosConDetalles.reduce((sum, prod) => sum + (prod.precio_unitario * prod.cantidad), 0)
             };
           } catch (error) {
             console.error(`Error al obtener productos del pedido ${pedido.id_pedido}:`, error);
@@ -573,6 +595,18 @@ export default function PerfilPage() {
       </div>
     );
   };
+
+  if (isUserLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
