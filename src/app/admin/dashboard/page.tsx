@@ -36,6 +36,24 @@ interface Estadisticas {
   ordenes_pendientes: number;
 }
 
+const estadosEnvio: Record<number, string> = {
+  1: "Enviado",
+  2: "Pendiente",
+  3: "Recibido"
+};
+
+const mediosPago: Record<number, string> = {
+  1: "Transferencia",
+  2: "Webpay"
+};
+
+const getEstadoPago = (id_estado: number) => {
+  return {
+    texto: id_estado === 1 ? 'Pagado' : 'Pendiente',
+    color: id_estado === 1 ? 'green' : 'yellow'
+  };
+};
+
 const validateEmployeeData = (data: {
   nombre: string;
   apellido: string;
@@ -172,11 +190,13 @@ export default function AdminDashboard() {
   const getEstadoPedido = (id_estado: number, id_estado_envio: number) => {
     switch (id_estado_envio) {
       case 1:
-        return { texto: 'Enviado', color: 'green' };
+        return { texto: 'preparado', color: 'blue' };
       case 2:
         return { texto: 'Pendiente', color: 'yellow' };
       case 3:
-        return { texto: 'Entregado', color: 'blue' };
+        return { texto: 'Entregado', color: 'green' };
+      case 4:
+        return { texto: 'despachado', color: 'purple' };
       default:
         return { texto: 'Pendiente', color: 'yellow' };
     }
@@ -491,13 +511,16 @@ export default function AdminDashboard() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Pago</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Envío</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Medio de Pago</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {pedidos
                   .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
                   .map((pedido) => {
+                  const estadoPago = getEstadoPago(pedido.id_estado);
                   const estado = getEstadoPedido(pedido.id_estado, pedido.id_estado_envio);
                   return (
                     <tr key={pedido.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -517,6 +540,15 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          estadoPago.color === 'green' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {estadoPago.texto}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           estado.color === 'green' 
                             ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                             : estado.color === 'yellow'
@@ -526,6 +558,15 @@ export default function AdminDashboard() {
                             : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                         }`}>
                           {estado.texto}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          pedido.medio_pago_id === 1 || pedido.medio_pago_id === 2
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                        }`}>
+                          {mediosPago[pedido.medio_pago_id] || "Desconocido"}
                         </span>
                       </td>
                     </tr>
