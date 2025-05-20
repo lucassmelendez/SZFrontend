@@ -341,6 +341,16 @@ export const authApi = {
     const response = await api.put<ApiResponse<User>>('/auth/profile', data);
     return response.data;
   },
+
+  getPedidosCliente: async (clienteId: number): Promise<Pedido[]> => {
+    try {
+      const response = await apiFast.get(`/pedidos/cliente/${clienteId}`);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error al obtener pedidos del cliente:', error);
+      throw error;
+    }
+  },
 };
 
 // API para clientes usando FastAPI

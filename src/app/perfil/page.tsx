@@ -5,7 +5,7 @@ import { useAuth } from '../../lib/auth/AuthContext';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import Link from 'next/link';
-import { authApi } from '@/lib/api';
+import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 // Interfaz para los pedidos
@@ -15,6 +15,10 @@ interface Pedido {
   estado: string;
   total: number;
   productos?: PedidoProducto[];
+  id_estado: number;
+  id_estado_envio: number;
+  medio_pago_id: number;
+  id_cliente: number;
 }
 
 interface PedidoProducto {
@@ -73,69 +77,43 @@ export default function PerfilPage() {
 
   // Función para cargar los pedidos del usuario
   const cargarPedidos = async () => {
-    if (!user) return;
+    if (!user || !isCliente(user)) return;
     
     setLoadingPedidos(true);
     try {
-      // Aquí se implementaría la llamada a la API para obtener los pedidos
-      // Por ahora, usamos datos de ejemplo relacionados con tenis de mesa
-      const datosDePedidosEjemplo: Pedido[] = [
-        {
-          id_pedido: 1001,
-          fecha: '2023-11-15',
-          estado: 'Entregado',
-          total: 45990,
-          productos: [
-            { nombre: 'Paleta Profesional Butterfly', cantidad: 1, precio: 45990 }
-          ]
-        },
-        {
-          id_pedido: 1002,
-          fecha: '2023-12-05',
-          estado: 'En proceso',
-          total: 37980,
-          productos: [
-            { nombre: 'Pelotas Training 3 estrellas (Pack 6)', cantidad: 2, precio: 12990 },
-            { nombre: 'Cinta de protección para paleta', cantidad: 1, precio: 11990 }
-          ]
-        },
-        {
-          id_pedido: 1003,
-          fecha: '2024-01-20',
-          estado: 'Cancelado',
-          total: 129990,
-          productos: [
-            { nombre: 'Mesa Plegable Competición Stiga', cantidad: 1, precio: 129990 }
-          ]
-        },
-        {
-          id_pedido: 1004,
-          fecha: '2024-02-15',
-          estado: 'Entregado',
-          total: 78980,
-          productos: [
-            { nombre: 'Paleta Donic Waldner Carbon', cantidad: 1, precio: 52990 },
-            { nombre: 'Goma Yasaka Mark V', cantidad: 2, precio: 12995 }
-          ]
-        },
-        {
-          id_pedido: 1005,
-          fecha: '2024-03-10',
-          estado: 'En proceso',
-          total: 69980,
-          productos: [
-            { nombre: 'Red Profesional Joola', cantidad: 1, precio: 34990 },
-            { nombre: 'Zapatillas Butterfly Lezoline', cantidad: 1, precio: 34990 }
-          ]
-        }
-      ];
+      const pedidosCliente = await authApi.getPedidosCliente(user.id_cliente);
       
-      // Simulamos un retraso en la respuesta
-      setTimeout(() => {
-        setPedidos(datosDePedidosEjemplo);
-        setLoadingPedidos(false);
-      }, 800);
+      // Obtener los productos para cada pedido
+      const pedidosConProductos = await Promise.all(
+        pedidosCliente.map(async (pedido) => {
+          try {
+            const productos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido!);
+            return {
+              ...pedido,
+              estado: pedido.id_estado === 1 ? 'En proceso' : 
+                      pedido.id_estado === 2 ? 'Entregado' : 'Cancelado',
+              productos: productos.map(prod => ({
+                nombre: prod.nombre || 'Producto',
+                cantidad: prod.cantidad,
+                precio: prod.precio_unitario
+              })),
+              total: productos.reduce((sum, prod) => sum + (prod.precio_unitario * prod.cantidad), 0)
+            };
+          } catch (error) {
+            console.error(`Error al obtener productos del pedido ${pedido.id_pedido}:`, error);
+            return {
+              ...pedido,
+              estado: pedido.id_estado === 1 ? 'En proceso' : 
+                      pedido.id_estado === 2 ? 'Entregado' : 'Cancelado',
+              productos: [],
+              total: 0
+            };
+          }
+        })
+      );
       
+      setPedidos(pedidosConProductos);
+      setLoadingPedidos(false);
     } catch (error) {
       console.error('Error al cargar pedidos:', error);
       setLoadingPedidos(false);
