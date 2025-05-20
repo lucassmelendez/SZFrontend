@@ -193,17 +193,40 @@ export default function PerfilPage() {
   };
 
   const handleConfirmarRecepcion = async (pedidoId: number) => {
-    toast.promise(
-      (async () => {
-        await pedidoApiFast.updateEstadoEnvio(pedidoId, 3);
-        await cargarPedidos();
-      })(),
-      {
-        loading: 'Confirmando recepción...',
-        success: '¡Pedido recepcionado correctamente!',
-        error: 'Error al confirmar la recepción del pedido'
-      }
-    );
+    toast((t) => (
+      <div className="flex flex-col items-center">
+        <p className="mb-4">¿Estás seguro que deseas confirmar la recepción de este pedido?</p>
+        <div className="flex gap-2">
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            onClick={() => {
+              toast.dismiss(t.id);
+              toast.promise(
+                (async () => {
+                  await pedidoApiFast.updateEstadoEnvio(pedidoId, 3);
+                  await cargarPedidos();
+                })(),
+                {
+                  loading: 'Confirmando recepción...',
+                  success: '¡Pedido recepcionado correctamente!',
+                  error: 'Error al confirmar la recepción del pedido'
+                }
+              );
+            }}
+          >
+            Confirmar
+          </button>
+          <button
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+    });
   };
 
   const renderUserInfo = () => (
