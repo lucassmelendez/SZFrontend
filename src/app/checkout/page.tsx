@@ -731,7 +731,7 @@ export default function CheckoutPage() {
 }
 
 // Función auxiliar para crear y enviar el formulario WebPay manualmente
-export function createAndSubmitWebpayForm(url, token) {
+export function createAndSubmitWebpayForm(url: string, token: string) {
   console.log('Creando formulario WebPay manualmente:', { url, token });
   
   // Crear el formulario
