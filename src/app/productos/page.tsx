@@ -50,8 +50,8 @@ export default function ProductosPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 max-w-7xl">
-      <div className="bg-gradient-to-r from-blue-500 to-blue-400 dark:from-blue-600 dark:to-blue-500 text-white rounded-xl shadow-md p-8 mb-8 mt-4">
+    <div className="container mx-auto px-4 py-8">
+      <div className="bg-gradient-to-r from-blue-500 to-blue-400 dark:from-blue-600 dark:to-blue-500 text-white rounded-xl shadow-md p-8 mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">Catálogo de Productos</h1>
