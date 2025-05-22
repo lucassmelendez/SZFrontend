@@ -31,9 +31,10 @@ interface OrderWithDetails {
 }
 
 const estadosEnvio: Record<number, string> = {
-  1: "Enviado",
+  1: "Preparado",
   2: "Pendiente",
-  3: "Recibido"
+  3: "Entregado",
+  4: "Despachado"
 };
 
 const mediosPago: Record<number, string> = {
@@ -120,7 +121,9 @@ export default function ContabilidadDashboard() {
       );
 
       const validPedidos = pedidosConProductos.filter((p): p is OrderWithDetails => p !== null);
-      setOrders(validPedidos);
+      // Ordenar pedidos de más reciente a más antiguo basado en id_pedido
+      const ordenados = validPedidos.sort((a, b) => b.id_pedido - a.id_pedido);
+      setOrders(ordenados);
       setError(null);
     } catch (err) {
       console.error('Error al cargar los pedidos:', err);
@@ -161,7 +164,7 @@ export default function ContabilidadDashboard() {
     }
 
     return true;
-  });
+  }).sort((a, b) => b.id_pedido - a.id_pedido);
 
   if (isLoading || loading) {
     return (
@@ -231,6 +234,9 @@ export default function ContabilidadDashboard() {
       {/* Lista de pedidos */}
       <div className="bg-white rounded-lg shadow-md">
         <div className="grid gap-4 p-6">
+          <p className="text-sm text-gray-500 italic mb-2">
+            Los pedidos se muestran ordenados del más reciente al más antiguo según su número de pedido.
+          </p>
           {filteredOrders.length === 0 ? (
             <p className="text-gray-500 text-center py-4">
               No hay pedidos que coincidan con los filtros seleccionados.
