@@ -215,14 +215,15 @@ export default function EmpleadosPage() {
         correo: String(target.correo.value).trim(),
         contrasena: String(target.contrasena.value),
         confirmarContrasena: String(target.confirmarContrasena.value),
-        direccion: String(target.direccion.value).trim() || 'N/A',
-        telefono: String(target.telefono.value).trim() || 'N/A',
+        direccion: String(target.direccion.value).trim(),
+        telefono: String(target.telefono.value).trim(),
         rol_id: Number(target.rol_id.value)
       };
 
       // Validación básica
       if (!formValues.nombre || !formValues.apellido || !formValues.rut || 
-          !formValues.correo || !formValues.contrasena || !formValues.confirmarContrasena || !formValues.rol_id) {
+          !formValues.correo || !formValues.contrasena || !formValues.confirmarContrasena || 
+          !formValues.direccion || !formValues.telefono || !formValues.rol_id) {
         setError('Todos los campos marcados con * son obligatorios');
         setIsSubmitting(false);
         return;
@@ -275,9 +276,7 @@ export default function EmpleadosPage() {
       const { confirmarContrasena, ...datosEmpleado } = formValues;
       const nuevoEmpleado = await empleadoApiFast.create({
         ...datosEmpleado,
-        rut: rutFormateado, // Usar el RUT formateado
-        direccion: datosEmpleado.direccion === '' ? 'N/A' : datosEmpleado.direccion,
-        telefono: datosEmpleado.telefono === '' ? 'N/A' : datosEmpleado.telefono
+        rut: rutFormateado // Usar el RUT formateado
       });
 
       console.log('Empleado creado:', nuevoEmpleado);
@@ -591,22 +590,24 @@ export default function EmpleadosPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Dirección
+                  Dirección <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="direccion"
+                  required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono
+                  Teléfono <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
                   name="telefono"
+                  required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
