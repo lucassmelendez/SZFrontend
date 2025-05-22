@@ -430,18 +430,18 @@ export default function CheckoutPage() {
                       Para completar tu compra, primero debes iniciar sesión o crear una cuenta.
                     </p>
                   </div>
-                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full max-w-xs sm:max-w-md">
                     <button
                       type="button"
                       onClick={openLoginModal}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors"
+                      className="w-full px-6 py-4 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors text-base"
                     >
                       Iniciar sesión
                     </button>
                     <button
                       type="button"
                       onClick={openRegisterModal}
-                      className="px-6 py-3 bg-gray-200 text-gray-800 rounded-md font-semibold hover:bg-gray-300 transition-colors"
+                      className="w-full px-6 py-4 bg-gray-200 text-gray-800 rounded-md font-semibold hover:bg-gray-300 transition-colors text-base"
                     >
                       Registrarse
                     </button>
