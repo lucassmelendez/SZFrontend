@@ -277,46 +277,44 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
             
             {/* Medios de pago */}
             <div className="mb-5">
-              <div className="flex items-center justify-center">
-                <div className="flex items-center space-x-6 w-fit mx-auto">
-                  <h3 className="text-gray-800 font-medium">Medios de pago</h3>
-                  <div className="flex items-center space-x-4">
-                    <div className="relative h-8 w-20">
-                      <Image 
-                        src="/webpay.svg" 
-                        alt="Webpay" 
-                        width={80}
-                        height={32}
-                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-                      />
-                    </div>
-                    <div className="relative h-8 w-12">
-                      <Image 
-                        src="/visa.svg" 
-                        alt="Visa" 
-                        width={48}
-                        height={32}
-                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-                      />
-                    </div>
-                    <div className="relative h-8 w-12">
-                      <Image 
-                        src="/mastercard.svg" 
-                        alt="Mastercard" 
-                        width={48}
-                        height={32}
-                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-                      />
-                    </div>
-                    <div className="relative h-8 w-20">
-                      <Image 
-                        src="/redcompra.svg" 
-                        alt="Redcompra" 
-                        width={80}
-                        height={32}
-                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-                      />
-                    </div>
+              <div className="flex flex-col items-center justify-center">
+                <h3 className="text-gray-800 font-medium mb-3">Medios de pago</h3>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <div className="relative h-8 w-20">
+                    <Image 
+                      src="/webpay.svg" 
+                      alt="Webpay" 
+                      width={80}
+                      height={32}
+                      style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+                    />
+                  </div>
+                  <div className="relative h-8 w-12">
+                    <Image 
+                      src="/visa.svg" 
+                      alt="Visa" 
+                      width={48}
+                      height={32}
+                      style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+                    />
+                  </div>
+                  <div className="relative h-8 w-12">
+                    <Image 
+                      src="/mastercard.svg" 
+                      alt="Mastercard" 
+                      width={48}
+                      height={32}
+                      style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+                    />
+                  </div>
+                  <div className="relative h-8 w-20">
+                    <Image 
+                      src="/redcompra.svg" 
+                      alt="Redcompra" 
+                      width={80}
+                      height={32}
+                      style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+                    />
                   </div>
                 </div>
               </div>
