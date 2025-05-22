@@ -61,8 +61,8 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
   if (productos.length === 0) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">{title}</h2>
-        <p className="text-gray-600 dark:text-gray-400">No se encontraron productos.</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">{title}</h2>
+        <p className="text-gray-600">No se encontraron productos.</p>
       </div>
     );
   }
@@ -74,15 +74,15 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
 
   return (
     <div className="my-8">
-      {title && <h2 className="text-3xl font-bold text-center mb-8 dark:text-white">{title}</h2>}
+      {title && <h2 className="text-3xl font-bold text-center mb-8">{title}</h2>}
 
       <div className="relative">
         {/* Botón anterior */}
         <button 
           onClick={prevPage} 
           disabled={currentPage === 0}
-          className={`absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-gray-800 rounded-full shadow-md p-3 text-blue-600 dark:text-blue-400 ${
-            currentPage === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          className={`absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-3 text-blue-600 ${
+            currentPage === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
           }`}
           aria-label="Anterior"
         >
@@ -113,8 +113,8 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
         <button 
           onClick={nextPage} 
           disabled={currentPage >= totalPages - 1}
-          className={`absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-gray-800 rounded-full shadow-md p-3 text-blue-600 dark:text-blue-400 ${
-            currentPage >= totalPages - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          className={`absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-3 text-blue-600 ${
+            currentPage >= totalPages - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
           }`}
           aria-label="Siguiente"
         >
@@ -130,8 +130,8 @@ export default function ProductCarousel({ productos, title }: ProductCarouselPro
             onClick={() => setCurrentPage(index)}
             className={`w-3 h-3 rounded-full ${
               currentPage === index 
-                ? 'bg-blue-600 dark:bg-blue-400' 
-                : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                ? 'bg-blue-600' 
+                : 'bg-gray-300 hover:bg-gray-400'
             }`}
             aria-label={`Página ${index + 1}`}
           />
