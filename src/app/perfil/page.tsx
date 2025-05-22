@@ -225,7 +225,9 @@ export default function PerfilPage() {
         if (formData.newPassword) {
           updateData = {
             currentPassword: formData.currentPassword,
-            newPassword: formData.newPassword
+            newPassword: formData.newPassword,
+            // Para la API FastAPI necesitamos enviar contrasena directamente
+            contrasena: formData.newPassword
           };
         }
       } else {
@@ -238,16 +240,34 @@ export default function PerfilPage() {
           direccion: formData.direccion,
           ...(formData.newPassword ? {
             currentPassword: formData.currentPassword,
-            newPassword: formData.newPassword
+            newPassword: formData.newPassword,
+            // Para la API FastAPI necesitamos enviar contrasena directamente
+            contrasena: formData.newPassword
           } : {})
         };
       }
       
+      console.log('Enviando datos para actualizar perfil:', updateData);
       const response = await authApi.updateProfile(updateData);
+      console.log('Respuesta actualización de perfil:', response);
       setSuccess('Perfil actualizado exitosamente');
       setIsEditing(false);
+      
+      // Actualizar los datos del usuario en el contexto si fue exitoso
+      if (response.success && user) {
+        // Actualizar el usuario en localStorage para reflejar los cambios
+        if (isCliente(user)) {
+          localStorage.setItem('cliente_data', JSON.stringify(response.data));
+        } else if (isEmpleado(user)) {
+          localStorage.setItem('empleado_data', JSON.stringify(response.data));
+        }
+        
+        // Recargar la página para mostrar los datos actualizados
+        window.location.reload();
+      }
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Error al actualizar el perfil');
+      console.error('Error completo al actualizar perfil:', error);
+      setError(error.response?.data?.message || error.response?.data?.detail || 'Error al actualizar el perfil');
     } finally {
       setIsLoading(false);
     }

@@ -340,8 +340,51 @@ export const authApi = {
     currentPassword?: string;
     newPassword?: string;
   }): Promise<ApiResponse<User>> => {
-    const response = await api.put<ApiResponse<User>>('/auth/profile', data);
-    return response.data;
+    try {
+      // Verificar si estamos usando un token de FastAPI
+      const token = localStorage.getItem('auth_token');
+      const userType = localStorage.getItem('user_type');
+      
+      // Si es un cliente autenticado con FastAPI
+      if (token && token.startsWith('cliente_fastapi_') && userType === 'cliente') {
+        // Recuperar los datos del cliente del localStorage
+        const clienteData = localStorage.getItem('cliente_data');
+        if (!clienteData) {
+          throw new Error('No se encontraron datos del cliente');
+        }
+        
+        const cliente = JSON.parse(clienteData);
+        
+        // Preparar datos para actualizar el perfil usando la API FastAPI para clientes
+        const updateData = {
+          ...data,
+          id_cliente: cliente.id_cliente
+        };
+        
+        // Usar la API FastAPI para actualizar el cliente
+        const response = await apiFast.put(`/clientes/${cliente.id_cliente}`, updateData);
+        
+        if (response.data && response.data.cliente) {
+          // Actualizar datos en localStorage
+          localStorage.setItem('cliente_data', JSON.stringify(response.data.cliente));
+          
+          // Retornar en el formato esperado por la aplicación
+          return {
+            success: true,
+            data: response.data.cliente
+          };
+        } else {
+          throw new Error('Respuesta inesperada del servidor');
+        }
+      } else {
+        // Usar la API normal para actualizar el perfil
+        const response = await api.put<ApiResponse<User>>('/auth/profile', data);
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      throw error;
+    }
   },
 
   getPedidosCliente: async (clienteId: number): Promise<Pedido[]> => {
