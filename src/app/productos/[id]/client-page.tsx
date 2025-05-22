@@ -25,7 +25,7 @@ interface ProductoDetailClientProps {
 export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
   const router = useRouter();
   const { agregarProducto } = useCarrito();
-  const { openCart } = useFloatingCartContext();
+  const { openCart, isCartOpen } = useFloatingCartContext();
   const [producto, setProducto] = useState<Producto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -232,7 +232,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
             {/* Selector de cantidad y botón para agregar al carrito */}
             <div className="mt-3 mb-5">
               <div className="flex flex-col md:flex-row items-center justify-center space-y-3 md:space-y-0 md:space-x-4">
-                <div className="flex items-center bg-gray-50 p-3 rounded-lg w-full md:w-auto">
+                <div className="flex items-center bg-gray-50 p-3 rounded-lg w-full md:w-auto hidden md:flex">
                   <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden w-full">
                     <button
                       onClick={decrementCantidad}
@@ -255,7 +255,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
                 <button
                   onClick={handleAddToCart}
                   disabled={isAdding || producto.stock <= 0}
-                  className={`flex items-center justify-center space-x-2 py-3 px-6 rounded-lg text-white w-full md:w-auto md:flex-1 ${
+                  className={`flex items-center justify-center space-x-2 py-3 px-6 rounded-lg text-white w-full md:w-auto md:flex-1 hidden md:flex ${
                     producto.stock <= 0
                       ? 'bg-gray-400 cursor-not-allowed'
                       : isAdding
@@ -277,46 +277,44 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
             
             {/* Medios de pago */}
             <div className="mb-5">
-              <div className="flex items-center justify-center">
-                <div className="flex items-center space-x-6 w-fit mx-auto">
-                  <h3 className="text-gray-800 font-medium">Medios de pago</h3>
-                  <div className="flex items-center space-x-4">
-                    <div className="relative h-8 w-20">
-                      <Image 
-                        src="/webpay.svg" 
-                        alt="Webpay" 
-                        width={80}
-                        height={32}
-                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-                      />
-                    </div>
-                    <div className="relative h-8 w-12">
-                      <Image 
-                        src="/visa.svg" 
-                        alt="Visa" 
-                        width={48}
-                        height={32}
-                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-                      />
-                    </div>
-                    <div className="relative h-8 w-12">
-                      <Image 
-                        src="/mastercard.svg" 
-                        alt="Mastercard" 
-                        width={48}
-                        height={32}
-                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-                      />
-                    </div>
-                    <div className="relative h-8 w-20">
-                      <Image 
-                        src="/redcompra.svg" 
-                        alt="Redcompra" 
-                        width={80}
-                        height={32}
-                        style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
-                      />
-                    </div>
+              <div className="flex flex-col items-center justify-center">
+                <h3 className="text-gray-800 font-medium mb-3">Medios de pago</h3>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <div className="relative h-8 w-20">
+                    <Image 
+                      src="/webpay.svg" 
+                      alt="Webpay" 
+                      width={80}
+                      height={32}
+                      style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+                    />
+                  </div>
+                  <div className="relative h-8 w-12">
+                    <Image 
+                      src="/visa.svg" 
+                      alt="Visa" 
+                      width={48}
+                      height={32}
+                      style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+                    />
+                  </div>
+                  <div className="relative h-8 w-12">
+                    <Image 
+                      src="/mastercard.svg" 
+                      alt="Mastercard" 
+                      width={48}
+                      height={32}
+                      style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+                    />
+                  </div>
+                  <div className="relative h-8 w-20">
+                    <Image 
+                      src="/redcompra.svg" 
+                      alt="Redcompra" 
+                      width={80}
+                      height={32}
+                      style={{ objectFit: 'contain', width: 'auto', height: '100%' }}
+                    />
                   </div>
                 </div>
               </div>
@@ -324,6 +322,55 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
           </div>
         </div>
       </div>
+
+      {/* Sticky Add to Cart para móviles */}
+      {producto && (
+        <div 
+          className={`fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-3 md:hidden ${
+            isCartOpen ? 'opacity-0 pointer-events-none' : 'opacity-100 z-50'
+          } transition-opacity duration-300`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+              <button
+                onClick={decrementCantidad}
+                disabled={cantidad <= 1 || producto.stock <= 0}
+                className="px-3 py-2 border-r border-gray-300 hover:bg-gray-100 disabled:opacity-50 text-gray-700"
+              >
+                -
+              </button>
+              <span className="px-3 py-1 text-gray-800 font-medium min-w-[30px] text-center">{cantidad}</span>
+              <button
+                onClick={incrementCantidad}
+                disabled={producto.stock <= cantidad || producto.stock <= 0}
+                className="px-3 py-2 border-l border-gray-300 hover:bg-gray-100 disabled:opacity-50 text-gray-700"
+              >
+                +
+              </button>
+            </div>
+            <button
+              onClick={handleAddToCart}
+              disabled={isAdding || producto.stock <= 0}
+              className={`flex items-center justify-center space-x-1 py-2 px-6 rounded-lg text-white flex-1 ml-3 ${
+                producto.stock <= 0
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : isAdding
+                  ? 'bg-green-500'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } transition-colors font-medium`}
+            >
+              <FaShoppingCart size={16} />
+              <span>
+                {isAdding
+                  ? '¡Agregado!'
+                  : producto.stock <= 0
+                  ? 'Sin stock'
+                  : 'Agregar'}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
