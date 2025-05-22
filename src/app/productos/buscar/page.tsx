@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { productoApi, Producto } from '@/lib/api';
 import ProductGrid from '@/components/ui/ProductGrid';
 import Link from 'next/link';
 import { FaArrowLeft } from 'react-icons/fa';
 
-export default function BuscarProductos() {
+function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   
@@ -88,5 +88,22 @@ export default function BuscarProductos() {
         </>
       )}
     </div>
+  );
+}
+
+// Componente de carga mientras se resuelve la suspensión
+function BusquedaLoading() {
+  return (
+    <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[50vh]">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+    </div>
+  );
+}
+
+export default function BuscarProductos() {
+  return (
+    <Suspense fallback={<BusquedaLoading />}>
+      <SearchResults />
+    </Suspense>
   );
 } 
