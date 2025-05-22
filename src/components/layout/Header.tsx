@@ -282,21 +282,36 @@ export default function Header() {
 
           {/* Primera fila (móvil): Menú, Logo, Perfil y Carrito */}
           <div className="flex md:hidden justify-between items-center py-4">
-            {/* Sección izquierda: Menú y Logo */}
-            <div className="flex items-center space-x-4">
-              {/* Hamburger menu for mobile */}
+            {/* Sección izquierda: Menú hamburguesa */}
+            <div className="flex items-center">
               <button
-                className="text-white mr-2"
+                className="text-white"
                 onClick={toggleMenu}
                 aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
               >
                 {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
               </button>
+            </div>
             
-              {/* Logo */}
-              <Link href="/" className="text-2xl font-bold flex items-center">
-                <span>SpinZone</span>
-              </Link>
+            {/* Logo o botón de Administrar (centrado entre elementos) */}
+            <div className="flex-1 flex justify-center">
+              {user && isEmpleado(user) ? (
+                <Link
+                  href={
+                    user.rol_id === 2 ? '/admin/dashboard' :
+                    user.rol_id === 3 ? '/empleado/dashboard' :
+                    user.rol_id === 4 ? '/bodega/dashboard' :
+                    user.rol_id === 5 ? '/contabilidad/dashboard' : '/'
+                  }
+                  className="text-xl font-bold"
+                >
+                  Administrar
+                </Link>
+              ) : (
+                <Link href="/" className="text-2xl font-bold">
+                  SpinZone
+                </Link>
+              )}
             </div>
 
             {/* Sección derecha: Perfil y Carrito */}
@@ -428,27 +443,7 @@ export default function Header() {
                     >
                       Productos
                     </Link>
-                    {/* Opción de Administrar para roles de empleado (no clientes) */}
-                    {user && isEmpleado(user) && (
-                      <Link
-                        href={
-                          user.rol_id === 2 ? '/admin/dashboard' :
-                          user.rol_id === 3 ? '/empleado/dashboard' :
-                          user.rol_id === 4 ? '/bodega/dashboard' :
-                          user.rol_id === 5 ? '/contabilidad/dashboard' : '/'
-                        }
-                        className={`block py-3 hover:text-blue-200 ${
-                          pathname.includes('/admin') || pathname.includes('/empleado') || 
-                          pathname.includes('/bodega') || pathname.includes('/contabilidad') ? 'font-bold' : ''
-                        }`}
-                        onClick={toggleMenu}
-                      >
-                        <div className="flex items-center">
-                          <FaCogs className="mr-2" />
-                          Administrar
-                        </div>
-                      </Link>
-                    )}
+                    {/* Eliminar opción de Administrar en el menú, ya que ahora está en el header */}
                     {/* Categorías en móvil */}
                     <div className="py-3">
                       <span className="block text-white mb-2">Categorías</span>
