@@ -54,7 +54,7 @@ export default function PerfilPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('pedidos-todos');
+  const [activeTab, setActiveTab] = useState('info');
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loadingPedidos, setLoadingPedidos] = useState(false);
   const [isUserLoading, setIsUserLoading] = useState(true);
@@ -65,6 +65,7 @@ export default function PerfilPage() {
       router.push('/');
       openLoginModal();
     } else {
+      // Actualizar el formulario con los datos del usuario
       setFormData({
         nombre: user.nombre || '',
         apellido: user.apellido || '',
@@ -77,13 +78,19 @@ export default function PerfilPage() {
         confirmPassword: ''
       });
       
-      // Cargar pedidos del usuario cuando el usuario esté autenticado
-      if (activeTab.startsWith('pedidos')) {
+      // Establecer tab activo según el tipo de usuario
+      if (isCliente(user)) {
+        // Si es cliente, mostrar "Todos los pedidos" por defecto
+        setActiveTab('pedidos-todos');
+        // Cargar pedidos del usuario cuando el usuario es cliente
         cargarPedidos();
+      } else {
+        // Si es empleado, mostrar "Información personal" por defecto
+        setActiveTab('info');
       }
     }
     setIsUserLoading(false);
-  }, [user, router, openLoginModal, activeTab]);
+  }, [user, router, openLoginModal]);
 
   // Función para cargar los pedidos del usuario
   const cargarPedidos = async () => {
@@ -744,62 +751,67 @@ export default function PerfilPage() {
               Información Personal
             </button>
             
-            <div className="py-2">
-              <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Mis Pedidos
-              </h3>
-            </div>
+            {/* Mostrar sección "Mis Pedidos" solo si es cliente */}
+            {user && isCliente(user) && (
+              <>
+                <div className="py-2">
+                  <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Mis Pedidos
+                  </h3>
+                </div>
 
-            <button
-              onClick={() => {
-                setActiveTab('pedidos-todos');
-                cargarPedidos();
-              }}
-              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                activeTab === 'pedidos-todos'
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <FaShoppingBag className={`mr-3 h-5 w-5 ${
-                activeTab === 'pedidos-todos' ? 'text-blue-500' : 'text-gray-400'
-              }`} />
-              Todos
-            </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('pedidos-todos');
+                    cargarPedidos();
+                  }}
+                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    activeTab === 'pedidos-todos'
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <FaShoppingBag className={`mr-3 h-5 w-5 ${
+                    activeTab === 'pedidos-todos' ? 'text-blue-500' : 'text-gray-400'
+                  }`} />
+                  Todos
+                </button>
 
-            <button
-              onClick={() => {
-                setActiveTab('pedidos-proceso');
-                cargarPedidos();
-              }}
-              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                activeTab === 'pedidos-proceso'
-                  ? 'bg-yellow-50 text-yellow-700'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <FaTruck className={`mr-3 h-5 w-5 ${
-                activeTab === 'pedidos-proceso' ? 'text-yellow-500' : 'text-gray-400'
-              }`} />
-              En Proceso
-            </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('pedidos-proceso');
+                    cargarPedidos();
+                  }}
+                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    activeTab === 'pedidos-proceso'
+                      ? 'bg-yellow-50 text-yellow-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <FaTruck className={`mr-3 h-5 w-5 ${
+                    activeTab === 'pedidos-proceso' ? 'text-yellow-500' : 'text-gray-400'
+                  }`} />
+                  En Proceso
+                </button>
 
-            <button
-              onClick={() => {
-                setActiveTab('pedidos-entregados');
-                cargarPedidos();
-              }}
-              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                activeTab === 'pedidos-entregados'
-                  ? 'bg-green-50 text-green-700'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <FaCheckCircle className={`mr-3 h-5 w-5 ${
-                activeTab === 'pedidos-entregados' ? 'text-green-500' : 'text-gray-400'
-              }`} />
-              Entregados
-            </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('pedidos-entregados');
+                    cargarPedidos();
+                  }}
+                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    activeTab === 'pedidos-entregados'
+                      ? 'bg-green-50 text-green-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <FaCheckCircle className={`mr-3 h-5 w-5 ${
+                    activeTab === 'pedidos-entregados' ? 'text-green-500' : 'text-gray-400'
+                  }`} />
+                  Entregados
+                </button>
+              </>
+            )}
           </nav>
         </div>
 
@@ -818,9 +830,9 @@ export default function PerfilPage() {
 
           <div className="p-6">
             {activeTab === 'info' && (isEditing ? renderEditForm() : renderUserInfo())}
-            {activeTab === 'pedidos-todos' && renderPedidosPorEstado('todos')}
-            {activeTab === 'pedidos-proceso' && renderPedidosPorEstado('En proceso')}
-            {activeTab === 'pedidos-entregados' && renderPedidosPorEstado('Entregado')}
+            {user && isCliente(user) && activeTab === 'pedidos-todos' && renderPedidosPorEstado('todos')}
+            {user && isCliente(user) && activeTab === 'pedidos-proceso' && renderPedidosPorEstado('En proceso')}
+            {user && isCliente(user) && activeTab === 'pedidos-entregados' && renderPedidosPorEstado('Entregado')}
           </div>
         </div>
       </div>
