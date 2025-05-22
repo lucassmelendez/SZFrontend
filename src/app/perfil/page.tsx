@@ -10,6 +10,19 @@ import { useLoginModal } from '@/lib/auth/LoginModalContext';
 import toast from 'react-hot-toast';
 
 // Interfaz para los pedidos
+interface ApiPedidoExtended extends ApiPedido {
+  id_pedido?: number;
+  estado?: string;
+  total?: number;
+  productos?: PedidoProducto[];
+}
+
+interface PedidoProducto {
+  nombre: string;
+  cantidad: number;
+  precio: number;
+}
+
 interface Pedido {
   id_pedido: number;
   fecha: string;
@@ -20,12 +33,6 @@ interface Pedido {
   id_estado_envio: number;
   medio_pago_id: number;
   id_cliente: number;
-}
-
-interface PedidoProducto {
-  nombre: string;
-  cantidad: number;
-  precio: number;
 }
 
 export default function PerfilPage() {
@@ -88,9 +95,12 @@ export default function PerfilPage() {
       
       // Obtener los productos para cada pedido
       const pedidosConProductos = await Promise.all(
-        pedidosCliente.map(async (pedido) => {
+        pedidosCliente.map(async (pedido: ApiPedidoExtended) => {
           try {
-            const productos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido!);
+            // Asegurarnos de que id_pedido existe, y si no, usamos un valor por defecto
+            const pedidoId = pedido.id_pedido !== undefined ? pedido.id_pedido : 0;
+            
+            const productos = await pedidoProductoApiFast.getByPedido(pedidoId);
             
             // Obtener los detalles de cada producto
             const productosConDetalles = await Promise.all(
@@ -111,24 +121,42 @@ export default function PerfilPage() {
               })
             );
 
-            return {
-              ...pedido,
+            // Crear un objeto Pedido con todos los campos requeridos
+            const pedidoCompleto: Pedido = {
+              id_pedido: pedidoId,
+              fecha: pedido.fecha,
               estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
+              total: productosConDetalles.reduce((sum, prod) => sum + (prod.precio_unitario * prod.cantidad), 0),
               productos: productosConDetalles.map(prod => ({
                 nombre: prod.nombre,
                 cantidad: prod.cantidad,
                 precio: prod.precio_unitario
               })),
-              total: productosConDetalles.reduce((sum, prod) => sum + (prod.precio_unitario * prod.cantidad), 0)
+              id_estado: pedido.id_estado,
+              id_estado_envio: pedido.id_estado_envio,
+              medio_pago_id: pedido.medio_pago_id,
+              id_cliente: pedido.id_cliente
             };
+            
+            return pedidoCompleto;
           } catch (error) {
             console.error(`Error al obtener productos del pedido ${pedido.id_pedido}:`, error);
-            return {
-              ...pedido,
+            
+            // En caso de error, también crear un objeto Pedido válido
+            const pedidoId = pedido.id_pedido !== undefined ? pedido.id_pedido : 0;
+            const pedidoCompleto: Pedido = {
+              id_pedido: pedidoId,
+              fecha: pedido.fecha,
               estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
+              total: 0,
               productos: [],
-              total: 0
+              id_estado: pedido.id_estado,
+              id_estado_envio: pedido.id_estado_envio,
+              medio_pago_id: pedido.medio_pago_id,
+              id_cliente: pedido.id_cliente
             };
+            
+            return pedidoCompleto;
           }
         })
       );
@@ -242,7 +270,7 @@ export default function PerfilPage() {
                 <FaUser className="mt-1 text-gray-500 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Nombre Completo</p>
-                  <p className="font-medium text-gray-900">{user.nombre} {user.apellido}</p>
+                  <p className="font-medium text-gray-900">{user?.nombre || ''} {user?.apellido || ''}</p>
                 </div>
       </div>
 
@@ -250,16 +278,18 @@ export default function PerfilPage() {
                 <FaIdCard className="mt-1 text-gray-500 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">RUT</p>
-                  <p className="font-medium text-gray-900">{user.rut || 'No disponible'}</p>
+                  <p className="font-medium text-gray-900">{user?.rut || 'No disponible'}</p>
                 </div>
         </div>
 
-              {user.id_rol !== undefined && (
+              {user && 'id_rol' in user && (
                 <div className="flex items-start">
                   <FaUserTag className="mt-1 text-gray-500 mr-3" />
                   <div>
                     <p className="text-sm text-gray-500">Tipo de Usuario</p>
-                    <p className="font-medium text-gray-900">{user.id_rol === 1 ? 'Cliente' : 'Administrador'}</p>
+                    <p className="font-medium text-gray-900">
+                      {isCliente(user) ? 'Cliente' : 'Administrador'}
+                    </p>
                   </div>
                 </div>
               )}
@@ -277,7 +307,7 @@ export default function PerfilPage() {
                 <FaEnvelope className="mt-1 text-gray-500 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Correo Electrónico</p>
-                  <p className="font-medium text-gray-900">{user.correo}</p>
+                  <p className="font-medium text-gray-900">{user?.correo || ''}</p>
                 </div>
               </div>
               
@@ -285,7 +315,7 @@ export default function PerfilPage() {
                 <FaPhone className="mt-1 text-gray-500 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Teléfono</p>
-                  <p className="font-medium text-gray-900">{user.telefono || 'No disponible'}</p>
+                  <p className="font-medium text-gray-900">{user?.telefono || 'No disponible'}</p>
                 </div>
               </div>
               
@@ -293,7 +323,7 @@ export default function PerfilPage() {
                 <FaMapMarkerAlt className="mt-1 text-gray-500 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Dirección</p>
-                  <p className="font-medium text-gray-900">{user.direccion || 'No disponible'}</p>
+                  <p className="font-medium text-gray-900">{user?.direccion || 'No disponible'}</p>
                 </div>
               </div>
             </div>
