@@ -18,7 +18,7 @@ export default function CheckoutPage() {
   const { items, limpiarCarrito, calcularTotal } = useCarrito();
   const { closeCart } = useFloatingCartContext();
   const { user, isLoading: authLoading } = useAuth();
-  const { openLoginModal } = useLoginModal();
+  const { openLoginModal, openRegisterModal } = useLoginModal();
   const [loading, setLoading] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -138,7 +138,7 @@ export default function CheckoutPage() {
     if (!user) {
       // En lugar de solo abrir el modal, mostrar mensaje específico
       alert('Debes iniciar sesión o registrarte para continuar con la compra');
-      openLoginModal();
+      openRegisterModal();
       return;
     }
     
@@ -440,16 +440,7 @@ export default function CheckoutPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        openLoginModal();
-                        // Pequeño timeout para asegurar que el modal está abierto antes de cambiar a registro
-                        setTimeout(() => {
-                          const registerTab = document.querySelector('[data-tab="register"]');
-                          if (registerTab) {
-                            (registerTab as HTMLElement).click();
-                          }
-                        }, 100);
-                      }}
+                      onClick={openRegisterModal}
                       className="px-6 py-3 bg-gray-200 text-gray-800 rounded-md font-semibold hover:bg-gray-300 transition-colors"
                     >
                       Registrarse

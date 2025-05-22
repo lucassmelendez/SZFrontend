@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
+import { useLoginModal } from '@/lib/auth/LoginModalContext';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -11,7 +12,13 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const [isLoginView, setIsLoginView] = useState(true);
+  const { isRegisterView } = useLoginModal();
+  const [isLoginView, setIsLoginView] = useState(!isRegisterView);
+  
+  // Actualizar el estado local cuando cambia isRegisterView
+  useEffect(() => {
+    setIsLoginView(!isRegisterView);
+  }, [isRegisterView]);
 
   const showLogin = () => {
     setIsLoginView(true);
