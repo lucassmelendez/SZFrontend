@@ -69,7 +69,9 @@ export default function Header() {
         }
       } else {
         setSearchResults([]);
-        setIsSearchOpen(false);
+        if (searchQuery.trim().length === 0) {
+          setIsSearchOpen(false);
+        }
       }
     };
 
@@ -89,6 +91,7 @@ export default function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       window.location.href = `/productos/buscar?q=${encodeURIComponent(searchQuery)}`;
+      setIsSearchOpen(false);
     }
   };
 
