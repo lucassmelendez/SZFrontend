@@ -214,6 +214,7 @@ export default function EmpleadosPage() {
         rut: String(target.rut.value).trim(),
         correo: String(target.correo.value).trim(),
         contrasena: String(target.contrasena.value),
+        confirmarContrasena: String(target.confirmarContrasena.value),
         direccion: String(target.direccion.value).trim() || 'N/A',
         telefono: String(target.telefono.value).trim() || 'N/A',
         rol_id: Number(target.rol_id.value)
@@ -221,8 +222,15 @@ export default function EmpleadosPage() {
 
       // Validación básica
       if (!formValues.nombre || !formValues.apellido || !formValues.rut || 
-          !formValues.correo || !formValues.contrasena || !formValues.rol_id) {
+          !formValues.correo || !formValues.contrasena || !formValues.confirmarContrasena || !formValues.rol_id) {
         setError('Todos los campos marcados con * son obligatorios');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validar que las contraseñas coinciden
+      if (formValues.contrasena !== formValues.confirmarContrasena) {
+        setError('Las contraseñas no coinciden');
         setIsSubmitting(false);
         return;
       }
@@ -263,12 +271,13 @@ export default function EmpleadosPage() {
         rut: rutFormateado // Usar el RUT formateado
       });
 
-      // Crear el empleado usando la API
+      // Crear el empleado usando la API, omitiendo el campo confirmarContrasena
+      const { confirmarContrasena, ...datosEmpleado } = formValues;
       const nuevoEmpleado = await empleadoApiFast.create({
-        ...formValues,
+        ...datosEmpleado,
         rut: rutFormateado, // Usar el RUT formateado
-        direccion: formValues.direccion === '' ? 'N/A' : formValues.direccion,
-        telefono: formValues.telefono === '' ? 'N/A' : formValues.telefono
+        direccion: datosEmpleado.direccion === '' ? 'N/A' : datosEmpleado.direccion,
+        telefono: datosEmpleado.telefono === '' ? 'N/A' : datosEmpleado.telefono
       });
 
       console.log('Empleado creado:', nuevoEmpleado);
@@ -488,8 +497,8 @@ export default function EmpleadosPage() {
       </div>
 
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full relative shadow-xl">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full relative shadow-xl max-h-[90vh] overflow-y-auto my-4">
             <button
               onClick={() => setIsAddModalOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -499,14 +508,14 @@ export default function EmpleadosPage() {
               </svg>
             </button>
             <h2 className="text-xl font-bold mb-4">Añadir Nuevo Empleado</h2>
-            <form onSubmit={handleCreateEmpleado} className="space-y-4">
+            <form onSubmit={handleCreateEmpleado} className="space-y-3">
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
                   <span className="block sm:inline">{error}</span>
                 </div>
               )}
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre <span className="text-red-500">*</span>
@@ -570,6 +579,18 @@ export default function EmpleadosPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirmar Contraseña <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  name="confirmarContrasena"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Dirección
                 </label>
                 <input
@@ -607,7 +628,7 @@ export default function EmpleadosPage() {
                 </select>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4">
+              <div className="flex justify-end space-x-3 pt-3 mt-2">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
@@ -629,8 +650,8 @@ export default function EmpleadosPage() {
       )}
 
       {isEditModalOpen && selectedEmpleado && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl max-h-[90vh] overflow-y-auto my-4">
             <button
               onClick={() => setIsEditModalOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -717,7 +738,7 @@ export default function EmpleadosPage() {
                 }
               }
             }}>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nombre</label>
                   <input
@@ -787,7 +808,7 @@ export default function EmpleadosPage() {
                   </select>
                 </div>
               </div>
-              <div className="mt-6 flex justify-end space-x-3">
+              <div className="mt-5 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
