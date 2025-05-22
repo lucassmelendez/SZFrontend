@@ -210,18 +210,39 @@ export default function PerfilPage() {
         }
       }
 
-      const updateData = {
-        nombre: formData.nombre,
-        apellido: formData.apellido,
-        correo: formData.email,
-        telefono: formData.telefono,
-        direccion: formData.direccion,
-        ...(formData.newPassword ? {
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword
-        } : {})
-      };
+      // Si es empleado y no está cambiando la contraseña, mostrar un mensaje y no enviar solicitud
+      if (user && isEmpleado(user) && !formData.newPassword) {
+        setError('Como empleado, solo puedes cambiar tu contraseña');
+        setIsLoading(false);
+        return;
+      }
 
+      let updateData = {};
+      
+      // Para empleados, solo permitir actualizar la contraseña
+      if (user && isEmpleado(user)) {
+        // Si es empleado, solo actualizar contraseña
+        if (formData.newPassword) {
+          updateData = {
+            currentPassword: formData.currentPassword,
+            newPassword: formData.newPassword
+          };
+        }
+      } else {
+        // Si es cliente, actualizar todos los datos
+        updateData = {
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          correo: formData.email,
+          telefono: formData.telefono,
+          direccion: formData.direccion,
+          ...(formData.newPassword ? {
+            currentPassword: formData.currentPassword,
+            newPassword: formData.newPassword
+          } : {})
+        };
+      }
+      
       const response = await authApi.updateProfile(updateData);
       setSuccess('Perfil actualizado exitosamente');
       setIsEditing(false);
@@ -346,17 +367,23 @@ export default function PerfilPage() {
         </div>
       </div>
       
-      {/* Mostrar botón "Editar Perfil" solo para clientes */}
-      {user && isCliente(user) && (
-        <div className="flex justify-end">
+      <div className="flex justify-end">
+        {user && isCliente(user) ? (
           <button
             onClick={() => setIsEditing(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Editar Perfil
           </button>
-        </div>
-      )}
+        ) : (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Cambiar Contraseña
+          </button>
+        )}
+      </div>
     </div>
   );
 
@@ -377,11 +404,13 @@ export default function PerfilPage() {
   };
   
   const renderEditForm = () => (
-        <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Mostrar campos de información personal solo para clientes */}
+      {user && isCliente(user) ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-            Nombre
+              Nombre
             </label>
             <div className="mt-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -391,28 +420,28 @@ export default function PerfilPage() {
                 id="nombre"
                 name="nombre"
                 type="text"
-              value={formData.nombre}
+                value={formData.nombre}
                 onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
-          </div>
-        </div>
-        
-        <div>
-          <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">
-            Apellido
-          </label>
-          <div className="mt-1 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaUser className="text-gray-400" />
+                className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
             </div>
-            <input
-              id="apellido"
-              name="apellido"
-              type="text"
-              value={formData.apellido}
-              onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          </div>
+          
+          <div>
+            <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">
+              Apellido
+            </label>
+            <div className="mt-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaUser className="text-gray-400" />
+              </div>
+              <input
+                id="apellido"
+                name="apellido"
+                type="text"
+                value={formData.apellido}
+                onChange={handleChange}
+                className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
           </div>
@@ -429,136 +458,143 @@ export default function PerfilPage() {
                 id="email"
                 name="email"
                 type="email"
-              value={formData.email}
+                value={formData.email}
                 onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
           </div>
 
-        <div>
-          <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
-            Teléfono
-          </label>
-          <div className="mt-1 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaPhone className="text-gray-400" />
+          <div>
+            <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
+              Teléfono
+            </label>
+            <div className="mt-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaPhone className="text-gray-400" />
+              </div>
+              <input
+                id="telefono"
+                name="telefono"
+                type="text"
+                value={formData.telefono}
+                onChange={handleChange}
+                className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
             </div>
-            <input
-              id="telefono"
-              name="telefono"
-              type="text"
-              value={formData.telefono}
-              onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
+              Dirección
+            </label>
+            <div className="mt-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaMapMarkerAlt className="text-gray-400" />
+              </div>
+              <input
+                id="direccion"
+                name="direccion"
+                type="text"
+                value={formData.direccion}
+                onChange={handleChange}
+                className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
           </div>
         </div>
+      ) : (
+        <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-blue-800 text-sm">
+            Como empleado, solo puedes cambiar tu contraseña. Para modificar tu información personal, contacta con el administrador del sistema.
+          </p>
+        </div>
+      )}
 
-        <div className="md:col-span-2">
-          <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
-            Dirección
-          </label>
-          <div className="mt-1 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaMapMarkerAlt className="text-gray-400" />
+      <div className="mt-8 border-t pt-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Cambiar Contraseña {user && isCliente(user) ? "(opcional)" : ""}
+        </h3>
+        
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
+              Contraseña actual
+            </label>
+            <div className="mt-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaKey className="text-gray-400" />
+              </div>
+              <input
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                value={formData.currentPassword}
+                onChange={handleChange}
+                className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="••••••••"
+              />
             </div>
-            <input
-              id="direccion"
-              name="direccion"
-              type="text"
-              value={formData.direccion}
-              onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
+          </div>
+
+          <div>
+            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+              Nueva contraseña
+            </label>
+            <div className="mt-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaKey className="text-gray-400" />
+              </div>
+              <input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                value={formData.newPassword}
+                onChange={handleChange}
+                className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              Confirmar nueva contraseña
+            </label>
+            <div className="mt-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaKey className="text-gray-400" />
+              </div>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="••••••••"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-8 border-t pt-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">
-          Cambiar Contraseña (opcional)
-        </h3>
-        
-        <div className="space-y-4">
-              <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
-                  Contraseña actual
-                </label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaKey className="text-gray-400" />
-                  </div>
-                  <input
-                    id="currentPassword"
-                    name="currentPassword"
-                    type="password"
-                    value={formData.currentPassword}
-                    onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
-              Nueva contraseña
-                </label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaKey className="text-gray-400" />
-                  </div>
-                  <input
-                    id="newPassword"
-                    name="newPassword"
-                    type="password"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                  Confirmar nueva contraseña
-                </label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaKey className="text-gray-400" />
-                  </div>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="••••••••"
-                  />
-            </div>
-          </div>
-                </div>
-              </div>
-
       <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? 'Guardando...' : 'Guardar cambios'}
-                </button>
-              </div>
+        <button
+          type="button"
+          onClick={() => setIsEditing(false)}
+          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Guardando...' : 'Guardar cambios'}
+        </button>
+      </div>
     </form>
   );
 

@@ -337,6 +337,8 @@ export const authApi = {
     correo?: string;
     telefono?: string;
     direccion?: string;
+    currentPassword?: string;
+    newPassword?: string;
   }): Promise<ApiResponse<User>> => {
     const response = await api.put<ApiResponse<User>>('/auth/profile', data);
     return response.data;
