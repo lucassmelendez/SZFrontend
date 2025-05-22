@@ -321,9 +321,10 @@ export default function Header() {
                 <div className="flex items-center space-x-3">
                   <Link
                     href="/perfil"
-                    className="hover:text-blue-200"
+                    className="flex items-center space-x-1 hover:text-blue-200"
                   >
                     <FaUser size={20} />
+                    <span className="text-sm">{user.nombre.split(' ')[0]}</span>
                   </Link>
                   
                   <button
