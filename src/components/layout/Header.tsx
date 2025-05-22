@@ -356,7 +356,7 @@ export default function Header() {
           </div>
 
           {/* Barra de búsqueda móvil - RESTAURADA LA CLASE ORIGINAL */}
-          <div className="md:hidden pb-4 px-4" ref={searchMobileRef}>
+          <div className="md:hidden pb-4" ref={searchMobileRef}>
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
