@@ -112,14 +112,14 @@ export default function Header() {
         <div className="container mx-auto px-4">
           {/* Primera fila (web): Logo, Navegación, Búsqueda, Perfil y Carrito */}
           <div className="hidden md:flex items-center justify-between py-4">
-            {/* Sección izquierda: Logo y navegación */}
+            {/* Sección izquierda: Logo y navegación principal */}
             <div className="flex items-center space-x-8">
               {/* Logo */}
               <Link href="/" className="text-2xl font-bold flex items-center">
                 <span>SpinZone</span>
               </Link>
 
-              {/* Desktop Navigation */}
+              {/* Desktop Navigation - Solo incluye Inicio, Productos y Categorías */}
               <nav className="flex items-center space-x-8">
                 <Link
                   href="/"
@@ -160,76 +160,78 @@ export default function Header() {
                     </div>
                   )}
                 </div>
-                
-                {/* Opción de Administrar para roles de empleado (no clientes) */}
-                {user && isEmpleado(user) && (
-                  <Link
-                    href={
-                      user.rol_id === 2 ? '/admin/dashboard' :
-                      user.rol_id === 3 ? '/empleado/dashboard' :
-                      user.rol_id === 4 ? '/bodega/dashboard' :
-                      user.rol_id === 5 ? '/contabilidad/dashboard' : '/'
-                    }
-                    className={`hover:text-blue-200 ${
-                      pathname.includes('/admin') || pathname.includes('/empleado') || 
-                      pathname.includes('/bodega') || pathname.includes('/contabilidad') ? 'font-bold' : ''
-                    }`}
-                  >
-                    Administrar
-                  </Link>
-                )}
               </nav>
             </div>
 
-            {/* Sección central: Búsqueda - RESTAURADA CON LA IMPLEMENTACIÓN QUE FUNCIONA */}
-            <div className="flex-grow max-w-md mx-auto px-4" ref={searchRef}>
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <input
-                  type="text"
-                  placeholder="Buscar productos..."
-                  className="bg-blue-600 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
-                  value={searchQuery}
-                  onChange={handleSearchInput}
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-white"
-                  aria-label="Buscar"
-                >
-                  <FaSearch />
-                </button>
+            {/* Sección central: Búsqueda con administrar a la derecha */}
+            <div className="flex items-center flex-grow max-w-lg" ref={searchRef}>
+              <div className="relative flex-grow mx-4">
+                <form onSubmit={handleSearchSubmit} className="relative">
+                  <input
+                    type="text"
+                    placeholder="Buscar productos..."
+                    className="bg-blue-600 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
+                    value={searchQuery}
+                    onChange={handleSearchInput}
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-white"
+                    aria-label="Buscar"
+                  >
+                    <FaSearch />
+                  </button>
 
-                {/* Resultados de búsqueda */}
-                {isSearchOpen && searchResults.length > 0 && (
-                  <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-96 overflow-y-auto">
-                    {searchResults.map((producto) => (
-                      <Link
-                        key={producto.id_producto}
-                        href={`/productos/${producto.id_producto}`}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => {
-                          setIsSearchOpen(false);
-                          setSearchQuery('');
-                        }}
-                      >
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 w-10 h-10 bg-gray-200 rounded overflow-hidden">
-                            <img
-                              src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
-                              alt={producto.nombre}
-                              className="w-full h-full object-cover"
-                            />
+                  {/* Resultados de búsqueda */}
+                  {isSearchOpen && searchResults.length > 0 && (
+                    <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-96 overflow-y-auto">
+                      {searchResults.map((producto) => (
+                        <Link
+                          key={producto.id_producto}
+                          href={`/productos/${producto.id_producto}`}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => {
+                            setIsSearchOpen(false);
+                            setSearchQuery('');
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 w-10 h-10 bg-gray-200 rounded overflow-hidden">
+                              <img
+                                src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
+                                alt={producto.nombre}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="ml-3">
+                              <p className="font-medium">{producto.nombre}</p>
+                              <p className="text-xs text-gray-500">${Math.round(producto.precio)}</p>
+                            </div>
                           </div>
-                          <div className="ml-3">
-                            <p className="font-medium">{producto.nombre}</p>
-                            <p className="text-xs text-gray-500">${Math.round(producto.precio)}</p>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </form>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </form>
+              </div>
+              
+              {/* Opción de Administrar - Ahora a la derecha de la barra de búsqueda */}
+              {user && isEmpleado(user) && (
+                <Link
+                  href={
+                    user.rol_id === 2 ? '/admin/dashboard' :
+                    user.rol_id === 3 ? '/empleado/dashboard' :
+                    user.rol_id === 4 ? '/bodega/dashboard' :
+                    user.rol_id === 5 ? '/contabilidad/dashboard' : '/'
+                  }
+                  className={`whitespace-nowrap hover:text-blue-200 ${
+                    pathname.includes('/admin') || pathname.includes('/empleado') || 
+                    pathname.includes('/bodega') || pathname.includes('/contabilidad') ? 'font-bold' : ''
+                  }`}
+                >
+                  Administrar
+                </Link>
+              )}
             </div>
 
             {/* Sección derecha: Perfil y Carrito */}
