@@ -339,6 +339,7 @@ export const authApi = {
     direccion?: string;
     currentPassword?: string;
     newPassword?: string;
+    contrasena?: string;
   }): Promise<ApiResponse<User>> => {
     try {
       // Verificar si estamos usando un token de FastAPI
@@ -375,6 +376,47 @@ export const authApi = {
           };
         } else {
           throw new Error('Respuesta inesperada del servidor');
+        }
+      } 
+      // Si es un empleado autenticado con FastAPI
+      else if (token && token.startsWith('empleado_session_') && userType === 'empleado') {
+        // Recuperar los datos del empleado del localStorage
+        const empleadoData = localStorage.getItem('empleado_data');
+        if (!empleadoData) {
+          throw new Error('No se encontraron datos del empleado');
+        }
+        
+        const empleado = JSON.parse(empleadoData);
+        
+        // Para los empleados, solo permitimos actualizar la contraseña
+        if (data.newPassword || data.contrasena) {
+          // Usar la función de actualización de empleado
+          const updateData = new URLSearchParams();
+          
+          // Asegurar que enviamos la contraseña con el nombre correcto
+          if (data.newPassword) {
+            updateData.append('contrasena', data.newPassword);
+          } else if (data.contrasena) {
+            updateData.append('contrasena', data.contrasena);
+          }
+          
+          // Actualizar el empleado con su contraseña
+          const response = await apiFast.put(`/empleados/${empleado.id_empleado}?${updateData.toString()}`);
+          
+          if (response.data && response.data.empleado) {
+            // Actualizar datos en localStorage
+            localStorage.setItem('empleado_data', JSON.stringify(response.data.empleado));
+            
+            // Retornar en el formato esperado
+            return {
+              success: true,
+              data: response.data.empleado
+            };
+          } else {
+            throw new Error('Respuesta inesperada del servidor');
+          }
+        } else {
+          throw new Error('Para empleados, solo se permite cambiar la contraseña');
         }
       } else {
         // Usar la API normal para actualizar el perfil

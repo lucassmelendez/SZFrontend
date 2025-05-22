@@ -191,12 +191,12 @@ export default function PerfilPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setIsLoading(true);
+    setSuccess('');
+    setError('');
 
     try {
-      // Validar contraseñas si se está intentando cambiar
+      // Validaciones básicas
       if (formData.newPassword) {
         if (!formData.currentPassword) {
           setError('Debes proporcionar tu contraseña actual para cambiarla');
