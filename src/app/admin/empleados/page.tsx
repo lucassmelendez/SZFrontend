@@ -329,7 +329,8 @@ export default function EmpleadosPage() {
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
           >
             <FiPlus className="w-5 h-5" />
-            Añadir Empleado
+            <span className="hidden sm:inline">Añadir Empleado</span>
+            <span className="sm:hidden">Añadir</span>
           </button>
           <button 
             onClick={() => router.back()}
@@ -340,24 +341,25 @@ export default function EmpleadosPage() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="bg-white rounded-lg shadow-md p-6">
+        {/* Tabla para pantallas medianas y grandes */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">RUT</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teléfono</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dirección</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RUT</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Correo</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dirección</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-200">
               {empleados.map((empleado) => (
-                <tr key={empleado.id_empleado} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr key={empleado.id_empleado} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{empleado.id_empleado}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="font-medium">{`${empleado.nombre} ${empleado.apellido}`}</div>
@@ -381,12 +383,12 @@ export default function EmpleadosPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       empleado.rol_id === 2 
-                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                        ? 'bg-purple-100 text-purple-800'
                         : empleado.rol_id === 3
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                        ? 'bg-blue-100 text-blue-800'
                         : empleado.rol_id === 4
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
                     }`}>
                       {roles[empleado.rol_id] || "Desconocido"}
                     </span>
@@ -394,14 +396,14 @@ export default function EmpleadosPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEdit(empleado.id_empleado)}
-                      className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-4"
+                      className="text-indigo-600 hover:text-indigo-900 mr-4"
                       title="Editar"
                     >
                       <FiEdit2 className="inline-block w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(empleado.id_empleado)}
-                      className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                      className="text-red-600 hover:text-red-900"
                       title="Eliminar"
                     >
                       <FiTrash2 className="inline-block w-5 h-5" />
@@ -412,20 +414,91 @@ export default function EmpleadosPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Vista de tarjetas para dispositivos móviles */}
+        <div className="md:hidden space-y-4">
+          {empleados.map((empleado) => (
+            <div key={empleado.id_empleado} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex justify-between items-center mb-2">
+                <div className="text-lg font-bold text-blue-600">#{empleado.id_empleado}</div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(empleado.id_empleado)}
+                    className="p-2 text-indigo-600 hover:text-indigo-900"
+                    title="Editar"
+                  >
+                    <FiEdit2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(empleado.id_empleado)}
+                    className="p-2 text-red-600 hover:text-red-900"
+                    title="Eliminar"
+                  >
+                    <FiTrash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="font-medium text-lg mb-2">{`${empleado.nombre} ${empleado.apellido}`}</div>
+              
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Correo:</span>
+                  <span className="font-medium text-right">{empleado.correo}</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-500">RUT:</span>
+                  <span className="font-medium text-right">
+                    {empleado.rut ? empleado.rut : 'No proporcionado'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Teléfono:</span>
+                  <span className="font-medium text-right">
+                    {empleado.telefono ? empleado.telefono : 'N/A'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Dirección:</span>
+                  <span className="font-medium text-right">
+                    {empleado.direccion ? empleado.direccion : 'N/A'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="mt-2 flex justify-end">
+                <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                  empleado.rol_id === 2 
+                    ? 'bg-purple-100 text-purple-800'
+                    : empleado.rol_id === 3
+                    ? 'bg-blue-100 text-blue-800'
+                    : empleado.rol_id === 4
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {roles[empleado.rol_id] || "Desconocido"}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full relative shadow-xl">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full relative shadow-xl">
             <button
               onClick={() => setIsAddModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h2 className="text-xl font-bold mb-4 dark:text-white">Añadir Nuevo Empleado</h2>
+            <h2 className="text-xl font-bold mb-4">Añadir Nuevo Empleado</h2>
             <form onSubmit={handleCreateEmpleado} className="space-y-4">
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
@@ -435,31 +508,31 @@ export default function EmpleadosPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="nombre"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Apellido <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="apellido"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   RUT <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -467,64 +540,64 @@ export default function EmpleadosPage() {
                   name="rut"
                   required
                   placeholder="12345678-9"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Correo <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
                   name="correo"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Contraseña <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="password"
                   name="contrasena"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Dirección
                 </label>
                 <input
                   type="text"
                   name="direccion"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Teléfono
                 </label>
                 <input
                   type="tel"
                   name="telefono"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Rol <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="rol_id"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Seleccione un rol</option>
                   <option value="2">Administrador</option>
@@ -538,7 +611,7 @@ export default function EmpleadosPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
                 >
                   Cancelar
                 </button>
@@ -557,16 +630,16 @@ export default function EmpleadosPage() {
 
       {isEditModalOpen && selectedEmpleado && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-xl">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
             <button
               onClick={() => setIsEditModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h2 className="text-xl font-bold mb-4 dark:text-gray-100">Editar Empleado</h2>
+            <h2 className="text-xl font-bold mb-4">Editar Empleado</h2>
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                 <span className="block sm:inline">{error}</span>
@@ -646,65 +719,65 @@ export default function EmpleadosPage() {
             }}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
                   <input
                     name="nombre"
                     defaultValue={selectedEmpleado.nombre}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Apellido</label>
+                  <label className="block text-sm font-medium text-gray-700">Apellido</label>
                   <input
                     name="apellido"
                     defaultValue={selectedEmpleado.apellido}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">RUT</label>
+                  <label className="block text-sm font-medium text-gray-700">RUT</label>
                   <input
                     name="rut"
                     defaultValue={selectedEmpleado.rut}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo</label>
+                  <label className="block text-sm font-medium text-gray-700">Correo</label>
                   <input
                     name="correo"
                     type="email"
                     defaultValue={selectedEmpleado.correo}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
+                  <label className="block text-sm font-medium text-gray-700">Dirección</label>
                   <input
                     name="direccion"
                     defaultValue={selectedEmpleado.direccion}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+                  <label className="block text-sm font-medium text-gray-700">Teléfono</label>
                   <input
                     name="telefono"
                     defaultValue={selectedEmpleado.telefono}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
+                  <label className="block text-sm font-medium text-gray-700">Rol</label>
                   <select
                     name="rol_id"
                     defaultValue={selectedEmpleado.rol_id}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
                     required
                   >
                     <option value="2">Administrador</option>
@@ -718,7 +791,7 @@ export default function EmpleadosPage() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white px-4 py-2 rounded-md transition-colors"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
                 >
                   Cancelar
                 </button>

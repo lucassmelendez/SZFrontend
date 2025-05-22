@@ -51,22 +51,22 @@ export function CategoriaClient({ categoriaId }: CategoriaClientProps) {
       <div className="mb-6 flex items-center space-x-4">
         <Link
           href="/productos"
-          className="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          className="flex items-center text-blue-600 hover:text-blue-800"
         >
           <FaArrowLeft className="mr-2" />
           Volver a productos
         </Link>
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+        <h1 className="text-3xl font-bold text-gray-800">
           {categoriaNombre}
         </h1>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 dark:border-blue-400"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
         </div>
       ) : error ? (
-        <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
+        <div className="text-center text-red-600 py-8">{error}</div>
       ) : (
         <ProductGrid 
           productos={productos}

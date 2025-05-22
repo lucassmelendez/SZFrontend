@@ -151,7 +151,7 @@ export default function OrderList() {
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg">
+      <div className="bg-red-50 text-red-700 p-4 rounded-lg">
         {error}
       </div>
     );
@@ -159,7 +159,7 @@ export default function OrderList() {
 
   if (!orders.length) {
     return (
-      <div className="text-center py-8 text-gray-600 dark:text-gray-400">
+      <div className="text-center py-8 text-gray-600">
         No hay órdenes aceptadas para procesar
       </div>
     );
@@ -170,24 +170,24 @@ export default function OrderList() {
       {/* Versión móvil */}
       <div className="md:hidden space-y-4">
         {orders.filter((order): order is OrderWithDetails => order.id_pedido != null).map((order) => (
-          <div key={order.id_pedido} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+          <div key={order.id_pedido} className="bg-white rounded-lg shadow-md overflow-hidden">
             {/* Encabezado del pedido */}
-            <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-800 dark:text-white">
+                <span className="text-lg font-semibold text-gray-800">
                   Pedido #{order.id_pedido}
                 </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="text-sm text-gray-500">
                   {new Date(order.fecha).toLocaleString()}
                 </span>
               </div>
             </div>
 
             {/* Información del cliente */}
-            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cliente</h3>
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h3 className="text-sm font-medium text-gray-700 mb-1">Cliente</h3>
               {order.cliente ? (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-sm text-gray-600">
                   <p className="font-medium">{`${order.cliente.nombre} ${order.cliente.apellido}`}</p>
                   <p>{order.cliente.correo}</p>
                   <p>{order.cliente.telefono}</p>
@@ -198,16 +198,16 @@ export default function OrderList() {
             </div>
 
             {/* Productos */}
-            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Productos</h3>
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Productos</h3>
               <ul className="space-y-1">
                 {order.productos.map((producto: PedidoProducto & { nombre: string }) => (
-                  <li key={producto.id_producto} className="text-sm text-gray-600 dark:text-gray-400">
+                  <li key={producto.id_producto} className="text-sm text-gray-600">
                     {producto.nombre} x{producto.cantidad}
                   </li>
                 ))}
               </ul>
-              <div className="mt-2 text-sm font-medium text-gray-800 dark:text-white">
+              <div className="mt-2 text-sm font-medium text-gray-800">
                 Total: ${order.total.toLocaleString()}
               </div>
             </div>
@@ -217,28 +217,28 @@ export default function OrderList() {
               <div className="flex flex-wrap gap-2">
                 <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                   order.id_estado === 1 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
                 }`}>
                   {order.id_estado === 1 ? 'Pagado' : 'No pagado'}
                 </span>
                 <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                   order.id_estado_envio === 1 
-                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                    ? 'bg-blue-100 text-blue-800'
                     : order.id_estado_envio === 2
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    ? 'bg-yellow-100 text-yellow-800'
                     : order.id_estado_envio === 3
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                    ? 'bg-green-100 text-green-800'
                     : order.id_estado_envio === 4
-                    ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                    ? 'bg-purple-100 text-purple-800'
+                    : 'bg-gray-100 text-gray-800'
                 }`}>
                   {order.estado_envio}
                 </span>
                 <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                   order.medio_pago === 'Transferencia' || order.medio_pago === 'Webpay'
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
                 }`}>
                   {order.medio_pago}
                 </span>
@@ -262,11 +262,11 @@ export default function OrderList() {
                     )}
                   </button>
                 ) : order.id_estado_envio === 1 ? (
-                  <span className="block text-center text-green-600 dark:text-green-400 font-medium">
+                  <span className="block text-center text-green-600 font-medium">
                     Enviado
                   </span>
                 ) : (
-                  <span className="block text-center text-gray-600 dark:text-gray-400 font-medium">
+                  <span className="block text-center text-gray-600 font-medium">
                     No disponible
                   </span>
                 )}
@@ -278,30 +278,30 @@ export default function OrderList() {
 
       {/* Versión web */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Productos</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Pago</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Envío</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Medio Pago</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Pago</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Envío</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medio Pago</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-gray-200">
             {orders.filter((order): order is OrderWithDetails => order.id_pedido != null).map((order) => (
-              <tr key={order.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-white">
+              <tr key={order.id_pedido} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                   #{order.id_pedido}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {new Date(order.fecha).toLocaleString()}
                 </td>              
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {order.cliente ? (
                     <div>
                       <div className="font-medium">{`${order.cliente.nombre} ${order.cliente.apellido}`}</div>
@@ -310,7 +310,7 @@ export default function OrderList() {
                     </div>
                   ) : 'N/A'}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                <td className="px-6 py-4 text-sm text-gray-600">
                   <ul className="list-disc list-inside">
                     {order.productos.map((producto: PedidoProducto & { nombre: string }) => (
                       <li key={producto.id_producto}>
@@ -319,14 +319,14 @@ export default function OrderList() {
                     ))}
                   </ul>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-white">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                   ${order.total.toLocaleString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                     order.id_estado === 1 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
                   }`}>
                     {order.id_estado === 1 ? 'Pagado' : 'No pagado'}
                   </span>
@@ -334,14 +334,14 @@ export default function OrderList() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                     order.id_estado_envio === 1 
-                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                      ? 'bg-blue-100 text-blue-800'
                       : order.id_estado_envio === 2
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      ? 'bg-yellow-100 text-yellow-800'
                       : order.id_estado_envio === 3
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      ? 'bg-green-100 text-green-800'
                       : order.id_estado_envio === 4
-                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                      ? 'bg-purple-100 text-purple-800'
+                      : 'bg-gray-100 text-gray-800'
                   }`}>
                     {order.estado_envio}
                   </span>
@@ -349,8 +349,8 @@ export default function OrderList() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                     order.medio_pago === 'Transferencia' || order.medio_pago === 'Webpay'
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
                   }`}>
                     {order.medio_pago}
                   </span>
@@ -372,11 +372,11 @@ export default function OrderList() {
                       )}
                     </button>
                   ) : order.id_estado_envio === 1 ? (
-                    <span className="text-green-600 dark:text-green-400 font-medium">
+                    <span className="text-green-600 font-medium">
                       Enviado
                     </span>
                   ) : (
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">
+                    <span className="text-gray-600 font-medium">
                       No disponible
                     </span>
                   )}

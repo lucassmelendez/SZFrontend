@@ -7,7 +7,9 @@ import { isCliente, isEmpleado } from '@/lib/api';
 
 interface LoginModalContextType {
   isLoginModalOpen: boolean;
+  isRegisterView: boolean;
   openLoginModal: () => void;
+  openRegisterModal: () => void;
   closeLoginModal: () => void;
   redirectBasedOnUserType: () => void;
 }
@@ -16,6 +18,7 @@ const LoginModalContext = createContext<LoginModalContextType | undefined>(undef
 
 export function LoginModalProvider({ children }: { children: ReactNode }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isRegisterView, setIsRegisterView] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -27,11 +30,19 @@ export function LoginModalProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const openLoginModal = () => {
+    setIsRegisterView(false);
+    setIsLoginModalOpen(true);
+  };
+
+  const openRegisterModal = () => {
+    setIsRegisterView(true);
     setIsLoginModalOpen(true);
   };
 
   const closeLoginModal = () => {
     setIsLoginModalOpen(false);
+    // Reseteamos a la vista de login por defecto cuando se cierra
+    setIsRegisterView(false);
   };
 
   // Función para redirigir según el tipo de usuario (cliente o empleado) y su rol
@@ -69,7 +80,9 @@ export function LoginModalProvider({ children }: { children: ReactNode }) {
   return (
     <LoginModalContext.Provider value={{ 
       isLoginModalOpen, 
+      isRegisterView,
       openLoginModal, 
+      openRegisterModal,
       closeLoginModal,
       redirectBasedOnUserType
     }}>

@@ -233,33 +233,33 @@ export default function PerfilPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:space-x-4">
         <div className="flex-1 space-y-4">
-          <div className="bg-white dark:bg-gray-700 p-5 rounded-lg shadow">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 border-b pb-2">
+          <div className="bg-white p-5 rounded-lg shadow">
+            <h3 className="text-lg font-medium text-gray-900 mb-4 border-b pb-2">
               Información Personal
             </h3>
             <div className="space-y-3">
               <div className="flex items-start">
-                <FaUser className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <FaUser className="mt-1 text-gray-500 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Nombre Completo</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{user.nombre} {user.apellido}</p>
+                  <p className="text-sm text-gray-500">Nombre Completo</p>
+                  <p className="font-medium text-gray-900">{user.nombre} {user.apellido}</p>
                 </div>
       </div>
 
               <div className="flex items-start">
-                <FaIdCard className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <FaIdCard className="mt-1 text-gray-500 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">RUT</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{user.rut || 'No disponible'}</p>
+                  <p className="text-sm text-gray-500">RUT</p>
+                  <p className="font-medium text-gray-900">{user.rut || 'No disponible'}</p>
                 </div>
         </div>
 
               {user.id_rol !== undefined && (
                 <div className="flex items-start">
-                  <FaUserTag className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                  <FaUserTag className="mt-1 text-gray-500 mr-3" />
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Tipo de Usuario</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{user.id_rol === 1 ? 'Cliente' : 'Administrador'}</p>
+                    <p className="text-sm text-gray-500">Tipo de Usuario</p>
+                    <p className="font-medium text-gray-900">{user.id_rol === 1 ? 'Cliente' : 'Administrador'}</p>
                   </div>
                 </div>
               )}
@@ -268,32 +268,32 @@ export default function PerfilPage() {
         </div>
         
         <div className="flex-1 space-y-4 mt-4 md:mt-0">
-          <div className="bg-white dark:bg-gray-700 p-5 rounded-lg shadow">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 border-b pb-2">
+          <div className="bg-white p-5 rounded-lg shadow">
+            <h3 className="text-lg font-medium text-gray-900 mb-4 border-b pb-2">
               Información de Contacto
             </h3>
             <div className="space-y-3">
               <div className="flex items-start">
-                <FaEnvelope className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <FaEnvelope className="mt-1 text-gray-500 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Correo Electrónico</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{user.correo}</p>
+                  <p className="text-sm text-gray-500">Correo Electrónico</p>
+                  <p className="font-medium text-gray-900">{user.correo}</p>
                 </div>
               </div>
               
               <div className="flex items-start">
-                <FaPhone className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <FaPhone className="mt-1 text-gray-500 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Teléfono</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{user.telefono || 'No disponible'}</p>
+                  <p className="text-sm text-gray-500">Teléfono</p>
+                  <p className="font-medium text-gray-900">{user.telefono || 'No disponible'}</p>
                 </div>
               </div>
               
               <div className="flex items-start">
-                <FaMapMarkerAlt className="mt-1 text-gray-500 dark:text-gray-400 mr-3" />
+                <FaMapMarkerAlt className="mt-1 text-gray-500 mr-3" />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Dirección</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{user.direccion || 'No disponible'}</p>
+                  <p className="text-sm text-gray-500">Dirección</p>
+                  <p className="font-medium text-gray-900">{user.direccion || 'No disponible'}</p>
                 </div>
               </div>
             </div>
@@ -316,7 +316,7 @@ export default function PerfilPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
             Nombre
             </label>
             <div className="mt-1 relative">
@@ -329,13 +329,13 @@ export default function PerfilPage() {
                 type="text"
               value={formData.nombre}
                 onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
         </div>
         
         <div>
-          <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">
             Apellido
           </label>
           <div className="mt-1 relative">
@@ -348,13 +348,13 @@ export default function PerfilPage() {
               type="text"
               value={formData.apellido}
               onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Correo electrónico
             </label>
             <div className="mt-1 relative">
@@ -367,13 +367,13 @@ export default function PerfilPage() {
                 type="email"
               value={formData.email}
                 onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
           </div>
 
         <div>
-          <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
             Teléfono
           </label>
           <div className="mt-1 relative">
@@ -386,13 +386,13 @@ export default function PerfilPage() {
               type="text"
               value={formData.telefono}
               onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
         </div>
 
         <div className="md:col-span-2">
-          <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
             Dirección
           </label>
           <div className="mt-1 relative">
@@ -405,20 +405,20 @@ export default function PerfilPage() {
               type="text"
               value={formData.direccion}
               onChange={handleChange}
-              className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+              className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
         </div>
       </div>
 
-      <div className="mt-8 border-t pt-6 dark:border-gray-600">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <div className="mt-8 border-t pt-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
           Cambiar Contraseña (opcional)
         </h3>
         
         <div className="space-y-4">
               <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
                   Contraseña actual
                 </label>
                 <div className="mt-1 relative">
@@ -431,14 +431,14 @@ export default function PerfilPage() {
                     type="password"
                     value={formData.currentPassword}
                     onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="••••••••"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
               Nueva contraseña
                 </label>
                 <div className="mt-1 relative">
@@ -451,14 +451,14 @@ export default function PerfilPage() {
                     type="password"
                     value={formData.newPassword}
                     onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="••••••••"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                   Confirmar nueva contraseña
                 </label>
                 <div className="mt-1 relative">
@@ -471,7 +471,7 @@ export default function PerfilPage() {
                     type="password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="••••••••"
                   />
             </div>
@@ -483,7 +483,7 @@ export default function PerfilPage() {
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Cancelar
                 </button>
@@ -516,10 +516,10 @@ export default function PerfilPage() {
             <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : pedidos.length === 0 ? (
-          <div className="text-center py-10 bg-white dark:bg-gray-700 rounded-lg shadow-md">
-            <FaShoppingBag className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">No tienes pedidos</h3>
-            <p className="mt-1 text-gray-500 dark:text-gray-400">¡Comienza a comprar ahora!</p>
+          <div className="text-center py-10 bg-white rounded-lg shadow-md">
+            <FaShoppingBag className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900">No tienes pedidos</h3>
+            <p className="mt-1 text-gray-500">¡Comienza a comprar ahora!</p>
             <button 
               onClick={() => router.push('/')}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -528,12 +528,12 @@ export default function PerfilPage() {
             </button>
           </div>
         ) : pedidosFiltrados.length === 0 ? (
-          <div className="text-center py-10 bg-white dark:bg-gray-700 rounded-lg shadow-md">
-            <StatusIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          <div className="text-center py-10 bg-white rounded-lg shadow-md">
+            <StatusIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900">
               No tienes pedidos {estadoLabel}
             </h3>
-            <p className="mt-1 text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-gray-500">
               {estado === 'En proceso' ? 'Tus pedidos en proceso aparecerán aquí' : 
                'Tus pedidos entregados aparecerán aquí'}
             </p>
@@ -543,17 +543,17 @@ export default function PerfilPage() {
             {pedidosFiltrados.map((pedido) => (
               <div 
                 key={pedido.id_pedido} 
-                className="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-600"
+                className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
               >
-                <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
+                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                   <div className="flex flex-wrap items-center justify-between">
                     <div className="flex items-center mb-2 md:mb-0">
-                      <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium">
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                         Pedido #{pedido.id_pedido}
                       </span>
                     </div>
                     
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center text-sm text-gray-500">
                       <FaClock className="mr-1.5" />
                       {pedido.fecha}
                     </div>
@@ -561,31 +561,31 @@ export default function PerfilPage() {
                 </div>
                 
                 <div className="p-6">
-                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden mb-4">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-100 dark:bg-gray-800">
+                  <div className="bg-gray-50 rounded-lg overflow-hidden mb-4">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-100">
                         <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Producto
                           </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Cantidad
                           </th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Precio
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
+                      <tbody className="bg-white divide-y divide-gray-200">
                         {pedido.productos && pedido.productos.map((producto, index) => (
-                          <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                               {producto.nombre}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {producto.cantidad}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white text-right">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                               ${producto.precio.toLocaleString('es-CL')}
                             </td>
                           </tr>
@@ -594,9 +594,9 @@ export default function PerfilPage() {
                     </table>
                   </div>
                   
-                  <div className="flex justify-between items-center pt-3 border-t dark:border-gray-700">
-                    <div className="flex items-center text-gray-700 dark:text-gray-300">
-                      <FaMoneyBillWave className="mr-2 text-green-600 dark:text-green-400" />
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <div className="flex items-center text-gray-700">
+                      <FaMoneyBillWave className="mr-2 text-green-600" />
                       <span className="font-medium">Total del pedido</span>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -609,7 +609,7 @@ export default function PerfilPage() {
                           Confirmar Recepción
                         </button>
                       )}
-                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-xl font-bold text-gray-900">
                         ${pedido.total.toLocaleString('es-CL')}
                       </p>
                     </div>
@@ -637,8 +637,8 @@ export default function PerfilPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
-        <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-900">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+        <div className="w-full md:w-64 bg-gray-50">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6">
             <div>
               <p className="text-white font-medium text-lg">
@@ -655,18 +655,18 @@ export default function PerfilPage() {
               onClick={() => setActiveTab('info')}
               className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                 activeTab === 'info'
-                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               <FaUser className={`mr-3 h-5 w-5 ${
-                activeTab === 'info' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                activeTab === 'info' ? 'text-blue-500' : 'text-gray-400'
               }`} />
               Información Personal
             </button>
             
             <div className="py-2">
-              <h3 className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Mis Pedidos
               </h3>
             </div>
@@ -678,12 +678,12 @@ export default function PerfilPage() {
               }}
               className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                 activeTab === 'pedidos-proceso'
-                  ? 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'
-                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  ? 'bg-yellow-50 text-yellow-700'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               <FaTruck className={`mr-3 h-5 w-5 ${
-                activeTab === 'pedidos-proceso' ? 'text-yellow-500 dark:text-yellow-400' : 'text-gray-400 dark:text-gray-500'
+                activeTab === 'pedidos-proceso' ? 'text-yellow-500' : 'text-gray-400'
               }`} />
               En Proceso
             </button>
@@ -695,12 +695,12 @@ export default function PerfilPage() {
               }}
               className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                 activeTab === 'pedidos-entregados'
-                  ? 'bg-green-50 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  ? 'bg-green-50 text-green-700'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               <FaCheckCircle className={`mr-3 h-5 w-5 ${
-                activeTab === 'pedidos-entregados' ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
+                activeTab === 'pedidos-entregados' ? 'text-green-500' : 'text-gray-400'
               }`} />
               Entregados
             </button>
@@ -709,13 +709,13 @@ export default function PerfilPage() {
 
         <div className="flex-1">
           {error && (
-            <div className="m-6 bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
+            <div className="m-6 bg-red-50 text-red-600 p-3 rounded-md text-sm">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="m-6 bg-green-50 dark:bg-green-900/50 text-green-600 dark:text-green-400 p-3 rounded-md text-sm">
+            <div className="m-6 bg-green-50 text-green-600 p-3 rounded-md text-sm">
               {success}
             </div>
           )}

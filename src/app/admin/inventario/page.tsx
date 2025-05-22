@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, productoApi, Producto, api } from '@/lib/api';
+import { isEmpleado, productoApi, Producto } from '@/lib/api';
 import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiArrowLeft } from 'react-icons/fi';
 
 const categoriasMap: { [key: string]: string } = {
@@ -124,6 +124,12 @@ export default function AdminInventario() {
     alert('Funcionalidad de edición en desarrollo');
   };
 
+  const handleEliminarProducto = (id: number) => {
+    // Por ahora solo mostramos un mensaje - la funcionalidad se implementará después
+    console.log('Eliminar producto:', id);
+    alert('Funcionalidad de eliminación en desarrollo');
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
@@ -145,7 +151,7 @@ export default function AdminInventario() {
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="p-4">
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
@@ -155,7 +161,7 @@ export default function AdminInventario() {
                 placeholder="Buscar producto..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="relative flex-1">
@@ -163,7 +169,7 @@ export default function AdminInventario() {
               <select 
                 value={categoriaSeleccionada}
                 onChange={handleCategoriaChange}
-                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Todas las categorías</option>
                 {Object.entries(categoriasMap).map(([id, nombre]) => (
@@ -173,24 +179,25 @@ export default function AdminInventario() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          {/* Tabla para pantallas medianas y grandes */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-700">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
-                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Descripción</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Marca</th>
-                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
-                  <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peso</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Precio</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marca</th>
+                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                  <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-gray-200">
                 {productos.map((producto) => (
-                  <tr key={producto.id_producto} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr key={producto.id_producto} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">#{producto.id_producto}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                       <div className="font-medium">{producto.nombre}</div>
@@ -203,10 +210,10 @@ export default function AdminInventario() {
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         producto.stock > 10 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          ? 'bg-green-100 text-green-800'
                           : producto.stock > 0
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
                       }`}>
                         {producto.stock}
                       </span>
@@ -218,13 +225,13 @@ export default function AdminInventario() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEditarProducto(producto.id_producto)}
-                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="text-blue-600 hover:text-blue-800"
                         >
                           <FiEdit2 className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => handleEliminarProducto(producto.id_producto)}
-                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          className="text-red-600 hover:text-red-800"
                         >
                           <FiTrash2 className="w-5 h-5" />
                         </button>
@@ -236,23 +243,86 @@ export default function AdminInventario() {
             </table>
           </div>
 
+          {/* Vista de tarjetas para dispositivos móviles */}
+          <div className="md:hidden space-y-4">
+            {productos.map((producto) => (
+              <div key={producto.id_producto} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-lg font-bold text-blue-600">#{producto.id_producto}</div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEditarProducto(producto.id_producto)}
+                      className="p-1 text-blue-600 hover:text-blue-800"
+                    >
+                      <FiEdit2 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleEliminarProducto(producto.id_producto)}
+                      className="p-1 text-red-600 hover:text-red-800"
+                    >
+                      <FiTrash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="font-medium text-lg mb-2">{producto.nombre}</div>
+                <p className="text-sm text-gray-600 mb-3">{producto.descripcion}</p>
+                
+                <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                  <div>
+                    <span className="text-gray-500">Marca:</span>
+                    <span className="font-medium ml-2">{producto.marca}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-500">Categoría:</span>
+                    <span className="font-medium ml-2">{categoriasMap[producto.categoria_id]}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-500">Peso:</span>
+                    <span className="font-medium ml-2">{producto.peso} kg</span>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-500">Stock:</span>
+                    <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      producto.stock > 10 
+                        ? 'bg-green-100 text-green-800'
+                        : producto.stock > 0
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {producto.stock}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
+                  <span className="text-gray-500">Precio:</span>
+                  <span className="font-bold text-lg">${producto.precio.toLocaleString('es-CL')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Paginación */}
-          <div className="flex justify-between items-center mt-4">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mt-4">
+            <div className="text-sm text-gray-700 text-center sm:text-left">
               Mostrando {((pagina - 1) * productosPorPagina) + 1} a {Math.min(pagina * productosPorPagina, totalProductos)} de {totalProductos} productos
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 justify-center sm:justify-end">
               <button
                 onClick={() => setPagina(p => Math.max(1, p - 1))}
                 disabled={pagina === 1}
-                className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+                className="px-3 py-1 rounded-md bg-gray-200 text-gray-700 disabled:opacity-50"
               >
                 Anterior
               </button>
               <button
                 onClick={() => setPagina(p => p + 1)}
                 disabled={pagina * productosPorPagina >= totalProductos}
-                className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+                className="px-3 py-1 rounded-md bg-gray-200 text-gray-700 disabled:opacity-50"
               >
                 Siguiente
               </button>

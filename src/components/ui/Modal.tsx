@@ -9,10 +9,11 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   size?: 'sm' | 'md' | 'lg';
+  isFullMobile?: boolean;
   children: React.ReactNode;
 }
 
-export default function Modal({ isOpen, onClose, title, size = 'md', children }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, size = 'md', isFullMobile = false, children }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   
   // Cerrar con tecla ESC
@@ -46,27 +47,35 @@ export default function Modal({ isOpen, onClose, title, size = 'md', children }:
     lg: 'max-w-3xl'
   };
 
+  // Clase especial para dispositivos móviles cuando se requiere pantalla completa
+  const mobileFullScreenClass = isFullMobile 
+    ? 'sm:rounded-lg max-h-full h-full sm:h-auto rounded-lg sm:m-4 m-0' 
+    : 'rounded-lg';
+
   if (!isOpen) return null;
 
   // Usar Portal para renderizar fuera del DOM normal
   return createPortal(
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm transition-opacity"
       onClick={handleOutsideClick}
     >
       <div 
         ref={modalRef}
-        className={`${sizeClasses[size]} w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all duration-300 ease-in-out`}
+        className={`${sizeClasses[size]} w-full bg-white shadow-xl transform transition-all duration-300 ease-in-out overflow-y-auto relative ${mobileFullScreenClass}`}
       >
+        {/* Botón de cierre siempre visible, independientemente de si hay título o no */}
+        <button 
+          onClick={onClose}
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 focus:outline-none transition-colors"
+          aria-label="Cerrar"
+        >
+          <FaTimes size={16} />
+        </button>
+        
         {title && (
-          <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{title}</h3>
-            <button 
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
-            >
-              <FaTimes />
-            </button>
+          <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 pr-12">
+            <h3 className="text-lg font-medium text-gray-900">{title}</h3>
           </div>
         )}
         

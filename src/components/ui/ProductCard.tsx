@@ -52,10 +52,10 @@ export default function ProductCard({ producto }: ProductCardProps) {
   };
 
   return (
-    <div onClick={handleCardClick} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700 cursor-pointer">
+    <div onClick={handleCardClick} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full border border-gray-100 cursor-pointer">
       {/* Imagen del producto (placeholder) */}
       <div className="relative overflow-hidden group">
-        <div className="aspect-square bg-gray-100 dark:bg-gray-700">
+        <div className="aspect-square bg-gray-100">
           <img
             src={`/productos/${producto.id_producto}.webp`}
             alt={producto.nombre}
@@ -65,19 +65,19 @@ export default function ProductCard({ producto }: ProductCardProps) {
       </div>
       
       <div className="p-5 flex-grow flex flex-col">
-        <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white line-clamp-2 min-h-[3rem]">
+        <h3 className="text-lg font-semibold mb-2 text-gray-800 line-clamp-2 min-h-[3rem]">
           {producto.nombre}
         </h3>
         
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2 flex-grow">{producto.descripcion}</p>
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">{producto.descripcion}</p>
         
         <div className="flex justify-between items-center mb-4">
-          <span className="text-xl font-bold text-blue-700 dark:text-blue-400">${Math.round(producto.precio)}</span>          <span className={`text-sm px-2 py-1 rounded-full ${
+          <span className="text-xl font-bold text-blue-700">${Math.round(producto.precio)}</span>          <span className={`text-sm px-2 py-1 rounded-full ${
             producto.stock === 0
-              ? 'bg-red-100 text-red-500 dark:bg-red-900/30 dark:text-red-400'
+              ? 'bg-red-100 text-red-500'
               : producto.stock <= 5
-              ? 'bg-yellow-100 text-yellow-500 dark:bg-yellow-900/30 dark:text-yellow-400'
-              : 'bg-green-100 text-green-500 dark:bg-green-900/30 dark:text-green-400'
+              ? 'bg-yellow-100 text-yellow-500'
+              : 'bg-green-100 text-green-500'
           }`}>
             {producto.stock === 0 ? 'Sin stock' : `Stock: ${producto.stock}`}
           </span>
@@ -88,10 +88,10 @@ export default function ProductCard({ producto }: ProductCardProps) {
           disabled={isAdding || producto.stock <= 0}
           className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg text-white ${
             producto.stock <= 0
-              ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+              ? 'bg-gray-400 cursor-not-allowed'
               : isAdding
-              ? 'bg-green-500 dark:bg-green-600'
-              : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600'
+              ? 'bg-green-500'
+              : 'bg-blue-600 hover:bg-blue-700'
           } transition-colors duration-300`}
         >
           <FaShoppingCart />
