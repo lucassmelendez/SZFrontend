@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { productoApi, Producto } from '@/lib/api';
+import { productoApi, Producto, isEmpleado } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
 import { FaShoppingCart, FaCreditCard, FaTimesCircle, FaExclamationCircle, FaCheckCircle, FaShieldAlt, FaTruck } from 'react-icons/fa';
 import Image from 'next/image';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 // Mapa de categorías
 const categoriasMap = {
@@ -32,6 +33,10 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
   const [cantidad, setCantidad] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
+  const { user } = useAuth();
+
+  // Verificar si el usuario es un empleado
+  const isUserEmpleado = user && isEmpleado(user);
 
   useEffect(() => {
     const fetchProducto = async () => {
@@ -230,50 +235,52 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
             {/* Separador */}
             <div className="border-t border-gray-200 my-4"></div>
             {/* Selector de cantidad y botón para agregar al carrito */}
-            <div className="mt-3 mb-5">
-              <div className="flex flex-col md:flex-row items-center justify-center space-y-3 md:space-y-0 md:space-x-4">
-                <div className="flex items-center bg-gray-50 p-3 rounded-lg w-full md:w-auto hidden md:flex">
-                  <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden w-full">
-                    <button
-                      onClick={decrementCantidad}
-                      disabled={cantidad <= 1 || producto.stock <= 0}
-                      className="px-5 py-3 border-r border-gray-300 hover:bg-gray-100 disabled:opacity-50 text-gray-700 text-lg"
-                    >
-                      -
-                    </button>
-                    <span className="px-5 py-3 text-gray-800 font-medium min-w-[40px] text-center text-lg">{cantidad}</span>
-                    <button
-                      onClick={incrementCantidad}
-                      disabled={producto.stock <= cantidad || producto.stock <= 0}
-                      className="px-5 py-3 border-l border-gray-300 hover:bg-gray-100 disabled:opacity-50 text-gray-700 text-lg"
-                    >
-                      +
-                    </button>
+            {!isUserEmpleado && (
+              <div className="mt-3 mb-5">
+                <div className="flex flex-col md:flex-row items-center justify-center space-y-3 md:space-y-0 md:space-x-4">
+                  <div className="flex items-center bg-gray-50 p-3 rounded-lg w-full md:w-auto hidden md:flex">
+                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden w-full">
+                      <button
+                        onClick={decrementCantidad}
+                        disabled={cantidad <= 1 || producto.stock <= 0}
+                        className="px-5 py-3 border-r border-gray-300 hover:bg-gray-100 disabled:opacity-50 text-gray-700 text-lg"
+                      >
+                        -
+                      </button>
+                      <span className="px-5 py-3 text-gray-800 font-medium min-w-[40px] text-center text-lg">{cantidad}</span>
+                      <button
+                        onClick={incrementCantidad}
+                        disabled={producto.stock <= cantidad || producto.stock <= 0}
+                        className="px-5 py-3 border-l border-gray-300 hover:bg-gray-100 disabled:opacity-50 text-gray-700 text-lg"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
+                  
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={isAdding || producto.stock <= 0}
+                    className={`flex items-center justify-center space-x-2 py-3 px-6 rounded-lg text-white w-full md:w-auto md:flex-1 hidden md:flex ${
+                      producto.stock <= 0
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : isAdding
+                        ? 'bg-green-500'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    } transition-colors font-medium text-lg`}
+                  >
+                    <FaShoppingCart size={20} />
+                    <span>
+                      {isAdding
+                        ? '¡Agregado!'
+                        : producto.stock <= 0
+                        ? 'Sin stock'
+                        : 'Agregar al carrito'}
+                    </span>
+                  </button>
                 </div>
-                
-                <button
-                  onClick={handleAddToCart}
-                  disabled={isAdding || producto.stock <= 0}
-                  className={`flex items-center justify-center space-x-2 py-3 px-6 rounded-lg text-white w-full md:w-auto md:flex-1 hidden md:flex ${
-                    producto.stock <= 0
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : isAdding
-                      ? 'bg-green-500'
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  } transition-colors font-medium text-lg`}
-                >
-                  <FaShoppingCart size={20} />
-                  <span>
-                    {isAdding
-                      ? '¡Agregado!'
-                      : producto.stock <= 0
-                      ? 'Sin stock'
-                      : 'Agregar al carrito'}
-                  </span>
-                </button>
               </div>
-            </div>
+            )}
             
             {/* Medios de pago */}
             <div className="mb-5">
@@ -324,7 +331,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
       </div>
 
       {/* Sticky Add to Cart para móviles */}
-      {producto && (
+      {producto && !isUserEmpleado && (
         <div 
           className={`fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-3 md:hidden ${
             isCartOpen ? 'opacity-0 pointer-events-none' : 'opacity-100 z-50'

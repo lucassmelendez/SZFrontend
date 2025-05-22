@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { FaShoppingCart, FaEye } from 'react-icons/fa';
-import { Producto } from '@/lib/api';
+import { Producto, isEmpleado } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 interface ProductCardProps {
   producto: Producto;
@@ -17,6 +18,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
   const { openCart } = useFloatingCartContext();
   const [isAdding, setIsAdding] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleCardClick = () => {
     router.push(`/productos/${producto.id_producto}`);
@@ -51,6 +53,9 @@ export default function ProductCard({ producto }: ProductCardProps) {
     };
   };
 
+  // Verificar si el usuario es un empleado
+  const isUserEmpleado = user && isEmpleado(user);
+
   return (
     <div onClick={handleCardClick} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full border border-gray-100 cursor-pointer">
       {/* Imagen del producto (placeholder) */}
@@ -83,20 +88,23 @@ export default function ProductCard({ producto }: ProductCardProps) {
           </span>
         </div>
         
-        <button
-          onClick={handleAddToCart}
-          disabled={isAdding || producto.stock <= 0}
-          className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg text-white ${
-            producto.stock <= 0
-              ? 'bg-gray-400 cursor-not-allowed'
-              : isAdding
-              ? 'bg-green-500'
-              : 'bg-blue-600 hover:bg-blue-700'
-          } transition-colors duration-300`}
-        >
-          <FaShoppingCart />
-          <span>{isAdding ? '¡Agregado!' : producto.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}</span>
-        </button>
+        {/* Botón de agregar al carrito (solo visible para clientes) */}
+        {!isUserEmpleado && (
+          <button
+            onClick={handleAddToCart}
+            disabled={isAdding || producto.stock <= 0}
+            className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg text-white ${
+              producto.stock <= 0
+                ? 'bg-gray-400 cursor-not-allowed'
+                : isAdding
+                ? 'bg-green-500'
+                : 'bg-blue-600 hover:bg-blue-700'
+            } transition-colors duration-300`}
+          >
+            <FaShoppingCart />
+            <span>{isAdding ? '¡Agregado!' : producto.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}</span>
+          </button>
+        )}
       </div>
     </div>
   );

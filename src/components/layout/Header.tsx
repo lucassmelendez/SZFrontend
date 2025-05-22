@@ -287,18 +287,20 @@ export default function Header() {
                 </button>
               )}
 
-              {/* Carrito - botón que abre el carrito flotante */}
-              <button 
-                onClick={openCart} 
-                className={`relative hover:text-blue-200 ${showCartAnimation ? 'animate-pulse' : ''}`}
-              >
-                <FaShoppingCart size={24} />
-                {cantidadTotal > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cantidadTotal}
-                  </span>
-                )}
-              </button>
+              {/* Carrito - botón que abre el carrito flotante (solo para clientes) */}
+              {(!user || !isEmpleado(user)) && (
+                <button 
+                  onClick={openCart} 
+                  className={`relative hover:text-blue-200 ${showCartAnimation ? 'animate-pulse' : ''}`}
+                >
+                  <FaShoppingCart size={24} />
+                  {cantidadTotal > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cantidadTotal}
+                    </span>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -367,18 +369,20 @@ export default function Header() {
                 </button>
               )}
 
-              {/* Carrito - botón que abre el carrito flotante */}
-              <button 
-                onClick={openCart} 
-                className={`relative hover:text-blue-200 ${showCartAnimation ? 'animate-pulse' : ''}`}
-              >
-                <FaShoppingCart size={24} />
-                {cantidadTotal > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cantidadTotal}
-                  </span>
-                )}
-              </button>
+              {/* Carrito - botón que abre el carrito flotante (solo para clientes) */}
+              {(!user || !isEmpleado(user)) && (
+                <button 
+                  onClick={openCart} 
+                  className={`relative hover:text-blue-200 ${showCartAnimation ? 'animate-pulse' : ''}`}
+                >
+                  <FaShoppingCart size={24} />
+                  {cantidadTotal > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cantidadTotal}
+                    </span>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -489,8 +493,10 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Carrito flotante */}
-      <FloatingCart isOpen={isCartOpen} onClose={closeCart} />
+      {/* Carrito flotante - solo para clientes */}
+      {(!user || !isEmpleado(user)) && (
+        <FloatingCart isOpen={isCartOpen} onClose={closeCart} />
+      )}
     </>
   );
 }
