@@ -678,7 +678,7 @@ export default function PerfilPage() {
                         <span className="font-medium">Total del pedido</span>
                       </div>
                       <div className="flex items-center space-x-4">
-                        {pedido.id_estado_envio === 1 && (
+                        {pedido.id_estado_envio === 4 && (
                           <button
                             onClick={() => handleConfirmarRecepcion(pedido.id_pedido)}
                             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
