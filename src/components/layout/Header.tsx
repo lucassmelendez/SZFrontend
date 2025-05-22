@@ -36,6 +36,7 @@ export default function Header() {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const searchMobileRef = useRef<HTMLDivElement>(null);
   const { openLoginModal } = useLoginModal();
 
   // Cerrar los menús cuando se hace clic fuera
@@ -45,6 +46,9 @@ export default function Header() {
         setIsCategoryOpen(false);
       }
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+      if (searchMobileRef.current && !searchMobileRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false);
       }
     };
@@ -179,7 +183,7 @@ export default function Header() {
               </nav>
             </div>
 
-            {/* Sección central: Búsqueda */}
+            {/* Sección central: Búsqueda - RESTAURADA CON LA IMPLEMENTACIÓN QUE FUNCIONA */}
             <div className="flex-grow max-w-md mx-auto px-4" ref={searchRef}>
               <form onSubmit={handleSearchSubmit} className="relative">
                 <input
@@ -351,8 +355,8 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Segunda fila: Barra de búsqueda (solo en móvil) */}
-          <div className="md:hidden pb-4" ref={searchRef}>
+          {/* Barra de búsqueda móvil - RESTAURADA LA CLASE ORIGINAL */}
+          <div className="md:hidden pb-4 px-4" ref={searchMobileRef}>
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
