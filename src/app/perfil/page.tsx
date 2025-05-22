@@ -5,7 +5,7 @@ import { useAuth } from '../../lib/auth/AuthContext';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle, FaBoxOpen, FaExclamationCircle } from 'react-icons/fa';
 import Link from 'next/link';
-import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast, pedidoApiFast, productoApi } from '@/lib/api';
+import { authApi, isCliente, isEmpleado, Pedido as ApiPedido, pedidoProductoApiFast, pedidoApiFast, productoApi } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 import toast from 'react-hot-toast';
 
@@ -284,7 +284,7 @@ export default function PerfilPage() {
                   <p className="text-sm text-gray-500">Nombre Completo</p>
                   <p className="font-medium text-gray-900">{user?.nombre || ''} {user?.apellido || ''}</p>
                 </div>
-      </div>
+              </div>
 
               <div className="flex items-start">
                 <FaIdCard className="mt-1 text-gray-500 mr-3" />
@@ -292,19 +292,22 @@ export default function PerfilPage() {
                   <p className="text-sm text-gray-500">RUT</p>
                   <p className="font-medium text-gray-900">{user?.rut || 'No disponible'}</p>
                 </div>
-        </div>
+              </div>
 
-              {user && 'id_rol' in user && (
-                <div className="flex items-start">
-                  <FaUserTag className="mt-1 text-gray-500 mr-3" />
-                  <div>
-                    <p className="text-sm text-gray-500">Tipo de Usuario</p>
-                    <p className="font-medium text-gray-900">
-                      {isCliente(user) ? 'Cliente' : 'Administrador'}
-                    </p>
-                  </div>
+              {/* Sección de tipo de usuario para todos los usuarios */}
+              <div className="flex items-start">
+                <FaUserTag className="mt-1 text-gray-500 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500">Tipo de Usuario</p>
+                  <p className="font-medium text-gray-900">
+                    {user && isCliente(user) 
+                      ? 'Cliente' 
+                      : user && 'rol_id' in user 
+                        ? getRolEmpleado(user.rol_id) 
+                        : 'Usuario'}
+                  </p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -353,6 +356,22 @@ export default function PerfilPage() {
       </div>
     </div>
   );
+
+  // Función para obtener el nombre del rol de empleado
+  const getRolEmpleado = (rolId: number): string => {
+    switch (rolId) {
+      case 2:
+        return 'Administrador';
+      case 3:
+        return 'Vendedor';
+      case 4:
+        return 'Bodeguero';
+      case 5:
+        return 'Contador';
+      default:
+        return 'Empleado';
+    }
+  };
   
   const renderEditForm = () => (
         <form onSubmit={handleSubmit} className="space-y-6">
