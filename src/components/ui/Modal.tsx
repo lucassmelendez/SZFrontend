@@ -48,7 +48,9 @@ export default function Modal({ isOpen, onClose, title, size = 'md', isFullMobil
   };
 
   // Clase especial para dispositivos móviles cuando se requiere pantalla completa
-  const mobileFullScreenClass = isFullMobile ? 'sm:rounded-lg sm:max-h-[calc(100%-2rem)] max-h-full h-full sm:h-auto rounded-none sm:m-4 m-0' : '';
+  const mobileFullScreenClass = isFullMobile 
+    ? 'sm:rounded-lg max-h-full h-full sm:h-auto rounded-lg sm:m-4 m-0' 
+    : 'rounded-lg';
 
   if (!isOpen) return null;
 
