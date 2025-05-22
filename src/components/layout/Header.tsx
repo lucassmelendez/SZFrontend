@@ -110,7 +110,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-blue-700 dark:bg-blue-900 text-white shadow-md transition-colors duration-200">
+      <header className="bg-blue-700 text-white shadow-md transition-colors duration-200">
         <div className="container mx-auto px-4">
           {/* Primera fila (web): Logo, Navegación, Búsqueda, Tema, Perfil y Carrito */}
           <div className="hidden md:flex items-center justify-between py-4">
@@ -148,12 +148,12 @@ export default function Header() {
                   
                   {/* Menú desplegable */}
                   {isCategoryOpen && (
-                    <div className="absolute left-0 mt-2 w-48 py-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50">
+                    <div className="absolute left-0 mt-2 w-48 py-2 bg-white rounded-md shadow-xl z-50">
                       {categorias.map((categoria) => (
                         <Link
                           key={categoria.id}
                           href={`/productos/categoria/${categoria.id}`}
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsCategoryOpen(false)}
                         >
                           {categoria.nombre}
@@ -189,7 +189,7 @@ export default function Header() {
                 <input
                   type="text"
                   placeholder="Buscar productos..."
-                  className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
+                  className="bg-blue-600 text-white placeholder-blue-300 rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
                   value={searchQuery}
                   onChange={handleSearchInput}
                 />
@@ -203,19 +203,19 @@ export default function Header() {
 
                 {/* Resultados de búsqueda */}
                 {isSearchOpen && searchResults.length > 0 && (
-                  <div className="absolute left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50 max-h-96 overflow-y-auto">
+                  <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-96 overflow-y-auto">
                     {searchResults.map((producto) => (
                       <Link
                         key={producto.id_producto}
                         href={`/productos/${producto.id_producto}`}
-                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setIsSearchOpen(false);
                           setSearchQuery('');
                         }}
                       >
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                          <div className="flex-shrink-0 w-10 h-10 bg-gray-200 rounded overflow-hidden">
                             <img
                               src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
                               alt={producto.nombre}
@@ -224,7 +224,7 @@ export default function Header() {
                           </div>
                           <div className="ml-3">
                             <p className="font-medium">{producto.nombre}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">${Math.round(producto.precio)}</p>
+                            <p className="text-xs text-gray-500">${Math.round(producto.precio)}</p>
                           </div>
                         </div>
                       </Link>
@@ -361,7 +361,7 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="Buscar productos..."
-                className="bg-blue-600 dark:bg-blue-800 text-white placeholder-blue-300 rounded-full py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="bg-blue-600 text-white placeholder-blue-300 rounded-full py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
                 value={searchQuery}
                 onChange={handleSearchInput}
               />
@@ -375,12 +375,12 @@ export default function Header() {
 
               {/* Resultados de búsqueda en móvil */}
               {isSearchOpen && searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-xl z-50 max-h-[60vh] overflow-y-auto">
+                <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-[60vh] overflow-y-auto">
                   {searchResults.map((producto) => (
                     <Link
                       key={producto.id_producto}
                       href={`/productos/${producto.id_producto}`}
-                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-100 last:border-0"
                       onClick={() => {
                         setIsSearchOpen(false);
                         setSearchQuery('');
@@ -388,7 +388,7 @@ export default function Header() {
                       }}
                     >
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                        <div className="flex-shrink-0 w-12 h-12 bg-gray-200 rounded overflow-hidden">
                           <img
                             src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
                             alt={producto.nombre}
@@ -397,7 +397,7 @@ export default function Header() {
                         </div>
                         <div className="ml-3 flex-grow">
                           <p className="font-medium line-clamp-1">{producto.nombre}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">${Math.round(producto.precio)}</p>
+                          <p className="text-sm text-gray-500">${Math.round(producto.precio)}</p>
                         </div>
                       </div>
                     </Link>
@@ -410,7 +410,7 @@ export default function Header() {
           {/* Mobile Navigation - Panel lateral desde la izquierda */}
           {isMenuOpen && (
             <div className="md:hidden fixed inset-0 z-50 backdrop-blur-sm bg-transparent">
-              <div className="bg-blue-700 dark:bg-blue-900 h-full w-4/5 max-w-sm py-4 px-6 overflow-y-auto transform transition-transform duration-300 ease-in-out">
+              <div className="bg-blue-700 h-full w-4/5 max-w-sm py-4 px-6 overflow-y-auto transform transition-transform duration-300 ease-in-out">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-bold">Menú</h2>
                   <button 
@@ -490,7 +490,7 @@ export default function Header() {
                   </div>
                   
                   {/* Divisor principal */}
-                  <div className="my-4 border-t border-blue-600 dark:border-blue-800"></div>
+                  <div className="my-4 border-t border-blue-600"></div>
                   
                   {/* Sección de configuración */}
                   <div className="space-y-0">
@@ -510,13 +510,13 @@ export default function Header() {
 
                 {/* Menú móvil - Login/Register */}
                 {!user && (
-                  <div className="border-t border-blue-800 dark:border-blue-700 pt-4 mt-4">
+                  <div className="border-t border-blue-800 pt-4 mt-4">
                     <button
                       onClick={() => {
                         openLoginModal();
                         setIsMenuOpen(false);
                       }}
-                      className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-blue-800 dark:hover:bg-blue-800"
+                      className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-blue-800"
                     >
                       <FaUser className="mr-2" />
                       Iniciar sesión

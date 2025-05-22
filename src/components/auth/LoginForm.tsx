@@ -36,21 +36,18 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          El sistema detectará automáticamente si eres cliente o empleado
-        </p>
+        <h2 className="text-2xl font-bold text-gray-900">Iniciar Sesión</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
+          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
             {error}
           </div>
         )}
 
         <div>
-          <label htmlFor="correo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="correo" className="block text-sm font-medium text-gray-700 mb-1">
             Correo electrónico
           </label>
           <div className="relative">
@@ -65,14 +62,14 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
               required
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
-              className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2.5"
+              className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2.5"
               placeholder="ejemplo@correo.com"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700 mb-1">
             Contraseña
           </label>
           <div className="relative">
@@ -87,7 +84,7 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
               required
               value={contrasena}
               onChange={(e) => setContrasena(e.target.value)}
-              className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2.5"
+              className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2.5"
               placeholder="••••••••"
             />
           </div>
@@ -111,7 +108,7 @@ export default function LoginForm({ onRegister, onSuccess }: LoginFormProps) {
         </button>
         
         <div className="text-center pt-2">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600">
             ¿No tienes cuenta?{' '}
             <button 
               onClick={onRegister}

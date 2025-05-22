@@ -40,12 +40,12 @@ export default function BuscarProductos() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="bg-gradient-to-r from-blue-500 to-blue-400 dark:from-blue-600 dark:to-blue-500 text-white rounded-xl shadow-md p-8 mb-8">
+      <div className="bg-gradient-to-r from-blue-500 to-blue-400 text-white rounded-xl shadow-md p-8 mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">Resultados de búsqueda</h1>
             {query && (
-              <p className="text-blue-50 dark:text-blue-100">
+              <p className="text-blue-50">
                 Mostrando resultados para: "{query}"
               </p>
             )}
@@ -62,18 +62,18 @@ export default function BuscarProductos() {
 
       {loading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 dark:border-blue-400"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
         </div>
       ) : error ? (
-        <div className="text-center text-red-600 dark:text-red-400 py-8">{error}</div>
+        <div className="text-center text-red-600 py-8">{error}</div>
       ) : (
         <>
           {productos.length > 0 ? (
             <ProductGrid productos={productos} />
           ) : (
             <div className="text-center py-12">
-              <p className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">No se encontraron productos</p>
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
+              <p className="text-2xl font-bold text-gray-800 mb-4">No se encontraron productos</p>
+              <p className="text-gray-600 mb-8">
                 No encontramos productos que coincidan con "{query}". Intenta con otras palabras clave.
               </p>
               <Link 

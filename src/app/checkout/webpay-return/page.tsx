@@ -17,10 +17,10 @@ function LoadingFallback() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <div className="text-center mb-8">
         <FaSpinner className="animate-spin text-4xl text-blue-600 mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+        <h1 className="text-2xl font-bold text-gray-800">
           Cargando...
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">
+        <p className="text-gray-500 mt-2">
           Estamos preparando tu resultado de pago, por favor espera...
         </p>
       </div>
@@ -138,10 +138,10 @@ function WebpayReturnContent() {
       <div className="min-h-screen flex flex-col items-center justify-center px-4">
         <div className="text-center mb-8">
           <FaSpinner className="animate-spin text-4xl text-blue-600 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+          <h1 className="text-2xl font-bold text-gray-800">
             Procesando tu pago
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
+          <p className="text-gray-500 mt-2">
             Estamos verificando el estado de tu transacción, por favor espera...
           </p>
         </div>
@@ -151,24 +151,24 @@ function WebpayReturnContent() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg max-w-md w-full p-8 text-center">
+      <div className="bg-white shadow-xl rounded-lg max-w-md w-full p-8 text-center">
         {result?.success ? (
           <>
-            <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-6">
-              <FaCheck className="text-3xl text-green-600 dark:text-green-400" />
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+              <FaCheck className="text-3xl text-green-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
               ¡Pago completado con éxito!
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-gray-600 mb-6">
               Tu compra ha sido procesada correctamente. Recibirás un correo electrónico con los detalles de tu pedido.
             </p>
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-6 text-left">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
+            <div className="bg-gray-100 rounded-lg p-4 mb-6 text-left">
+              <p className="text-sm text-gray-700">
                 <span className="font-semibold">Pedido #:</span> {result.pedidoId}
               </p>
               {result.transaction?.card_detail && (
-                <p className="text-sm text-gray-700 dark:text-gray-300">
+                <p className="text-sm text-gray-700">
                   <span className="font-semibold">Tarjeta:</span> {result.transaction.card_detail.card_number}
                 </p>
               )}
@@ -176,13 +176,13 @@ function WebpayReturnContent() {
           </>
         ) : (
           <>
-            <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mb-6">
-              <FaTimes className="text-3xl text-red-600 dark:text-red-400" />
+            <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+              <FaTimes className="text-3xl text-red-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
               Transacción no completada
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-gray-600 mb-6">
               {result?.error || 'Hubo un problema al procesar tu pago.'}
             </p>
           </>
@@ -197,7 +197,7 @@ function WebpayReturnContent() {
           {!result?.success && (
             <Link
               href="/checkout"
-              className="bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-4 rounded-md font-medium transition-colors"
+              className="bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-100 py-2 px-4 rounded-md font-medium transition-colors"
             >
               Volver al checkout
             </Link>

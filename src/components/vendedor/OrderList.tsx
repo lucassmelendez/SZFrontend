@@ -120,7 +120,7 @@ export default function OrderList() {
 
   if (error) {
     return (
-      <div className="p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg">
+      <div className="p-4 bg-red-50 text-red-700 rounded-lg">
         {error}
       </div>
     );
@@ -128,7 +128,7 @@ export default function OrderList() {
 
   if (pedidos.length === 0) {
     return (
-      <div className="p-4 text-gray-700 dark:text-gray-300">
+      <div className="p-4 text-gray-700">
         No hay pedidos preparados pendientes de despacho o entrega.
       </div>
     );
@@ -139,33 +139,33 @@ export default function OrderList() {
       {pedidos.map(order => (
         <div
           key={order.id_pedido}
-          className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 shadow-sm"
+          className="bg-gray-50 rounded-lg p-4 shadow-sm"
         >
           <div className="flex flex-col md:flex-row justify-between gap-4">
             {/* Información del pedido */}
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 dark:text-white mb-2">
+              <h3 className="font-semibold text-gray-800 mb-2">
                 Pedido #{order.id_pedido}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
+              <p className="text-sm text-gray-600">
                 Cliente: {order.cliente.nombre} {order.cliente.apellido}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500">
                 Dirección: {order.cliente.direccion}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500">
                 Teléfono: {order.cliente.telefono}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500">
                 Fecha: {new Date(order.fecha).toLocaleDateString()}
               </p>
               
               {/* Lista de productos */}
               <div className="mt-3">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">
                   Productos:
                 </h4>
-                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <ul className="text-sm text-gray-600 space-y-1">
                   {order.productos.map(producto => (
                     <li key={producto.id_producto}>
                       {producto.cantidad}x {producto.nombre}

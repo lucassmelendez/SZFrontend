@@ -121,64 +121,64 @@ export default function BodegaDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Panel de Bodega</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Panel de Bodega</h1>
       
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600 dark:text-gray-300">Total de productos</span>
-            <span className="font-bold text-gray-800 dark:text-white">{totalProductos}</span>
+            <span className="text-gray-600">Total de productos</span>
+            <span className="font-bold text-gray-800">{totalProductos}</span>
           </div>
         </div>
         
         
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600 dark:text-gray-300">Productos bajo stock</span>
+            <span className="text-gray-600">Productos bajo stock</span>
             <span className="font-bold text-amber-500">{bajoStock}</span>
           </div>
         </div>
         
         
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600 dark:text-gray-300">Productos sin stock</span>
+            <span className="text-gray-600">Productos sin stock</span>
             <span className="font-bold text-red-500">{sinStock}</span>
           </div>
         </div>
       </div>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Órdenes Pendientes</h2>
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">Órdenes Pendientes</h2>
         <OrderList />
       </div>
 
       
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-8">
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-8">
           {error}
         </div>
       )}
 
       
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Gestión de Stock</h2>
+          <h2 className="text-xl font-semibold text-gray-800">Gestión de Stock</h2>
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="flex items-center gap-3">
-              <span className="text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">Filtrar:</span>
+              <span className="text-gray-700 font-medium whitespace-nowrap">Filtrar:</span>
               <div className="relative categorias-menu">
                 <button
                   onClick={() => setShowCategorias(!showCategorias)}
-                  className="flex items-center justify-between w-full md:w-48 px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="flex items-center justify-between w-full md:w-48 px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg text-gray-800 hover:bg-gray-200 transition-colors"
                 >
                   <span>{categoriasMap[selectedCategoria as keyof typeof categoriasMap]}</span>
                   <FaChevronDown className={`ml-2 transition-transform ${showCategorias ? 'rotate-180' : ''}`} />
                 </button>
                 
                 {showCategorias && (
-                  <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
+                  <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
                     {Object.entries(categoriasMap).map(([id, nombre]) => (
                       <button
                         key={id}
@@ -186,8 +186,8 @@ export default function BodegaDashboard() {
                           setSelectedCategoria(Number(id));
                           setShowCategorias(false);
                         }}
-                        className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600
-                          ${selectedCategoria === Number(id) ? 'bg-gray-100 dark:bg-gray-600' : ''}`}
+                        className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100
+                          ${selectedCategoria === Number(id) ? 'bg-gray-100' : ''}`}
                       >
                         {nombre}
                       </button>
@@ -203,7 +203,7 @@ export default function BodegaDashboard() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar productos..."
-                className="w-full md:w-64 px-4 py-2 pl-10 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                className="w-full md:w-64 px-4 py-2 pl-10 bg-gray-100 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <FaSearch className="absolute left-3 text-gray-400" />
             </div>

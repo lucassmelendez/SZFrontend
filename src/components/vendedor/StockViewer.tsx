@@ -48,7 +48,7 @@ export default function StockViewer({ productos }: StockViewerProps) {
 
   return (
     <div>      {/* Barra de búsqueda y filtros */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+      <div className="flex flex-col md:flex-row gap-4 mb-8 bg-white p-4 rounded-xl shadow-md">
         {/* Barra de búsqueda */}
         <div className="relative flex-1">
           <input
@@ -56,7 +56,7 @@ export default function StockViewer({ productos }: StockViewerProps) {
             placeholder="Buscar productos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+            className="w-full pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:bg-gray-100"
           />
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
@@ -66,7 +66,7 @@ export default function StockViewer({ productos }: StockViewerProps) {
           <select
             value={selectedStockState}
             onChange={(e) => setSelectedStockState(e.target.value as keyof typeof stockStates)}
-            className="w-full md:w-auto px-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white cursor-pointer transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+            className="w-full md:w-auto px-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:bg-gray-100"
           >
             {Object.entries(stockStates).map(([key, value]) => (
               <option key={key} value={key} className="py-2">
@@ -80,7 +80,7 @@ export default function StockViewer({ productos }: StockViewerProps) {
         <div className="relative">
           <button
             onClick={() => setShowCategorias(!showCategorias)}
-            className="w-full md:w-auto px-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white flex items-center justify-between gap-2 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+            className="w-full md:w-auto px-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:bg-gray-100"
           >
             <span>
               {selectedCategoria === 0 ? 'Todas las categorías' : categoriasMap[selectedCategoria as keyof typeof categoriasMap]}
@@ -88,14 +88,14 @@ export default function StockViewer({ productos }: StockViewerProps) {
           </button>
           
           {showCategorias && (
-            <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg shadow-lg">
+            <div className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg">
               <div className="py-1">
                 <button
                   onClick={() => {
                     setSelectedCategoria(0);
                     setShowCategorias(false);
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-white"
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100"
                 >
                   Todas las categorías
                 </button>
@@ -106,7 +106,7 @@ export default function StockViewer({ productos }: StockViewerProps) {
                       setSelectedCategoria(Number(id));
                       setShowCategorias(false);
                     }}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-white"
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100"
                   >
                     {nombre}
                   </button>
@@ -119,48 +119,48 @@ export default function StockViewer({ productos }: StockViewerProps) {
 
       {/* Tabla de productos */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-800">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ID
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Nombre
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Categoría
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Stock
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Estado
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-white divide-y divide-gray-200">
             {filteredProductos.map(producto => (
               <tr key={producto.id_producto}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   #{producto.id_producto}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {producto.nombre}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {categoriasMap[producto.categoria_id as keyof typeof categoriasMap] || 'Sin categoría'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {producto.stock}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     producto.stock === 0
-                      ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                      ? 'bg-red-100 text-red-800'
                       : producto.stock <= 5
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                      : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-green-100 text-green-800'
                   }`}>
                     {producto.stock === 0 ? 'Sin Stock' : producto.stock <= 5 ? 'Stock Bajo' : 'Disponible'}
                   </span>

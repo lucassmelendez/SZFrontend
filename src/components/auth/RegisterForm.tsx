@@ -108,19 +108,19 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
   return (
     <div>
       <div className="text-center mb-3">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Crear cuenta</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Crear cuenta</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-2.5">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-2 rounded-md text-sm">
+          <div className="bg-red-50 text-red-600 p-2 rounded-md text-sm">
             {error}
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
               Nombre
             </label>
             <div className="relative">
@@ -134,14 +134,14 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 required
                 value={formData.nombre}
                 onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                 placeholder="Francisco"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 mb-1">
               Apellido
             </label>
             <div className="relative">
@@ -155,7 +155,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 required
                 value={formData.apellido}
                 onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                 placeholder="Meléndez"
               />
             </div>
@@ -164,7 +164,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Correo electrónico
             </label>
             <div className="relative">
@@ -179,14 +179,14 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                 placeholder="correo@correo.com"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="rut" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="rut" className="block text-sm font-medium text-gray-700 mb-1">
               RUT
             </label>
             <div className="relative">
@@ -200,7 +200,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 required
                 value={formData.rut}
                 onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                 placeholder="12345678-9"
               />
             </div>
@@ -209,7 +209,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-1">
               Teléfono
             </label>
             <div className="relative">
@@ -223,14 +223,14 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 required
                 value={formData.telefono}
                 onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                 placeholder="912345678"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 mb-1">
               Dirección
             </label>
             <div className="relative">
@@ -244,7 +244,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 required
                 value={formData.direccion}
                 onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                 placeholder="Av. Principal 123"
               />
             </div>
@@ -253,7 +253,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Contraseña
             </label>
             <div className="relative">
@@ -267,14 +267,14 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
               Confirmar contraseña
             </label>
             <div className="relative">
@@ -288,7 +288,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-2"
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                 placeholder="••••••••"
               />
             </div>
@@ -313,7 +313,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
         </button>
         
         <div className="text-center pt-1">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600">
             ¿Ya tienes una cuenta?{' '}
             <button 
               onClick={onBackToLogin}

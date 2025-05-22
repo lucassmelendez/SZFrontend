@@ -173,15 +173,15 @@ export default function ContabilidadDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Panel de Contabilidad</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Panel de Contabilidad</h1>
       
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-lg mb-8">
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-8">
           {error}
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex gap-4">
             <button
@@ -189,7 +189,7 @@ export default function ContabilidadDashboard() {
               className={`px-4 py-2 rounded-lg ${
                 filterStatus === 'todos'
                   ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  : 'bg-gray-100 text-gray-700'
               }`}
             >
               Todos
@@ -199,7 +199,7 @@ export default function ContabilidadDashboard() {
               className={`px-4 py-2 rounded-lg ${
                 filterStatus === 'pagado'
                   ? 'bg-green-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  : 'bg-gray-100 text-gray-700'
               }`}
             >
               Pagados
@@ -209,7 +209,7 @@ export default function ContabilidadDashboard() {
               className={`px-4 py-2 rounded-lg ${
                 filterStatus === 'no_pagado'
                   ? 'bg-red-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  : 'bg-gray-100 text-gray-700'
               }`}
             >
               No Pagados
@@ -221,7 +221,7 @@ export default function ContabilidadDashboard() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por cliente o N° pedido..."
-              className="w-full px-4 py-2 pl-10 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              className="w-full px-4 py-2 pl-10 bg-gray-100 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <FaSearch className="absolute left-3 text-gray-400" />
           </div>
@@ -229,58 +229,58 @@ export default function ContabilidadDashboard() {
       </div>
 
       {/* Lista de pedidos */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div className="bg-white rounded-lg shadow-md">
         <div className="grid gap-4 p-6">
           {filteredOrders.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+            <p className="text-gray-500 text-center py-4">
               No hay pedidos que coincidan con los filtros seleccionados.
             </p>
           ) : (
             filteredOrders.map((order) => (
               <div
                 key={order.id_pedido}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                className="border border-gray-200 rounded-lg p-4"
               >
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   {/* Información del pedido */}
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      <h3 className="text-lg font-semibold text-gray-800">
                         Pedido #{order.id_pedido}
                       </h3>
                       <span className={`px-3 py-1 rounded-full text-sm ${
                         order.id_estado === 1
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
                       }`}>
                         {order.id_estado === 1 ? 'Pagado' : 'No Pagado'}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600">
                       Fecha: {new Date(order.fecha).toLocaleDateString()}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600">
                       Medio de pago: {order.medio_pago}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600">
                       Estado envío: {order.estado_envio}
                     </p>
                   </div>
 
                   {/* Información del cliente */}
                   <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">
                       Información del cliente
                     </h4>
                     {order.cliente ? (
                       <>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600">
                           {order.cliente.nombre} {order.cliente.apellido}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600">
                           {order.cliente.correo}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600">
                           {order.cliente.telefono}
                         </p>
                       </>
@@ -291,20 +291,20 @@ export default function ContabilidadDashboard() {
 
                   {/* Productos y acciones */}
                   <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">
                       Productos
                     </h4>
                     <ul className="space-y-1">
                       {order.productos.map((producto) => (
                         <li
                           key={producto.id_producto}
-                          className="text-sm text-gray-600 dark:text-gray-400"
+                          className="text-sm text-gray-600"
                         >
                           {producto.nombre} x{producto.cantidad}
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-2 font-medium text-gray-800 dark:text-white">
+                    <p className="mt-2 font-medium text-gray-800">
                       Total: ${order.total.toLocaleString()}
                     </p>
                   </div>

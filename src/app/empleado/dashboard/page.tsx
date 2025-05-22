@@ -14,7 +14,6 @@ export default function EmpleadoDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Verificar autenticación y rol
   useEffect(() => {
     if (!isLoading) {
       if (!user || !isEmpleado(user) || user.rol_id !== 3) {
@@ -23,7 +22,6 @@ export default function EmpleadoDashboard() {
     }
   }, [user, isLoading, router]);
 
-  // Cargar productos
   useEffect(() => {
     const fetchProductos = async () => {
       try {
@@ -50,26 +48,23 @@ export default function EmpleadoDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-8">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">
         Panel de Vendedor
       </h1>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Pedidos Listos para Despacho/Entrega
           </h2>
           <OrderList />
         </div>
 
       <div className="grid gap-8">
-        {/* Sección de Inventario */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Inventario Actual
           </h2>
           <StockViewer productos={productos} />
         </div>
-
-        {/* Sección de Pedidos */}
       </div>
     </div>
   );

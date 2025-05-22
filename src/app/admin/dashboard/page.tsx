@@ -468,7 +468,7 @@ export default function AdminDashboard() {
     placeholder?: string
   ) => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <label className="block text-sm font-medium text-gray-700">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
@@ -477,10 +477,10 @@ export default function AdminDashboard() {
         onChange={handleFieldChange}
         title={getFieldRequirements(name)}
         placeholder={placeholder || `Ingrese ${label.toLowerCase()}`}
-        className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 dark:text-white dark:placeholder-gray-400 ${
+        className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500${
           fieldErrors[name]
-            ? 'border-red-300 focus:border-red-500 dark:border-red-600'
-            : 'border-gray-300 focus:border-indigo-500 dark:border-gray-600'
+            ? 'border-red-300 focus:border-red-500'
+            : 'border-gray-300 focus:border-indigo-500'
         }`}
         required={required}
       />
@@ -576,28 +576,28 @@ export default function AdminDashboard() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Estadísticas */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col">
+        <div className="bg-white rounded-lg shadow-md p-6 flex flex-col">
           <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <FiShoppingCart className="w-6 h-6" />
             Estadísticas
           </h2>
           <div className="space-y-4 flex-grow">
-            <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+            <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-300">Ventas totales</span>
-                <span className="font-bold text-blue-600 dark:text-blue-400">{formatCurrency(estadisticas.ventas_totales)}</span>
+                <span className="text-gray-600">Ventas totales</span>
+                <span className="font-bold text-blue-600">{formatCurrency(estadisticas.ventas_totales)}</span>
               </div>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+            <div className="bg-green-50 p-4 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-300">Total de clientes</span>
-                <span className="font-bold text-green-600 dark:text-green-400">{estadisticas.total_clientes}</span>
+                <span className="text-gray-600">Total de clientes</span>
+                <span className="font-bold text-green-600">{estadisticas.total_clientes}</span>
               </div>
             </div>
-            <div className="bg-amber-50 dark:bg-amber-900/30 p-4 rounded-lg">
+            <div className="bg-amber-50 p-4 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-300">Órdenes pendientes</span>
-                <span className="font-bold text-amber-600 dark:text-amber-400">{estadisticas.ordenes_pendientes}</span>
+                <span className="text-gray-600">Órdenes pendientes</span>
+                <span className="font-bold text-amber-600">{estadisticas.ordenes_pendientes}</span>
               </div>
             </div>
             <button
@@ -611,7 +611,7 @@ export default function AdminDashboard() {
         </div>
         
         {/* Gestión de Usuarios */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col">
+        <div className="bg-white rounded-lg shadow-md p-6 flex flex-col">
           <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <FiUsers className="w-6 h-6" />
             Gestión
@@ -652,7 +652,7 @@ export default function AdminDashboard() {
       </div>
       
       {/* Órdenes Recientes */}
-      <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <div className="mt-8 bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
           <FiShoppingCart className="w-6 h-6" />
           Órdenes Recientes
@@ -661,27 +661,27 @@ export default function AdminDashboard() {
           <div className="text-red-600 text-center py-4">{error}</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Productos</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Pago</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado Envío</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Medio de Pago</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Pago</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Envío</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medio de Pago</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-gray-200">
                 {pedidos
                   .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
                   .map((pedido) => {
                   const estadoPago = getEstadoPago(pedido.id_estado);
                   const estado = getEstadoPedido(pedido.id_estado, pedido.id_estado_envio);
                   return (
-                    <tr key={pedido.id_pedido} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <tr key={pedido.id_pedido} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">#{pedido.id_pedido}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div>
@@ -715,8 +715,8 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           estadoPago.color === 'green' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
                         }`}>
                           {estadoPago.texto}
                         </span>
@@ -724,14 +724,14 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           estado.color === 'green' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            ? 'bg-green-100 text-green-800'
                             : estado.color === 'yellow'
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            ? 'bg-yellow-100 text-yellow-800'
                             : estado.color === 'blue'
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                            ? 'bg-blue-100 text-blue-800'
                             : estado.color === 'purple'
-                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-gray-100 text-gray-800'
                         }`}>
                           {estado.texto}
                         </span>
@@ -751,8 +751,8 @@ export default function AdminDashboard() {
       {/* Modal para agregar empleado */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-5 max-w-sm w-full">
-            <h2 className="text-lg font-bold mb-3 dark:text-white">Agregar Nuevo Empleado</h2>
+          <div className="bg-white rounded-lg p-5 max-w-sm w-full">
+            <h2 className="text-lg font-bold mb-3">Agregar Nuevo Empleado</h2>
             <form onSubmit={handleCreateEmpleado} className="space-y-3" noValidate>
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded relative text-sm" role="alert">
@@ -769,23 +769,23 @@ export default function AdminDashboard() {
               {renderField('telefono', 'Teléfono', 'tel', false, 'Entre 8 y 12 dígitos')}
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700">
                   Rol <span className="text-red-500">*</span>
                 </label>                <select
                   name="rol_id"
                   onChange={handleFieldChange}
-                  className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                  className={`mt-1 block w-full rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 bg-white text-gray-900 ${
                     fieldErrors.rol_id
-                      ? 'border-red-300 focus:border-red-500 dark:border-red-600'
-                      : 'border-gray-300 focus:border-indigo-500 dark:border-gray-600'
+                      ? 'border-red-300 focus:border-red-500'
+                      : 'border-gray-300 focus:border-indigo-500'
                   }`}
                   required
                 >
                   <option value="" className="text-gray-500">Seleccione un rol</option>
-                  <option value="1" className="text-gray-900 dark:text-white">Empleado Regular</option>
-                  <option value="2" className="text-gray-900 dark:text-white">Administrador</option>
-                  <option value="3" className="text-gray-900 dark:text-white">Bodeguero</option>
-                  <option value="4" className="text-gray-900 dark:text-white">Contador</option>
+                  <option value="1" className="text-gray-900">Empleado Regular</option>
+                  <option value="2" className="text-gray-900">Administrador</option>
+                  <option value="3" className="text-gray-900">Bodeguero</option>
+                  <option value="4" className="text-gray-900">Contador</option>
                 </select>
                 {fieldErrors.rol_id && (
                   <p className="mt-1 text-sm text-red-500">{fieldErrors.rol_id}</p>

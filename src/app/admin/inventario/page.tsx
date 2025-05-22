@@ -145,7 +145,7 @@ export default function AdminInventario() {
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="p-4">
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
@@ -155,7 +155,7 @@ export default function AdminInventario() {
                 placeholder="Buscar producto..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="relative flex-1">
@@ -163,7 +163,7 @@ export default function AdminInventario() {
               <select 
                 value={categoriaSeleccionada}
                 onChange={handleCategoriaChange}
-                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Todas las categorías</option>
                 {Object.entries(categoriasMap).map(([id, nombre]) => (
@@ -174,23 +174,23 @@ export default function AdminInventario() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-700">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
-                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Descripción</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Marca</th>
-                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
-                  <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peso</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Precio</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marca</th>
+                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                  <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-gray-200">
                 {productos.map((producto) => (
-                  <tr key={producto.id_producto} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr key={producto.id_producto} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">#{producto.id_producto}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                       <div className="font-medium">{producto.nombre}</div>
@@ -203,10 +203,10 @@ export default function AdminInventario() {
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         producto.stock > 10 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          ? 'bg-green-100 text-green-800'
                           : producto.stock > 0
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
                       }`}>
                         {producto.stock}
                       </span>
@@ -218,13 +218,13 @@ export default function AdminInventario() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEditarProducto(producto.id_producto)}
-                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="text-blue-600 hover:text-blue-800"
                         >
                           <FiEdit2 className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => handleEliminarProducto(producto.id_producto)}
-                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          className="text-red-600 hover:text-red-800"
                         >
                           <FiTrash2 className="w-5 h-5" />
                         </button>
@@ -238,21 +238,21 @@ export default function AdminInventario() {
 
           {/* Paginación */}
           <div className="flex justify-between items-center mt-4">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
+            <div className="text-sm text-gray-700">
               Mostrando {((pagina - 1) * productosPorPagina) + 1} a {Math.min(pagina * productosPorPagina, totalProductos)} de {totalProductos} productos
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setPagina(p => Math.max(1, p - 1))}
                 disabled={pagina === 1}
-                className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+                className="px-3 py-1 rounded-md bg-gray-200 text-gray-700 disabled:opacity-50"
               >
                 Anterior
               </button>
               <button
                 onClick={() => setPagina(p => p + 1)}
                 disabled={pagina * productosPorPagina >= totalProductos}
-                className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+                className="px-3 py-1 rounded-md bg-gray-200 text-gray-700 disabled:opacity-50"
               >
                 Siguiente
               </button>
