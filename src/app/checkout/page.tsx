@@ -10,7 +10,7 @@ import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
-import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast } from '@/lib/api';
+import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast, isEmpleado } from '@/lib/api';
 import { Suspense } from 'react';
 
 export default function CheckoutPage() {
@@ -23,6 +23,26 @@ export default function CheckoutPage() {
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   
+  // Formulario de checkout
+  const [formData, setFormData] = useState({
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    metodoPago: 'webpay'
+  });
+  
+  // Validación del formulario
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Redirigir a los empleados a la página principal ya que no deben acceder al checkout
+  useEffect(() => {
+    if (!authLoading && user && isEmpleado(user)) {
+      router.push('/');
+    }
+  }, [user, authLoading, router]);
+  
   // Asegurarnos de que la página tiene tiempo para cargar los datos del carrito
   useEffect(() => {
     // Pequeño delay para asegurar que useCarrito haya cargado los datos
@@ -34,6 +54,25 @@ export default function CheckoutPage() {
 
     return () => clearTimeout(timer);
   }, [closeCart]);
+  
+  // Cargar los datos del usuario cuando esté disponible
+  useEffect(() => {
+    if (user && !authLoading) {
+      setFormData(prevData => ({
+        ...prevData,
+        nombre: user.nombre || '',
+        apellido: user.apellido || '',
+        email: user.correo || '',
+        telefono: user.telefono?.toString() || '',
+        direccion: user.direccion || ''
+      }));
+    }
+  }, [user, authLoading]);
+  
+  // Si el usuario es un empleado, no mostrar la página de checkout
+  if (!authLoading && user && isEmpleado(user)) {
+    return null; // No renderizamos nada mientras se redirecciona
+  }
   
   // Banner simple para checkout
   const CheckoutBanner = () => (
@@ -71,33 +110,6 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
-
-  // Formulario de checkout
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: '',
-    direccion: '',
-    metodoPago: 'webpay'
-  });
-
-  // Cargar los datos del usuario cuando esté disponible
-  useEffect(() => {
-    if (user && !authLoading) {
-      setFormData(prevData => ({
-        ...prevData,
-        nombre: user.nombre || '',
-        apellido: user.apellido || '',
-        email: user.correo || '',
-        telefono: user.telefono?.toString() || '',
-        direccion: user.direccion || ''
-      }));
-    }
-  }, [user, authLoading]);
-
-  // Validación del formulario
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
