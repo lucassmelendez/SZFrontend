@@ -121,11 +121,14 @@ export default function PerfilPage() {
               })
             );
 
+            // Corregir la lógica del estado: estados 1, 2 y 4 son "En proceso", estado 3 es "Entregado"
+            const estadoPedido = pedido.id_estado_envio === 3 ? 'Entregado' : 'En proceso';
+
             // Crear un objeto Pedido con todos los campos requeridos
             const pedidoCompleto: Pedido = {
               id_pedido: pedidoId,
               fecha: pedido.fecha,
-              estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
+              estado: estadoPedido,
               total: productosConDetalles.reduce((sum, prod) => sum + (prod.precio_unitario * prod.cantidad), 0),
               productos: productosConDetalles.map(prod => ({
                 nombre: prod.nombre,
@@ -142,12 +145,14 @@ export default function PerfilPage() {
           } catch (error) {
             console.error(`Error al obtener productos del pedido ${pedido.id_pedido}:`, error);
             
-            // En caso de error, también crear un objeto Pedido válido
+            // En caso de error, también crear un objeto Pedido válido con la lógica corregida
             const pedidoId = pedido.id_pedido !== undefined ? pedido.id_pedido : 0;
+            const estadoPedido = pedido.id_estado_envio === 3 ? 'Entregado' : 'En proceso';
+            
             const pedidoCompleto: Pedido = {
               id_pedido: pedidoId,
               fecha: pedido.fecha,
-              estado: pedido.id_estado_envio <= 2 ? 'En proceso' : 'Entregado',
+              estado: estadoPedido,
               total: 0,
               productos: [],
               id_estado: pedido.id_estado,
