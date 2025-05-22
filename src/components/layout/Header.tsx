@@ -191,28 +191,31 @@ export default function Header() {
 
                   {/* Resultados de búsqueda */}
                   {isSearchOpen && searchResults.length > 0 && (
-                    <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-96 overflow-y-auto">
+                    <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-[400px] overflow-y-auto w-full">
                       {searchResults.map((producto) => (
                         <Link
                           key={producto.id_producto}
                           href={`/productos/${producto.id_producto}`}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
                           onClick={() => {
                             setIsSearchOpen(false);
                             setSearchQuery('');
                           }}
                         >
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 w-10 h-10 bg-gray-200 rounded overflow-hidden">
+                            <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded overflow-hidden">
                               <img
-                                src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
+                                src={`/productos/${producto.id_producto}.webp`}
                                 alt={producto.nombre}
                                 className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "/placeholder-product.jpg";
+                                }}
                               />
                             </div>
-                            <div className="ml-3">
-                              <p className="font-medium">{producto.nombre}</p>
-                              <p className="text-xs text-gray-500">${Math.round(producto.precio)}</p>
+                            <div className="ml-4">
+                              <p className="font-medium text-base">{producto.nombre}</p>
+                              <p className="text-sm text-gray-500">${Math.round(producto.precio)}</p>
                             </div>
                           </div>
                         </Link>
@@ -387,12 +390,12 @@ export default function Header() {
 
               {/* Resultados de búsqueda en móvil */}
               {isSearchOpen && searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-[60vh] overflow-y-auto">
+                <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-[70vh] overflow-y-auto w-full">
                   {searchResults.map((producto) => (
                     <Link
                       key={producto.id_producto}
                       href={`/productos/${producto.id_producto}`}
-                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-100 last:border-0"
+                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
                       onClick={() => {
                         setIsSearchOpen(false);
                         setSearchQuery('');
@@ -400,15 +403,18 @@ export default function Header() {
                       }}
                     >
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 w-12 h-12 bg-gray-200 rounded overflow-hidden">
+                        <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded overflow-hidden">
                           <img
-                            src={`https://picsum.photos/seed/${producto.id_producto}/100/100`}
+                            src={`/productos/${producto.id_producto}.webp`}
                             alt={producto.nombre}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/placeholder-product.jpg";
+                            }}
                           />
                         </div>
-                        <div className="ml-3 flex-grow">
-                          <p className="font-medium line-clamp-1">{producto.nombre}</p>
+                        <div className="ml-4 flex-grow">
+                          <p className="font-medium text-base line-clamp-1">{producto.nombre}</p>
                           <p className="text-sm text-gray-500">${Math.round(producto.precio)}</p>
                         </div>
                       </div>
