@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, productoApi, Producto, api } from '@/lib/api';
+import { isEmpleado, productoApi, Producto } from '@/lib/api';
 import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiArrowLeft } from 'react-icons/fi';
 
 const categoriasMap: { [key: string]: string } = {
@@ -122,6 +122,12 @@ export default function AdminInventario() {
     // Por ahora solo mostramos un mensaje - la funcionalidad se implementará después
     console.log('Editar producto:', id);
     alert('Funcionalidad de edición en desarrollo');
+  };
+
+  const handleEliminarProducto = (id: number) => {
+    // Por ahora solo mostramos un mensaje - la funcionalidad se implementará después
+    console.log('Eliminar producto:', id);
+    alert('Funcionalidad de eliminación en desarrollo');
   };
 
   if (authLoading) {

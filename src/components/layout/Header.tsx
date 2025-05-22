@@ -3,9 +3,8 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaMoon, FaSun, FaUser, FaSignOutAlt, FaChevronDown, FaCogs } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaUser, FaSignOutAlt, FaChevronDown, FaCogs } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
-import { useTheme } from '@/lib/useTheme';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import FloatingCart from '../cart/FloatingCart';
@@ -30,7 +29,6 @@ export default function Header() {
   const [searchResults, setSearchResults] = useState<Producto[]>([]);
   const pathname = usePathname();
   const { cantidadTotal } = useCarrito();
-  const { theme, toggleTheme, isClient } = useTheme();
   const { user, logout } = useAuth();
   const { isCartOpen, showCartAnimation, openCart, closeCart } = useFloatingCartContext();
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -112,7 +110,7 @@ export default function Header() {
     <>
       <header className="bg-blue-700 text-white shadow-md transition-colors duration-200">
         <div className="container mx-auto px-4">
-          {/* Primera fila (web): Logo, Navegación, Búsqueda, Tema, Perfil y Carrito */}
+          {/* Primera fila (web): Logo, Navegación, Búsqueda, Perfil y Carrito */}
           <div className="hidden md:flex items-center justify-between py-4">
             {/* Sección izquierda: Logo y navegación */}
             <div className="flex items-center space-x-8">
@@ -234,19 +232,8 @@ export default function Header() {
               </form>
             </div>
 
-            {/* Sección derecha: Tema, Perfil y Carrito */}
+            {/* Sección derecha: Perfil y Carrito */}
             <div className="flex items-center space-x-6">
-              {/* Botón de tema - solo se muestra si estamos en el cliente */}
-              {isClient && (
-                <button 
-                  onClick={toggleTheme} 
-                  className="text-white hover:text-blue-200 p-1 rounded-full focus:outline-none"
-                  aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-                >
-                  {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
-                </button>
-              )}
-              
               {/* Botones de Perfil y Cerrar Sesión */}
               {user ? (
                 <div className="flex items-center space-x-3">
@@ -486,24 +473,6 @@ export default function Header() {
                       >
                         Mi Perfil
                       </Link>
-                    )}
-                  </div>
-                  
-                  {/* Divisor principal */}
-                  <div className="my-4 border-t border-blue-600"></div>
-                  
-                  {/* Sección de configuración */}
-                  <div className="space-y-0">
-                    {/* Botón de tema en móvil - solo se muestra si estamos en el cliente */}
-                    {isClient && (
-                      <button 
-                        onClick={toggleTheme} 
-                        className="flex items-center space-x-2 hover:text-blue-200 py-3 w-full"
-                        aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-                      >
-                        {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
-                        <span>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</span>
-                      </button>
                     )}
                   </div>
                 </nav>
