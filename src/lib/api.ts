@@ -16,7 +16,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   // Configurar CORS en Axios
-  withCredentials: false,
+  withCredentials: true,
 });
 
 // Instancia para FastAPI
@@ -25,7 +25,7 @@ export const apiFast = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false,
+  withCredentials: true,
 });
 
 // Interceptor para agregar el token a las peticiones
