@@ -135,7 +135,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 value={formData.nombre}
                 onChange={handleChange}
                 className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
-                placeholder="Francisco"
+                placeholder="Juan"
               />
             </div>
           </div>
@@ -156,7 +156,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
                 value={formData.apellido}
                 onChange={handleChange}
                 className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
-                placeholder="Meléndez"
+                placeholder="Perez"
               />
             </div>
           </div>
