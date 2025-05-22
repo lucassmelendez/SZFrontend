@@ -24,6 +24,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Producto[]>([]);
@@ -80,6 +81,12 @@ export default function Header() {
     const timeoutId = setTimeout(searchProducts, 300);
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
+
+  // Cerrar el menú móvil al cambiar de ruta
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsMobileCategoryOpen(false);
+  }, [pathname]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -444,34 +451,37 @@ export default function Header() {
                     >
                       Productos
                     </Link>
-                    {/* Eliminar opción de Administrar en el menú, ya que ahora está en el header */}
-                    {/* Categorías en móvil */}
-                    <div className="py-3">
-                      <span className="block text-white mb-2">Categorías</span>
-                      <div className="pl-4 space-y-2">
-                        {categorias.map((categoria) => (
-                          <Link
-                            key={categoria.id}
-                            href={`/productos/categoria/${categoria.id}`}
-                            className="block py-2 text-sm hover:text-blue-200"
-                            onClick={toggleMenu}
-                          >
-                            {categoria.nombre}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
                     
-                    {/* Enlace a perfil en móvil (dentro del menú) */}
-                    {user && (
-                      <Link
-                        href="/perfil"
-                        className={`block py-3 hover:text-blue-200 ${pathname === '/perfil' ? 'font-bold' : ''}`}
-                        onClick={toggleMenu}
+                    {/* Categorías como desplegable */}
+                    <div className="py-3">
+                      <button 
+                        onClick={() => setIsMobileCategoryOpen(!isMobileCategoryOpen)}
+                        className={`flex items-center justify-between w-full hover:text-blue-200 ${
+                          pathname.includes('/productos/categoria') ? 'font-bold' : ''
+                        }`}
                       >
-                        Mi Perfil
-                      </Link>
-                    )}
+                        <span>Categorías</span>
+                        <FaChevronDown className={`transition-transform ${isMobileCategoryOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {isMobileCategoryOpen && (
+                        <div className="pl-4 pt-2 space-y-2">
+                          {categorias.map((categoria) => (
+                            <Link
+                              key={categoria.id}
+                              href={`/productos/categoria/${categoria.id}`}
+                              className="block py-2 text-sm hover:text-blue-200"
+                              onClick={() => {
+                                setIsMobileCategoryOpen(false);
+                                setIsMenuOpen(false);
+                              }}
+                            >
+                              {categoria.nombre}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </nav>
 
