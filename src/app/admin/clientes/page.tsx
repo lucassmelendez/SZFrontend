@@ -94,7 +94,8 @@ export default function AdminClientes() {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="overflow-x-auto ring-1 ring-gray-200 rounded-lg">
+        {/* Tabla para pantallas medianas y grandes */}
+        <div className="hidden md:block overflow-x-auto ring-1 ring-gray-200 rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
@@ -250,6 +251,83 @@ export default function AdminClientes() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Vista de tarjetas para dispositivos móviles */}
+        <div className="md:hidden space-y-4">
+          {isLoading ? (
+            <div className="py-8 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+                <p className="mt-2 text-sm text-gray-500">Cargando clientes...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="py-8 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <svg className="h-12 w-12 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p className="text-red-500 font-semibold text-lg">{error}</p>
+              </div>
+            </div>
+          ) : clientes.length === 0 ? (
+            <div className="py-8 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <svg className="h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <p className="text-gray-500 text-lg font-medium">No hay clientes registrados</p>
+              </div>
+            </div>
+          ) : (
+            clientes.map((cliente) => (
+              <div key={cliente.id_cliente} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-lg font-bold text-blue-600">
+                    CLI-{cliente.id_cliente.toString().padStart(4, '0')}
+                  </div>
+                  <span className={`px-3 py-1 text-sm rounded-full ${
+                    cliente.id_rol === 1 
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {cliente.id_rol === 1 ? 'Cliente' : 'Cliente VIP'}
+                  </span>
+                </div>
+                
+                <div className="font-medium text-lg mb-3">{`${cliente.nombre} ${cliente.apellido}`}</div>
+                
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Correo:</span>
+                    <span className="font-medium text-blue-600">{cliente.correo}</span>
+                  </div>
+                  
+                  {cliente.rut && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">RUT:</span>
+                      <span className="font-medium">{cliente.rut}</span>
+                    </div>
+                  )}
+                  
+                  {cliente.telefono && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Teléfono:</span>
+                      <span className="font-medium">{cliente.telefono}</span>
+                    </div>
+                  )}
+                  
+                  {cliente.direccion && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Dirección:</span>
+                      <span className="font-medium text-right flex-1 ml-4">{cliente.direccion}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

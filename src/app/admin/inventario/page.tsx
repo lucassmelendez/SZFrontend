@@ -179,7 +179,8 @@ export default function AdminInventario() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Tabla para pantallas medianas y grandes */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr className="bg-gray-50">
@@ -242,12 +243,75 @@ export default function AdminInventario() {
             </table>
           </div>
 
+          {/* Vista de tarjetas para dispositivos móviles */}
+          <div className="md:hidden space-y-4">
+            {productos.map((producto) => (
+              <div key={producto.id_producto} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-lg font-bold text-blue-600">#{producto.id_producto}</div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEditarProducto(producto.id_producto)}
+                      className="p-1 text-blue-600 hover:text-blue-800"
+                    >
+                      <FiEdit2 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleEliminarProducto(producto.id_producto)}
+                      className="p-1 text-red-600 hover:text-red-800"
+                    >
+                      <FiTrash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="font-medium text-lg mb-2">{producto.nombre}</div>
+                <p className="text-sm text-gray-600 mb-3">{producto.descripcion}</p>
+                
+                <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                  <div>
+                    <span className="text-gray-500">Marca:</span>
+                    <span className="font-medium ml-2">{producto.marca}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-500">Categoría:</span>
+                    <span className="font-medium ml-2">{categoriasMap[producto.categoria_id]}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-500">Peso:</span>
+                    <span className="font-medium ml-2">{producto.peso} kg</span>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-500">Stock:</span>
+                    <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      producto.stock > 10 
+                        ? 'bg-green-100 text-green-800'
+                        : producto.stock > 0
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {producto.stock}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
+                  <span className="text-gray-500">Precio:</span>
+                  <span className="font-bold text-lg">${producto.precio.toLocaleString('es-CL')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Paginación */}
-          <div className="flex justify-between items-center mt-4">
-            <div className="text-sm text-gray-700">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mt-4">
+            <div className="text-sm text-gray-700 text-center sm:text-left">
               Mostrando {((pagina - 1) * productosPorPagina) + 1} a {Math.min(pagina * productosPorPagina, totalProductos)} de {totalProductos} productos
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 justify-center sm:justify-end">
               <button
                 onClick={() => setPagina(p => Math.max(1, p - 1))}
                 disabled={pagina === 1}

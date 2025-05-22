@@ -329,7 +329,8 @@ export default function EmpleadosPage() {
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
           >
             <FiPlus className="w-5 h-5" />
-            Añadir Empleado
+            <span className="hidden sm:inline">Añadir Empleado</span>
+            <span className="sm:hidden">Añadir</span>
           </button>
           <button 
             onClick={() => router.back()}
@@ -341,7 +342,8 @@ export default function EmpleadosPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="overflow-x-auto">
+        {/* Tabla para pantallas medianas y grandes */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
@@ -411,6 +413,77 @@ export default function EmpleadosPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Vista de tarjetas para dispositivos móviles */}
+        <div className="md:hidden space-y-4">
+          {empleados.map((empleado) => (
+            <div key={empleado.id_empleado} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex justify-between items-center mb-2">
+                <div className="text-lg font-bold text-blue-600">#{empleado.id_empleado}</div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(empleado.id_empleado)}
+                    className="p-2 text-indigo-600 hover:text-indigo-900"
+                    title="Editar"
+                  >
+                    <FiEdit2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(empleado.id_empleado)}
+                    className="p-2 text-red-600 hover:text-red-900"
+                    title="Eliminar"
+                  >
+                    <FiTrash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="font-medium text-lg mb-2">{`${empleado.nombre} ${empleado.apellido}`}</div>
+              
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Correo:</span>
+                  <span className="font-medium text-right">{empleado.correo}</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-500">RUT:</span>
+                  <span className="font-medium text-right">
+                    {empleado.rut ? empleado.rut : 'No proporcionado'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Teléfono:</span>
+                  <span className="font-medium text-right">
+                    {empleado.telefono ? empleado.telefono : 'N/A'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Dirección:</span>
+                  <span className="font-medium text-right">
+                    {empleado.direccion ? empleado.direccion : 'N/A'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="mt-2 flex justify-end">
+                <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                  empleado.rol_id === 2 
+                    ? 'bg-purple-100 text-purple-800'
+                    : empleado.rol_id === 3
+                    ? 'bg-blue-100 text-blue-800'
+                    : empleado.rol_id === 4
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {roles[empleado.rol_id] || "Desconocido"}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
