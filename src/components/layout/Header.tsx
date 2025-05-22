@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaUser, FaSignOutAlt, FaChevronDown, FaCogs } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useAuth } from '../../lib/auth/AuthContext';
@@ -25,56 +25,57 @@ export default function Header() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Producto[]>([]);
   const pathname = usePathname();
+  const router = useRouter();
   const { cantidadTotal } = useCarrito();
   const { user, logout } = useAuth();
   const { isCartOpen, showCartAnimation, openCart, closeCart } = useFloatingCartContext();
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const categoryMenuRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const searchMobileRef = useRef<HTMLDivElement>(null);
+  const searchRefDesktop = useRef<HTMLDivElement>(null);
+  const searchRefMobile = useRef<HTMLDivElement>(null);
   const { openLoginModal } = useLoginModal();
 
-  // Cerrar los menús cuando se hace clic fuera
+  // Manejar clics fuera de los menús
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Cerrar menú de categorías al hacer clic fuera
       if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
         setIsCategoryOpen(false);
       }
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsSearchOpen(false);
-      }
-      if (searchMobileRef.current && !searchMobileRef.current.contains(event.target as Node)) {
-        setIsSearchOpen(false);
+      
+      // Cerrar resultados de búsqueda al hacer clic fuera
+      const clickedOutsideSearchDesktop = searchRefDesktop.current && !searchRefDesktop.current.contains(event.target as Node);
+      const clickedOutsideSearchMobile = searchRefMobile.current && !searchRefMobile.current.contains(event.target as Node);
+      
+      if (clickedOutsideSearchDesktop && clickedOutsideSearchMobile) {
+        setIsSearchActive(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Efecto para manejar la búsqueda en tiempo real
+  // Búsqueda en tiempo real
   useEffect(() => {
     const searchProducts = async () => {
       if (searchQuery.trim().length >= 2) {
         try {
           const results = await productoApi.search(searchQuery);
           setSearchResults(results);
-          setIsSearchOpen(true);
+          setIsSearchActive(results.length > 0);
         } catch (error) {
           console.error('Error al buscar productos:', error);
           setSearchResults([]);
+          setIsSearchActive(false);
         }
       } else {
         setSearchResults([]);
-        if (searchQuery.trim().length === 0) {
-          setIsSearchOpen(false);
-        }
+        setIsSearchActive(false);
       }
     };
 
@@ -88,6 +89,17 @@ export default function Header() {
     setIsMobileCategoryOpen(false);
   }, [pathname]);
 
+  // Navegar a la página del producto
+  const navigateToProduct = (productId: number) => {
+    // Limpiar búsqueda
+    setSearchQuery('');
+    setIsSearchActive(false);
+    setIsMenuOpen(false);
+    
+    // Navegar a la página del producto
+    router.push(`/productos/${productId}`);
+  };
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -99,8 +111,8 @@ export default function Header() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/productos/buscar?q=${encodeURIComponent(searchQuery)}`;
-      setIsSearchOpen(false);
+      setIsSearchActive(false);
+      router.push(`/productos/buscar?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -112,6 +124,31 @@ export default function Header() {
       console.error('Error al cerrar sesión:', error);
     }
   };
+
+  // Componente para mostrar un resultado de búsqueda
+  const SearchResultItem = ({ producto }: { producto: Producto }) => (
+    <div 
+      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-100 last:border-b-0 cursor-pointer"
+      onClick={() => navigateToProduct(producto.id_producto)}
+    >
+      <div className="flex items-center">
+        <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded overflow-hidden">
+          <img
+            src={`/productos/${producto.id_producto}.webp`}
+            alt={producto.nombre}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/placeholder-product.jpg";
+            }}
+          />
+        </div>
+        <div className="ml-4 flex-grow">
+          <p className="font-medium text-base line-clamp-1">{producto.nombre}</p>
+          <p className="text-sm text-gray-500">${Math.round(producto.precio)}</p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -171,7 +208,7 @@ export default function Header() {
             </div>
 
             {/* Sección central: Búsqueda con administrar a la derecha */}
-            <div className="flex items-center flex-grow max-w-lg" ref={searchRef}>
+            <div className="flex items-center flex-grow max-w-lg" ref={searchRefDesktop}>
               <div className="relative flex-grow mx-4">
                 <form onSubmit={handleSearchSubmit} className="relative">
                   <input
@@ -188,37 +225,12 @@ export default function Header() {
                   >
                     <FaSearch />
                   </button>
-
-                  {/* Resultados de búsqueda */}
-                  {isSearchOpen && searchResults.length > 0 && (
+                  
+                  {/* Resultados de búsqueda en desktop */}
+                  {isSearchActive && searchResults.length > 0 && (
                     <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-[400px] overflow-y-auto w-full">
-                      {searchResults.map((producto) => (
-                        <Link
-                          key={producto.id_producto}
-                          href={`/productos/${producto.id_producto}`}
-                          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
-                          onClick={() => {
-                            setIsSearchOpen(false);
-                            setSearchQuery('');
-                          }}
-                        >
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded overflow-hidden">
-                              <img
-                                src={`/productos/${producto.id_producto}.webp`}
-                                alt={producto.nombre}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = "/placeholder-product.jpg";
-                                }}
-                              />
-                            </div>
-                            <div className="ml-4">
-                              <p className="font-medium text-base">{producto.nombre}</p>
-                              <p className="text-sm text-gray-500">${Math.round(producto.precio)}</p>
-                            </div>
-                          </div>
-                        </Link>
+                      {searchResults.map(producto => (
+                        <SearchResultItem key={producto.id_producto} producto={producto} />
                       ))}
                     </div>
                   )}
@@ -370,8 +382,8 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Barra de búsqueda móvil - RESTAURADA LA CLASE ORIGINAL */}
-          <div className="md:hidden pb-4" ref={searchMobileRef}>
+          {/* Barra de búsqueda móvil */}
+          <div className="md:hidden pb-4" ref={searchRefMobile}>
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
@@ -387,38 +399,12 @@ export default function Header() {
               >
                 <FaSearch />
               </button>
-
+              
               {/* Resultados de búsqueda en móvil */}
-              {isSearchOpen && searchResults.length > 0 && (
+              {isSearchActive && searchResults.length > 0 && (
                 <div className="absolute left-0 right-0 mt-2 bg-white rounded-md shadow-xl z-50 max-h-[70vh] overflow-y-auto w-full">
-                  {searchResults.map((producto) => (
-                    <Link
-                      key={producto.id_producto}
-                      href={`/productos/${producto.id_producto}`}
-                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
-                      onClick={() => {
-                        setIsSearchOpen(false);
-                        setSearchQuery('');
-                        setIsMenuOpen(false); // Cerrar el menú móvil si está abierto
-                      }}
-                    >
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded overflow-hidden">
-                          <img
-                            src={`/productos/${producto.id_producto}.webp`}
-                            alt={producto.nombre}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/placeholder-product.jpg";
-                            }}
-                          />
-                        </div>
-                        <div className="ml-4 flex-grow">
-                          <p className="font-medium text-base line-clamp-1">{producto.nombre}</p>
-                          <p className="text-sm text-gray-500">${Math.round(producto.precio)}</p>
-                        </div>
-                      </div>
-                    </Link>
+                  {searchResults.map(producto => (
+                    <SearchResultItem key={producto.id_producto} producto={producto} />
                   ))}
                 </div>
               )}
