@@ -139,36 +139,68 @@ export default function OrderList() {
       {pedidos.map(order => (
         <div
           key={order.id_pedido}
-          className="bg-gray-50 rounded-lg p-4 shadow-sm"
+          className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
         >
           <div className="flex flex-col md:flex-row justify-between gap-4">
             {/* Información del pedido */}
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-2">
-                Pedido #{order.id_pedido}
-              </h3>
-              <p className="text-sm text-gray-600">
-                Cliente: {order.cliente.nombre} {order.cliente.apellido}
-              </p>
-              <p className="text-sm text-gray-500">
-                Dirección: {order.cliente.direccion}
-              </p>
-              <p className="text-sm text-gray-500">
-                Teléfono: {order.cliente.telefono}
-              </p>
-              <p className="text-sm text-gray-500">
-                Fecha: {new Date(order.fecha).toLocaleDateString()}
-              </p>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold text-lg text-gray-800">
+                  Pedido #{order.id_pedido}
+                </h3>
+                <span className="text-sm text-gray-500">
+                  {new Date(order.fecha).toLocaleDateString()}
+                </span>
+              </div>
+              
+              {/* Información del cliente - versión móvil con iconos */}
+              <div className="md:hidden bg-gray-50 p-3 rounded-lg mb-3">
+                <h4 className="font-medium text-gray-700 mb-2">Cliente:</h4>
+                <div className="space-y-2 text-sm">
+                  <p className="text-gray-800 font-medium">
+                    {order.cliente.nombre} {order.cliente.apellido}
+                  </p>
+                  <p className="flex items-center text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    {order.cliente.direccion}
+                  </p>
+                  <p className="flex items-center text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    {order.cliente.telefono}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Información del cliente - versión desktop */}
+              <div className="hidden md:block">
+                <p className="text-sm text-gray-600">
+                  Cliente: {order.cliente.nombre} {order.cliente.apellido}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Dirección: {order.cliente.direccion}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Teléfono: {order.cliente.telefono}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Fecha: {new Date(order.fecha).toLocaleDateString()}
+                </p>
+              </div>
               
               {/* Lista de productos */}
               <div className="mt-3">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">
                   Productos:
                 </h4>
-                <ul className="text-sm text-gray-600 space-y-1">
+                <ul className="text-sm text-gray-600 space-y-1 bg-gray-50 p-2 rounded-lg">
                   {order.productos.map(producto => (
-                    <li key={producto.id_producto}>
-                      {producto.cantidad}x {producto.nombre}
+                    <li key={producto.id_producto} className="flex justify-between py-1 border-b border-gray-100 last:border-0">
+                      <span>{producto.nombre}</span>
+                      <span className="font-medium">x{producto.cantidad}</span>
                     </li>
                   ))}
                 </ul>
@@ -176,22 +208,23 @@ export default function OrderList() {
             </div>
 
             {/* Botones de acción */}
-            <div className="flex md:flex-col justify-start gap-2">              <button
+            <div className="flex flex-row md:flex-col justify-center items-stretch gap-2 mt-4 md:mt-0">
+              <button
                 onClick={() => handleUpdateOrderStatus(order.id_pedido, 4)} // Marcar como despachado
                 disabled={updatingOrder === order.id_pedido}
-                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors duration-200"
               >
                 <FaTruck className="flex-shrink-0" />
-                <span>{updatingOrder === order.id_pedido ? 'Procesando...' : 'Despachar'}</span>
+                <span className="font-medium">{updatingOrder === order.id_pedido ? 'Procesando...' : 'Despachar'}</span>
               </button>
 
               <button
                 onClick={() => handleUpdateOrderStatus(order.id_pedido, 3)} // Marcar como entregado
                 disabled={updatingOrder === order.id_pedido}
-                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors duration-200"
               >
                 <FaCheckCircle className="flex-shrink-0" />
-                <span>{updatingOrder === order.id_pedido ? 'Procesando...' : 'Entregar'}</span>
+                <span className="font-medium">{updatingOrder === order.id_pedido ? 'Procesando...' : 'Entregar'}</span>
               </button>
             </div>
           </div>

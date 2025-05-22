@@ -47,20 +47,47 @@ export default function EmpleadoDashboard() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
         Panel de Vendedor
       </h1>
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+
+      {/* Panel de navegación móvil */}
+      <div className="md:hidden bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="flex overflow-x-auto space-x-4 pb-2">
+          <a href="#ordenes" className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg whitespace-nowrap">
+            Pedidos Pendientes
+          </a>
+          <a href="#inventario" className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg whitespace-nowrap">
+            Inventario
+          </a>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+          <p className="text-red-700">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      <div className="grid gap-6">
+        <div id="ordenes" className="bg-white rounded-lg shadow-md p-4 md:p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <span className="h-6 w-1 bg-blue-500 rounded mr-3"></span>
             Pedidos Listos para Despacho/Entrega
           </h2>
           <OrderList />
         </div>
 
-      <div className="grid gap-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <div id="inventario" className="bg-white rounded-lg shadow-md p-4 md:p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <span className="h-6 w-1 bg-green-500 rounded mr-3"></span>
             Inventario Actual
           </h2>
           <StockViewer productos={productos} />
