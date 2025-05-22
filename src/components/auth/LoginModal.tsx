@@ -29,8 +29,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={isLoginView ? "sm" : "md"}>
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 -mx-6 -mt-4 px-6 py-6 rounded-t-lg">
+    <Modal isOpen={isOpen} onClose={onClose} size={isLoginView ? "sm" : "md"} isFullMobile={!isLoginView}>
+      <div className="bg-gradient-to-br from-blue-600 to-blue-800 -mx-6 -mt-4 px-6 py-4 rounded-t-lg">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white">Bienvenido a SpinZone</h2>
           <p className="mt-2 text-blue-100">
@@ -41,7 +41,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         </div>
       </div>
 
-      <div className={`px-${isLoginView ? '2' : '4'} py-6`}>
+      <div className="px-4 py-4">
         {isLoginView ? (
           <LoginForm 
             onRegister={showRegister}

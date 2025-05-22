@@ -9,10 +9,11 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   size?: 'sm' | 'md' | 'lg';
+  isFullMobile?: boolean;
   children: React.ReactNode;
 }
 
-export default function Modal({ isOpen, onClose, title, size = 'md', children }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, size = 'md', isFullMobile = false, children }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   
   // Cerrar con tecla ESC
@@ -46,17 +47,20 @@ export default function Modal({ isOpen, onClose, title, size = 'md', children }:
     lg: 'max-w-3xl'
   };
 
+  // Clase especial para dispositivos móviles cuando se requiere pantalla completa
+  const mobileFullScreenClass = isFullMobile ? 'sm:rounded-lg sm:max-h-[calc(100%-2rem)] max-h-full h-full sm:h-auto rounded-none sm:m-4 m-0' : '';
+
   if (!isOpen) return null;
 
   // Usar Portal para renderizar fuera del DOM normal
   return createPortal(
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm transition-opacity"
       onClick={handleOutsideClick}
     >
       <div 
         ref={modalRef}
-        className={`${sizeClasses[size]} w-full bg-white rounded-lg shadow-xl transform transition-all duration-300 ease-in-out`}
+        className={`${sizeClasses[size]} w-full bg-white shadow-xl transform transition-all duration-300 ease-in-out overflow-y-auto ${mobileFullScreenClass}`}
       >
         {title && (
           <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4">

@@ -118,7 +118,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
               Nombre
@@ -162,7 +162,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Correo electrónico
@@ -207,7 +207,7 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-1">
               Teléfono
@@ -251,48 +251,48 @@ export default function RegisterForm({ onBackToLogin, onSuccess }: RegisterFormP
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaLock className="text-gray-400" />
-              </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirmar contraseña
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaLock className="text-gray-400" />
-              </div>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">          
+          <div>            
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">              
+              Contraseña            
+            </label>            
+            <div className="relative">              
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">                
+                <FaLock className="text-gray-400" />              
+              </div>              
+              <input                
+                id="password"                
+                name="password"                
+                type="password"                
+                required                
+                value={formData.password}                
+                onChange={handleChange}                
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"                
+                placeholder="••••••••"              
+              />            
+            </div>          
+          </div>          
+          
+          <div>            
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">              
+              Confirmar contraseña            
+            </label>            
+            <div className="relative">              
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">                
+                <FaLock className="text-gray-400" />              
+              </div>              
+              <input                
+                id="confirmPassword"                
+                name="confirmPassword"                
+                type="password"                
+                required                
+                value={formData.confirmPassword}                
+                onChange={handleChange}                
+                className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"                
+                placeholder="••••••••"              
+              />            
+            </div>          
+          </div>        
         </div>
 
         <button

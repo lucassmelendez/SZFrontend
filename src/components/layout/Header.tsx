@@ -488,16 +488,7 @@ export default function Header() {
                 {/* Menú móvil - Login/Register */}
                 {!user && (
                   <div className="border-t border-blue-800 pt-4 mt-4">
-                    <button
-                      onClick={() => {
-                        openLoginModal();
-                        setIsMenuOpen(false);
-                      }}
-                      className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-blue-800"
-                    >
-                      <FaUser className="mr-2" />
-                      Iniciar sesión
-                    </button>
+                    {/* Se eliminó el botón de iniciar sesión */}
                   </div>
                 )}
               </div>
