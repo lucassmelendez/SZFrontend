@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useRouter } from 'next/navigation';
-import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle, FaBoxOpen } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaKey, FaArrowLeft, FaPhone, FaMapMarkerAlt, FaIdCard, FaUserTag, FaShoppingBag, FaClock, FaMoneyBillWave, FaTruck, FaCheckCircle, FaTimesCircle, FaBoxOpen, FaExclamationCircle } from 'react-icons/fa';
 import Link from 'next/link';
 import { authApi, isCliente, Pedido as ApiPedido, pedidoProductoApiFast, pedidoApiFast, productoApi } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
@@ -54,7 +54,7 @@ export default function PerfilPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState('pedidos-todos');
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loadingPedidos, setLoadingPedidos] = useState(false);
   const [isUserLoading, setIsUserLoading] = useState(true);
@@ -530,14 +530,40 @@ export default function PerfilPage() {
 
   // Función para renderizar pedidos según el estado seleccionado
   const renderPedidosPorEstado = (estado: string) => {
-    const pedidosFiltrados = pedidos.filter(pedido => pedido.estado === estado);
-    const estadoLabel = estado === 'En proceso' ? 'en proceso' : 'entregados';
+    // Si es "todos", no filtramos
+    const pedidosFiltrados = estado === 'todos' ? pedidos : pedidos.filter(pedido => pedido.estado === estado);
+    
+    // Establecer etiquetas según el estado
+    let estadoLabel = '';
+    if (estado === 'En proceso') estadoLabel = 'en proceso';
+    else if (estado === 'Entregado') estadoLabel = 'entregados';
+    else estadoLabel = '';
     
     // Colores según estado
-    const statusColor = estado === 'En proceso' ? 'yellow' : 'green';
-                      
+    let statusColor = 'blue';
+    if (estado === 'En proceso') statusColor = 'yellow';
+    else if (estado === 'Entregado') statusColor = 'green';
+    
     // Iconos según estado
-    const StatusIcon = estado === 'En proceso' ? FaTruck : FaCheckCircle;
+    let StatusIcon = FaShoppingBag;
+    if (estado === 'En proceso') StatusIcon = FaTruck;
+    else if (estado === 'Entregado') StatusIcon = FaCheckCircle;
+    
+    // Función para obtener estado detallado según id_estado_envio
+    const getEstadoDetallado = (id_estado_envio: number) => {
+      switch (id_estado_envio) {
+        case 1:
+          return { texto: 'Preparado', color: 'blue', icon: FaBoxOpen };
+        case 2:
+          return { texto: 'Pendiente', color: 'yellow', icon: FaClock };
+        case 3:
+          return { texto: 'Entregado', color: 'green', icon: FaCheckCircle };
+        case 4:
+          return { texto: 'Despachado', color: 'purple', icon: FaTruck };
+        default:
+          return { texto: 'Desconocido', color: 'gray', icon: FaExclamationCircle };
+      }
+    };
     
     return (
       <div className="space-y-6">
@@ -565,88 +591,106 @@ export default function PerfilPage() {
             </h3>
             <p className="mt-1 text-gray-500">
               {estado === 'En proceso' ? 'Tus pedidos en proceso aparecerán aquí' : 
-               'Tus pedidos entregados aparecerán aquí'}
+               estado === 'Entregado' ? 'Tus pedidos entregados aparecerán aquí' :
+               'Tus pedidos aparecerán aquí'}
             </p>
           </div>
         ) : (
           <div className="space-y-6">
-            {pedidosFiltrados.map((pedido) => (
-              <div 
-                key={pedido.id_pedido} 
-                className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
-              >
-                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                  <div className="flex flex-wrap items-center justify-between">
-                    <div className="flex items-center mb-2 md:mb-0">
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                        Pedido #{pedido.id_pedido}
-                      </span>
+            {pedidosFiltrados.map((pedido) => {
+              const estadoDetallado = getEstadoDetallado(pedido.id_estado_envio);
+              const EstadoIcon = estadoDetallado.icon;
+              
+              return (
+                <div 
+                  key={pedido.id_pedido} 
+                  className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
+                >
+                  <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <div className="flex flex-wrap items-center justify-between">
+                      <div className="flex items-center mb-2 md:mb-0">
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                          Pedido #{pedido.id_pedido}
+                        </span>
+                        
+                        {/* Mostrar el estado detallado del pedido en todas las vistas */}
+                        <span className={`ml-2 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 
+                          ${estadoDetallado.color === 'blue' ? 'bg-blue-100 text-blue-800' : 
+                            estadoDetallado.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 
+                            estadoDetallado.color === 'green' ? 'bg-green-100 text-green-800' : 
+                            estadoDetallado.color === 'purple' ? 'bg-purple-100 text-purple-800' : 
+                            'bg-gray-100 text-gray-800'}`}
+                        >
+                          <EstadoIcon className="h-3 w-3" />
+                          <span>{estadoDetallado.texto}</span>
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center text-sm text-gray-500">
+                        <FaClock className="mr-1.5" />
+                        {pedido.fecha}
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center text-sm text-gray-500">
-                      <FaClock className="mr-1.5" />
-                      {pedido.fecha}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-6">
-                  <div className="bg-gray-50 rounded-lg overflow-hidden mb-4">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Producto
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Cantidad
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Precio
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {pedido.productos && pedido.productos.map((producto, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {producto.nombre}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {producto.cantidad}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                              ${producto.precio.toLocaleString('es-CL')}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
                   </div>
                   
-                  <div className="flex justify-between items-center pt-3 border-t">
-                    <div className="flex items-center text-gray-700">
-                      <FaMoneyBillWave className="mr-2 text-green-600" />
-                      <span className="font-medium">Total del pedido</span>
+                  <div className="p-6">
+                    <div className="bg-gray-50 rounded-lg overflow-hidden mb-4">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Producto
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Cantidad
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Precio
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {pedido.productos && pedido.productos.map((producto, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {producto.nombre}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {producto.cantidad}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                ${producto.precio.toLocaleString('es-CL')}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      {pedido.id_estado_envio === 1 && (
-                        <button
-                          onClick={() => handleConfirmarRecepcion(pedido.id_pedido!)}
-                          className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                        >
-                          <FaBoxOpen className="mr-2" />
-                          Confirmar Recepción
-                        </button>
-                      )}
-                      <p className="text-xl font-bold text-gray-900">
-                        ${pedido.total.toLocaleString('es-CL')}
-                      </p>
+                    
+                    <div className="flex justify-between items-center pt-3 border-t">
+                      <div className="flex items-center text-gray-700">
+                        <FaMoneyBillWave className="mr-2 text-green-600" />
+                        <span className="font-medium">Total del pedido</span>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        {pedido.id_estado_envio === 1 && (
+                          <button
+                            onClick={() => handleConfirmarRecepcion(pedido.id_pedido)}
+                            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                          >
+                            <FaBoxOpen className="mr-2" />
+                            Confirmar Recepción
+                          </button>
+                        )}
+                        <p className="text-xl font-bold text-gray-900">
+                          ${pedido.total.toLocaleString('es-CL')}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -672,10 +716,10 @@ export default function PerfilPage() {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6">
             <div>
               <p className="text-white font-medium text-lg">
-                {user.nombre} {user.apellido}
+                {user?.nombre || ''} {user?.apellido || ''}
               </p>
               <p className="text-blue-100 text-sm mt-1">
-                {user.correo}
+                {user?.correo || ''}
               </p>
             </div>
           </div>
@@ -700,6 +744,23 @@ export default function PerfilPage() {
                 Mis Pedidos
               </h3>
             </div>
+
+            <button
+              onClick={() => {
+                setActiveTab('pedidos-todos');
+                cargarPedidos();
+              }}
+              className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                activeTab === 'pedidos-todos'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <FaShoppingBag className={`mr-3 h-5 w-5 ${
+                activeTab === 'pedidos-todos' ? 'text-blue-500' : 'text-gray-400'
+              }`} />
+              Todos
+            </button>
 
             <button
               onClick={() => {
@@ -752,6 +813,7 @@ export default function PerfilPage() {
 
           <div className="p-6">
             {activeTab === 'info' && (isEditing ? renderEditForm() : renderUserInfo())}
+            {activeTab === 'pedidos-todos' && renderPedidosPorEstado('todos')}
             {activeTab === 'pedidos-proceso' && renderPedidosPorEstado('En proceso')}
             {activeTab === 'pedidos-entregados' && renderPedidosPorEstado('Entregado')}
           </div>
