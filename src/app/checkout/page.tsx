@@ -404,9 +404,26 @@ export default function CheckoutPage() {
             <FaCheck className="text-green-600 text-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">¡Compra realizada con éxito!</h1>
+          <p className="text-gray-600 mb-4">
+            Tu pedido ha sido procesado correctamente. Para completar la compra, realiza una transferencia con los siguientes datos:
+          </p>
+          
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold text-gray-800 mb-2">Datos de Transferencia</h3>
+            <ul className="space-y-2 text-gray-700">
+              <li><span className="font-medium">Banco:</span> Banco Estado</li>
+              <li><span className="font-medium">Tipo de Cuenta:</span> Cuenta Corriente</li>
+              <li><span className="font-medium">Número de Cuenta:</span> 12345678</li>
+              <li><span className="font-medium">RUT:</span> 12.345.678-9</li>
+              <li><span className="font-medium">Nombre:</span> SpinZone SpA</li>
+              <li><span className="font-medium">Correo:</span> pagos@spinzone.cl</li>
+              <li><span className="font-medium">Monto:</span> ${new Intl.NumberFormat('es-CL').format(calcularTotal())}</li>
+              <li><span className="font-medium">Asunto:</span> Pedido #{sessionStorage.getItem('lastOrderId') || 'número de pedido'}</li>
+            </ul>
+          </div>
+          
           <p className="text-gray-600 mb-8">
-            Tu pedido ha sido procesado correctamente. Recibirás un correo electrónico con los detalles
-            de tu compra. ¡Gracias por tu compra!
+            Una vez realizada la transferencia, envía el comprobante al correo pagos@spinzone.cl o al WhatsApp +56 9 1234 5678 indicando tu número de pedido.
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
             <Link
