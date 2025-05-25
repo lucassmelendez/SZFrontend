@@ -67,6 +67,13 @@ export default function ProductCard({ producto }: ProductCardProps) {
             className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
           />
         </div>
+        
+        {/* Etiqueta de "Más Vendido" si el producto tiene la propiedad total_vendido */}
+        {(producto as any).total_vendido && (
+          <div className="absolute top-0 right-0 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 text-sm font-semibold">
+            Más Vendido
+          </div>
+        )}
       </div>
       
       <div className="p-5 flex-grow flex flex-col">

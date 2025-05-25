@@ -15,6 +15,21 @@ export default function Home() {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
+        // Intentar obtener los productos más vendidos primero
+        try {
+          const productosVendidos = await productoApi.getMasVendidos(15);
+          // Si hay productos vendidos, mostrarlos
+          if (productosVendidos && productosVendidos.length > 0) {
+            setProductos(productosVendidos);
+            setLoading(false);
+            return;
+          }
+        } catch (errorMasVendidos) {
+          console.error('Error al obtener productos más vendidos:', errorMasVendidos);
+          // Si falla, continuamos con la carga normal
+        }
+
+        // Carga normal como fallback
         const data = await productoApi.getAll();
         // Mostrar hasta 15 productos para el carrusel
         setProductos(data.slice(0, 15));

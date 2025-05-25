@@ -187,6 +187,16 @@ export const productoApi = {
       throw error;
     }
   },
+  
+  getMasVendidos: async (limit: number = 15): Promise<Producto[]> => {
+    try {
+      const response = await apiFast.get<Producto[]>(`/pedido-producto/productos/mas-vendidos?limit=${limit}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener productos más vendidos:', error);
+      throw error;
+    }
+  },
 };
 
 // API de autenticación
