@@ -169,7 +169,7 @@ function WebpayReturnContent() {
               ¡Pago completado con éxito!
             </h1>
             <p className="text-gray-600 mb-6">
-              Tu compra ha sido procesada correctamente. Recibirás un correo electrónico con los detalles de tu pedido.
+              Tu pago ha sido procesado correctamente.
             </p>
             <div className="bg-gray-100 rounded-lg p-4 mb-6 text-left">
               <p className="text-sm text-gray-700">
