@@ -514,7 +514,7 @@ export default function AdminDashboard() {
     pedidos
       .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
       .forEach((pedido) => {
-        const fechaPedido = new Date(pedido.fecha).toLocaleDateString('es-CL');
+        const fechaPedido = new Date(pedido.fecha + 'T00:00:00').toLocaleDateString('es-CL');
         csvContent += `${pedido.id_pedido || ''},`;
         csvContent += `"${pedido.cliente.nombre} ${pedido.cliente.apellido}",`;
         csvContent += `${pedido.cliente.correo},`;
@@ -693,7 +693,7 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {new Date(pedido.fecha).toLocaleDateString('es-CL')}
+                          {new Date(pedido.fecha + 'T00:00:00').toLocaleDateString('es-CL')}
                         </td>
                         <td className="px-6 py-4 text-sm">
                           {pedido.productos && pedido.productos.length > 0 ? (
@@ -761,7 +761,7 @@ export default function AdminDashboard() {
                       <div className="flex justify-between items-center mb-3">
                         <div className="text-lg font-bold text-blue-600">#{pedido.id_pedido}</div>
                         <div className="text-sm text-gray-500">
-                          {new Date(pedido.fecha).toLocaleDateString('es-CL')}
+                          {new Date(pedido.fecha + 'T00:00:00').toLocaleDateString('es-CL')}
                         </div>
                       </div>
                       

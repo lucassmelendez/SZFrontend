@@ -149,7 +149,7 @@ export default function OrderList() {
                   Pedido #{order.id_pedido}
                 </h3>
                 <span className="text-sm text-gray-500">
-                  {new Date(order.fecha).toLocaleDateString()}
+                  {new Date(order.fecha + 'T00:00:00').toLocaleDateString('es-CL')}
                 </span>
               </div>
               
@@ -187,7 +187,7 @@ export default function OrderList() {
                   Teléfono: {order.cliente.telefono}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Fecha: {new Date(order.fecha).toLocaleDateString()}
+                  Fecha: {new Date(order.fecha + 'T00:00:00').toLocaleDateString('es-CL')}
                 </p>
               </div>
               
