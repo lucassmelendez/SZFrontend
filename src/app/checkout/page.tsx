@@ -22,6 +22,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [lastOrderId, setLastOrderId] = useState<string>('');
+  const [lastOrderAmount, setLastOrderAmount] = useState<number>(0);
   
   // Formulario de checkout
   const [formData, setFormData] = useState({
@@ -68,6 +70,22 @@ export default function CheckoutPage() {
       }));
     }
   }, [user, authLoading]);
+  
+  // Cargar los datos del pedido desde sessionStorage cuando la página se carga
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedOrderId = sessionStorage.getItem('lastOrderId');
+      const storedOrderAmount = sessionStorage.getItem('lastOrderAmount');
+      
+      if (storedOrderId && !lastOrderId) {
+        setLastOrderId(storedOrderId);
+      }
+      
+      if (storedOrderAmount && lastOrderAmount === 0) {
+        setLastOrderAmount(parseFloat(storedOrderAmount));
+      }
+    }
+  }, [lastOrderId, lastOrderAmount]);
   
   // Si el usuario es un empleado, no mostrar la página de checkout
   if (!authLoading && user && isEmpleado(user)) {
@@ -218,6 +236,18 @@ export default function CheckoutPage() {
             }
             
             // Si llegamos aquí, el pedido se creó correctamente
+            if (nuevoPedido.id_pedido) {
+              // Guardar el ID del pedido en sessionStorage y en el estado
+              const pedidoId = nuevoPedido.id_pedido.toString();
+              sessionStorage.setItem('lastOrderId', pedidoId);
+              setLastOrderId(pedidoId);
+              
+              // Guardar el monto total para mostrarlo en la página de confirmación
+              const montoTotal = calcularTotal();
+              sessionStorage.setItem('lastOrderAmount', montoTotal.toString());
+              setLastOrderAmount(montoTotal);
+            }
+            
             limpiarCarrito();
             setCheckoutSuccess(true);
           } catch (apiError) {
@@ -289,6 +319,16 @@ export default function CheckoutPage() {
             // Método alternativo para pruebas si hay problemas con WebPay
             if (process.env.NODE_ENV !== 'production') {
               alert(`Error con WebPay. En ambiente de desarrollo, simulando compra exitosa.`);
+              // Guardar información para la página de confirmación
+              const montoTotal = calcularTotal();
+              const pedidoId = 'WP-' + Date.now().toString().substring(8);
+              
+              sessionStorage.setItem('lastOrderAmount', montoTotal.toString());
+              sessionStorage.setItem('lastOrderId', pedidoId);
+              
+              setLastOrderAmount(montoTotal);
+              setLastOrderId(pedidoId);
+              
               setTimeout(() => {
                 limpiarCarrito();
                 setCheckoutSuccess(true);
@@ -306,6 +346,16 @@ export default function CheckoutPage() {
         }
       } else {
         // Otro método de pago
+        // Guardar información para la página de confirmación
+        const montoTotal = calcularTotal();
+        const pedidoId = 'OMP-' + Date.now().toString().substring(8);
+        
+        sessionStorage.setItem('lastOrderAmount', montoTotal.toString());
+        sessionStorage.setItem('lastOrderId', pedidoId);
+        
+        setLastOrderAmount(montoTotal);
+        setLastOrderId(pedidoId);
+        
         setTimeout(() => {
           limpiarCarrito();
           setCheckoutSuccess(true);
@@ -417,8 +467,8 @@ export default function CheckoutPage() {
               <li><span className="font-medium">RUT:</span> 12.345.678-9</li>
               <li><span className="font-medium">Nombre:</span> SpinZone SpA</li>
               <li><span className="font-medium">Correo:</span> pagos@spinzone.cl</li>
-              <li><span className="font-medium">Monto:</span> ${new Intl.NumberFormat('es-CL').format(calcularTotal())}</li>
-              <li><span className="font-medium">Asunto:</span> Pedido #{sessionStorage.getItem('lastOrderId') || 'número de pedido'}</li>
+              <li><span className="font-medium">Monto:</span> ${new Intl.NumberFormat('es-CL').format(lastOrderAmount)}</li>
+              <li><span className="font-medium">Asunto:</span> Pedido #{lastOrderId || sessionStorage.getItem('lastOrderId') || 'número de pedido'}</li>
             </ul>
           </div>
           
