@@ -179,7 +179,7 @@ export default function CheckoutPage() {
           
           // Datos para crear el pedido (usando una fecha estática para evitar problemas)
           const datosPedido = {
-            fecha: "2024-05-15", // Fecha estática para evitar problemas de formato
+            fecha: new Date().toISOString().split('T')[0], // Usar la fecha actual en formato YYYY-MM-DD
             medio_pago_id: 1, // ID para transferencia
             id_estado_envio: 2, // Estado de envío 2
             id_estado: 2, // Estado de pedido 2

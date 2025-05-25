@@ -263,7 +263,7 @@ export default function ContabilidadDashboard() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-600">
-                      Fecha: {new Date(order.fecha).toLocaleDateString()}
+                      Fecha: {new Date(order.fecha + 'T00:00:00').toLocaleDateString('es-CL')}
                     </p>
                     <p className="text-sm text-gray-600">
                       Medio de pago: {order.medio_pago}

@@ -178,7 +178,7 @@ export default function OrderList() {
                   Pedido #{order.id_pedido}
                 </span>
                 <span className="text-sm text-gray-500">
-                  {new Date(order.fecha).toLocaleString()}
+                  {new Date(order.fecha + 'T00:00:00').toLocaleDateString('es-CL')}
                 </span>
               </div>
             </div>
@@ -299,7 +299,7 @@ export default function OrderList() {
                   #{order.id_pedido}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {new Date(order.fecha).toLocaleString()}
+                  {new Date(order.fecha + 'T00:00:00').toLocaleDateString('es-CL')}
                 </td>              
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {order.cliente ? (

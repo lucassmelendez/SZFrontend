@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaCheck, FaTimes, FaSpinner } from 'react-icons/fa';
 import Link from 'next/link';
@@ -35,16 +35,21 @@ function WebpayReturnContent() {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<WebpayTransactionResult | null>(null);
   const { limpiarCarrito } = useCarrito();
+  const processingRef = useRef(false);
+
+  // Obtener parámetros de la URL una sola vez y no en el useEffect
+  const token_ws = searchParams.get('token_ws');
+  const TBK_TOKEN = searchParams.get('TBK_TOKEN');
+  const TBK_ORDEN_COMPRA = searchParams.get('TBK_ORDEN_COMPRA');
+  const TBK_ID_SESION = searchParams.get('TBK_ID_SESION');
 
   useEffect(() => {
+    // Prevenir procesamiento múltiple usando la referencia
+    if (processingRef.current) return;
+    processingRef.current = true;
+
     const processTransaction = async () => {
       try {
-        // Obtener parámetros de la URL
-        const token_ws = searchParams.get('token_ws');
-        const TBK_TOKEN = searchParams.get('TBK_TOKEN');
-        const TBK_ORDEN_COMPRA = searchParams.get('TBK_ORDEN_COMPRA');
-        const TBK_ID_SESION = searchParams.get('TBK_ID_SESION');
-
         // Log con información adicional sobre URLs
         console.log('Procesando retorno de WebPay', { 
           token_ws, 
@@ -131,7 +136,10 @@ function WebpayReturnContent() {
     };
 
     processTransaction();
-  }, [searchParams, limpiarCarrito]);
+    
+    // No incluimos processingRef en las dependencias para evitar rerenders
+    // Tampoco incluimos result porque solo queremos ejecutar este efecto una vez
+  }, [token_ws, TBK_TOKEN, TBK_ORDEN_COMPRA, TBK_ID_SESION, limpiarCarrito]);
 
   if (loading) {
     return (
