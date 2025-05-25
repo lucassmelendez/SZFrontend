@@ -182,16 +182,12 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
           <div className="border-t border-gray-200 bg-white sticky bottom-0 shadow-inner p-4">
             <div className="mb-4 bg-gray-50 p-3 rounded-lg">
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600">Subtotal:</span>
+                <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
                 <span className="font-medium text-gray-900">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
-              </div>
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600">Impuestos (19%):</span>
-                <span className="font-medium text-gray-900">${Math.round(calcularTotal() * 0.19).toLocaleString('es-CL')}</span>
               </div>
               <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-200">
                 <span className="text-gray-800">Total:</span>
-                <span className="text-blue-600">${Math.round(calcularTotal() * 1.19).toLocaleString('es-CL')}</span>
+                <span className="text-blue-600">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
               </div>
             </div>
             

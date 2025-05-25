@@ -235,8 +235,8 @@ export default function CheckoutPage() {
           // Importar el servicio de WebPay dinámicamente para evitar problemas de SSR
           const { iniciarTransaccion } = await import('@/services/webpayService');
           
-          // Calcular monto total con impuestos
-          const montoTotal = Math.round(calcularTotal() * 1.19);
+          // Calcular monto total (ya incluye IVA)
+          const montoTotal = Math.round(calcularTotal());
           
           // Preparar información de los productos para la transacción
           const itemsParaWebpay = items.map(item => ({
@@ -664,12 +664,12 @@ export default function CheckoutPage() {
                         <span className="font-medium text-gray-800">${Math.round(calcularTotal())}</span>
                       </div>
                       <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">Impuestos (19%):</span>
-                        <span className="font-medium text-gray-800">${Math.round(calcularTotal() * 0.19)}</span>
+                        <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
+                        <span className="font-medium text-gray-800">${Math.round(calcularTotal())}</span>
                       </div>
                       <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
                         <span className="font-bold text-gray-800">Total:</span>
-                        <span className="font-bold text-gray-800">${Math.round(calcularTotal() * 1.19 + 10)}</span>
+                        <span className="font-bold text-gray-800">${Math.round(calcularTotal() + 10)}</span>
                       </div>
                     </div>
                   </div>
@@ -730,16 +730,12 @@ export default function CheckoutPage() {
               
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between mb-2">
-                  <span className="text-gray-600">Subtotal:</span>
+                  <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
                   <span className="font-medium text-gray-800">${Math.round(calcularTotal())}</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-600">Impuestos (19%):</span>
-                  <span className="font-medium text-gray-800">${Math.round(calcularTotal() * 0.19)}</span>
                 </div>
                 <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
                   <span className="font-bold text-gray-800">Total:</span>
-                  <span className="font-bold text-gray-800 text-lg">${Math.round(calcularTotal() * 1.19 + 10)}</span>
+                  <span className="font-bold text-gray-800 text-lg">${Math.round(calcularTotal() + 10)}</span>
                 </div>
               </div>
             </div>
