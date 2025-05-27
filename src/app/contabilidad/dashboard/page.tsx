@@ -8,8 +8,12 @@ import { toast } from 'react-hot-toast';
 import { FaCheckCircle, FaSearch } from 'react-icons/fa';
 
 interface OrderWithDetails {
-  id_pedido: number;  fecha: string;
+  id_pedido: number;
+  fecha: string;
   total: number;
+  total_original: number;
+  total_descuentos: number;
+  aplicar_descuento: boolean;
   estado_envio: string;
   id_estado: number;
   id_estado_envio: number;
@@ -85,11 +89,19 @@ export default function ContabilidadDashboard() {
               };
             })
           );
-          
-          const total = productosConDetalles.reduce(
+            const total_original = productosConDetalles.reduce(
             (acc, curr) => acc + (curr.precio_unitario * curr.cantidad),
             0
           );
+          
+          // Verificar si aplica descuento (más de 4 productos)
+          const cantidad_total = productosConDetalles.reduce(
+            (acc, curr) => acc + curr.cantidad,
+            0
+          );
+          const aplicar_descuento = cantidad_total > 4;
+          const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
+          const total = total_original - total_descuentos;
 
           try {            const clienteData = pedido.cliente || await clienteApiFast.getById(pedido.id_cliente);
 
@@ -97,6 +109,9 @@ export default function ContabilidadDashboard() {
               id_pedido: pedido.id_pedido!,
               fecha: pedido.fecha,
               total,
+              total_original,
+              total_descuentos,
+              aplicar_descuento,
               estado_envio: estadosEnvio[pedido.id_estado_envio] || "Desconocido",
               id_estado: pedido.id_estado,
               id_estado_envio: pedido.id_estado_envio,
@@ -309,10 +324,19 @@ export default function ContabilidadDashboard() {
                           {producto.nombre} x{producto.cantidad}
                         </li>
                       ))}
-                    </ul>
-                    <p className="mt-2 font-medium text-gray-800">
-                      Total: ${order.total.toLocaleString()}
-                    </p>
+                    </ul>                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-gray-600">
+                        Subtotal: ${order.total_original.toLocaleString()}
+                      </p>
+                      {order.aplicar_descuento && (
+                        <p className="text-sm text-green-600">
+                          Descuento (5%): -${order.total_descuentos.toLocaleString()}
+                        </p>
+                      )}
+                      <p className="text-base font-medium text-gray-800">
+                        Total final: ${order.total.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex flex-col justify-center items-center gap-2">

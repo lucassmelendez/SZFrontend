@@ -8,6 +8,8 @@ import { pedidoApiFast, pedidoProductoApiFast, Pedido, PedidoProducto, productoA
 // Extender la interfaz Pedido con campos adicionales necesarios
 interface OrderWithDetails extends Pedido {
   total: number;
+  total_original: number;
+  total_descuentos: number;
   productos: Array<PedidoProducto & { nombre: string }>;
   cliente: {
     correo: string;
@@ -18,6 +20,7 @@ interface OrderWithDetails extends Pedido {
   };
   estado_envio: string;
   medio_pago: string;
+  aplicar_descuento?: boolean;
 }
 
 export default function OrderList() {
@@ -54,10 +57,20 @@ export default function OrderList() {
             })
           );
           
-          const total = productosConDetalles.reduce(
+          // Calculate original total and check if discount applies
+          const total_original = productosConDetalles.reduce(
             (acc, curr) => acc + (curr.precio_unitario * curr.cantidad), 
             0
           );
+          
+          const cantidad_total = productosConDetalles.reduce(
+            (acc, curr) => acc + curr.cantidad,
+            0
+          );
+          
+          const aplicar_descuento = cantidad_total > 4;
+          const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
+          const total = total_original - total_descuentos;
 
           try {
             console.log('Obteniendo datos del cliente para pedido:', pedido.id_pedido, 'ID Cliente:', pedido.id_cliente);
@@ -81,7 +94,10 @@ export default function OrderList() {
             return { 
               ...pedido, 
               productos: productosConDetalles,
+              total_original,
+              total_descuentos,
               total,
+              aplicar_descuento,
               cliente: clienteData ? {
                 correo: clienteData.correo,
                 nombre: clienteData.nombre,
@@ -90,7 +106,7 @@ export default function OrderList() {
                 direccion: clienteData.direccion
               } : undefined,
               estado_envio: estadosEnvio[pedido.id_estado_envio as keyof typeof estadosEnvio] || "Desconocido",
-              medio_pago: mediosPago[pedido.medio_pago_id as keyof typeof mediosPago] || "Desconocido"
+              medio_pago: mediosPago[pedido.medio_pago_id as keyof typeof mediosPago] || "Desconocido",
             } as OrderWithDetails;
           } catch (error) {
             console.error('Error al obtener información del cliente:', error);
@@ -211,9 +227,18 @@ export default function OrderList() {
                     {producto.nombre} x{producto.cantidad}
                   </li>
                 ))}
-              </ul>
-              <div className="mt-2 text-sm font-medium text-gray-800">
-                Total: ${order.total.toLocaleString()}
+              </ul>              <div className="mt-2 space-y-1">
+                <div className="text-sm text-gray-600">
+                  Subtotal: ${order.total_original.toLocaleString()}
+                </div>
+                {order.aplicar_descuento && (
+                  <div className="text-sm text-green-600">
+                    Descuento (5%): -${order.total_descuentos.toLocaleString()}
+                  </div>
+                )}
+                <div className="text-base font-medium text-gray-800">
+                  Total final: ${order.total.toLocaleString()}
+                </div>
               </div>
             </div>
 
@@ -285,12 +310,16 @@ export default function OrderList() {
       <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <tr>              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div className="flex flex-col">
+                  <span>Total</span>
+                  <span className="text-[10px] font-normal normal-case text-gray-400">(Subtotal / Descuento / Final)</span>
+                </div>
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Pago</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Envío</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medio Pago</th>
@@ -322,10 +351,21 @@ export default function OrderList() {
                         {producto.nombre} x{producto.cantidad}
                       </li>
                     ))}
-                  </ul>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                  ${order.total.toLocaleString()}
+                  </ul>                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <div className="space-y-1">
+                    <div className="text-gray-600">
+                      ${order.total_original.toLocaleString()}
+                    </div>
+                    {order.aplicar_descuento && (
+                      <div className="text-green-600 text-xs">
+                        -${order.total_descuentos.toLocaleString()}
+                      </div>
+                    )}
+                    <div className="font-medium text-gray-800">
+                      ${order.total.toLocaleString()}
+                    </div>
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
