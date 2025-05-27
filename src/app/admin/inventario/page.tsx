@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { isEmpleado, productoApi, Producto } from '@/lib/api';
-import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiArrowLeft, FiPlus } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiArrowLeft, FiPlus, FiAlertTriangle } from 'react-icons/fi';
 import Modal from '@/components/ui/Modal';
+import toast from 'react-hot-toast';
 
 const categoriasMap: { [key: string]: string } = {
   '1': 'Paletas',
@@ -41,6 +42,24 @@ export default function AdminInventario() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+  
+  // Estado para el modal de editar producto
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [productoEditando, setProductoEditando] = useState<Producto | null>(null);
+  const [datosEditados, setDatosEditados] = useState({
+    nombre: '',
+    descripcion: '',
+    marca: '',
+    categoria_id: '',
+    precio: '',
+    peso: '',
+    stock: ''
+  });
+  
+  // Estado para el modal de confirmación de eliminación
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productoAEliminar, setProductoAEliminar] = useState<Producto | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Cargar productos
   useEffect(() => {
@@ -49,78 +68,78 @@ export default function AdminInventario() {
       return;
     }
     
-    const cargarProductos = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        let productosData: Producto[] = [];        if (searchTerm || categoriaSeleccionada) {
+    cargarProductos();
+  }, [user, authLoading, router, pagina, searchTerm, categoriaSeleccionada]);
+
+  const cargarProductos = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      let productosData: Producto[] = [];        if (searchTerm || categoriaSeleccionada) {
+        const response = await fetch('https://sz-backend.vercel.app/api/productos');
+        const data = await response.json();
+        let allProducts = data.data;
+        if (!allProducts || !Array.isArray(allProducts)) {
+          throw new Error('Formato de datos no válido');
+        }
+        
+        // Filtrar productos según los criterios
+        productosData = allProducts.filter(producto => {
+          const matchesSearch = !searchTerm || 
+            producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+          
+          const matchesCategoria = !categoriaSeleccionada || 
+            producto.categoria_id === parseInt(categoriaSeleccionada);
+          
+          return matchesSearch && matchesCategoria;
+        });
+      } else {
+        console.log('Obteniendo todos los productos...');
+        try {
           const response = await fetch('https://sz-backend.vercel.app/api/productos');
           const data = await response.json();
-          let allProducts = data.data;
-          if (!allProducts || !Array.isArray(allProducts)) {
+          console.log('Respuesta completa de la API:', data);
+          
+          if (!data.data || !Array.isArray(data.data)) {
             throw new Error('Formato de datos no válido');
           }
           
-          // Filtrar productos según los criterios
-          productosData = allProducts.filter(producto => {
-            const matchesSearch = !searchTerm || 
-              producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-            
-            const matchesCategoria = !categoriaSeleccionada || 
-              producto.categoria_id === parseInt(categoriaSeleccionada);
-            
-            return matchesSearch && matchesCategoria;
-          });
-        } else {
-          console.log('Obteniendo todos los productos...');
-          try {
-            const response = await fetch('https://sz-backend.vercel.app/api/productos');
-            const data = await response.json();
-            console.log('Respuesta completa de la API:', data);
-            
-            if (!data.data || !Array.isArray(data.data)) {
-              throw new Error('Formato de datos no válido');
-            }
-            
-            productosData = data.data;
-            console.log('Productos procesados:', productosData);
-            if (!productosData.length) {
-              console.warn('No se encontraron productos');
-            }
-          } catch (error: any) {
-            console.error('Error detallado:', error);
-            throw new Error('Error al obtener productos: ' + (error.message || 'Error desconocido'));
+          productosData = data.data;
+          console.log('Productos procesados:', productosData);
+          if (!productosData.length) {
+            console.warn('No se encontraron productos');
           }
+        } catch (error: any) {
+          console.error('Error detallado:', error);
+          throw new Error('Error al obtener productos: ' + (error.message || 'Error desconocido'));
         }
-
-        if (!productosData || !Array.isArray(productosData)) {
-          console.error('Datos inválidos:', productosData);
-          throw new Error('No se recibieron datos válidos de la API');
-        }
-
-        const total = productosData.length;
-        console.log('Total de productos:', total);
-        
-        const inicio = (pagina - 1) * productosPorPagina;
-        const fin = inicio + productosPorPagina;
-        const productosPaginados = productosData.slice(inicio, fin);
-        console.log('Productos paginados:', productosPaginados);
-
-        setProductos(productosPaginados);
-        setTotalProductos(total);
-      } catch (error: any) {
-        console.error('Error al cargar productos:', error);
-        setError(error.message || 'No se pudieron cargar los productos. Por favor, intenta nuevamente más tarde.');
-        setProductos([]);
-        setTotalProductos(0);
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    cargarProductos();
-  }, [user, authLoading, router, pagina, searchTerm, categoriaSeleccionada]);
+      if (!productosData || !Array.isArray(productosData)) {
+        console.error('Datos inválidos:', productosData);
+        throw new Error('No se recibieron datos válidos de la API');
+      }
+
+      const total = productosData.length;
+      console.log('Total de productos:', total);
+      
+      const inicio = (pagina - 1) * productosPorPagina;
+      const fin = inicio + productosPorPagina;
+      const productosPaginados = productosData.slice(inicio, fin);
+      console.log('Productos paginados:', productosPaginados);
+
+      setProductos(productosPaginados);
+      setTotalProductos(total);
+    } catch (error: any) {
+      console.error('Error al cargar productos:', error);
+      setError(error.message || 'No se pudieron cargar los productos. Por favor, intenta nuevamente más tarde.');
+      setProductos([]);
+      setTotalProductos(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Manejadores de eventos
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,16 +152,135 @@ export default function AdminInventario() {
     setPagina(1);
   };
 
+  // Función para editar un producto
   const handleEditarProducto = (id: number) => {
-    // Por ahora solo mostramos un mensaje - la funcionalidad se implementará después
-    console.log('Editar producto:', id);
-    alert('Funcionalidad de edición en desarrollo');
+    const producto = productos.find(p => p.id_producto === id);
+    if (!producto) return;
+    
+    setProductoEditando(producto);
+    setDatosEditados({
+      nombre: producto.nombre,
+      descripcion: producto.descripcion || '',
+      marca: producto.marca,
+      categoria_id: producto.categoria_id.toString(),
+      precio: producto.precio.toString(),
+      peso: producto.peso.toString(),
+      stock: producto.stock.toString()
+    });
+    setIsEditModalOpen(true);
+    setModalError(null);
+  };
+  
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setProductoEditando(null);
+  };
+  
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setDatosEditados(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!productoEditando) return;
+    
+    setModalError(null);
+    
+    // Validación básica
+    if (!datosEditados.nombre || !datosEditados.marca || !datosEditados.precio || !datosEditados.stock) {
+      setModalError('Por favor, completa todos los campos obligatorios.');
+      return;
+    }
+    
+    try {
+      setIsSaving(true);
+      
+      // Convertir los campos numéricos
+      const productoData = {
+        id_producto: productoEditando.id_producto,
+        nombre: datosEditados.nombre,
+        descripcion: datosEditados.descripcion,
+        marca: datosEditados.marca,
+        categoria_id: parseInt(datosEditados.categoria_id),
+        precio: parseFloat(datosEditados.precio),
+        peso: parseFloat(datosEditados.peso) || 0,
+        stock: parseInt(datosEditados.stock)
+      };
+      
+      // Enviar datos a la API
+      const response = await fetch(`https://sz-backend.vercel.app/api/productos/${productoEditando.id_producto}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productoData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al actualizar el producto');
+      }
+      
+      // Actualizar la lista de productos
+      await cargarProductos();
+      
+      // Cerrar el modal y mostrar mensaje de éxito
+      handleCloseEditModal();
+      toast.success('Producto actualizado correctamente');
+    } catch (error: any) {
+      console.error('Error al actualizar producto:', error);
+      setModalError(error.message || 'Error al actualizar el producto. Por favor, intenta nuevamente.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
+  // Funciones para eliminar un producto
   const handleEliminarProducto = (id: number) => {
-    // Por ahora solo mostramos un mensaje - la funcionalidad se implementará después
-    console.log('Eliminar producto:', id);
-    alert('Funcionalidad de eliminación en desarrollo');
+    const producto = productos.find(p => p.id_producto === id);
+    if (!producto) return;
+    
+    setProductoAEliminar(producto);
+    setIsDeleteModalOpen(true);
+  };
+  
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setProductoAEliminar(null);
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (!productoAEliminar) return;
+    
+    try {
+      setIsDeleting(true);
+      
+      // Enviar solicitud de eliminación a la API
+      const response = await fetch(`https://sz-backend.vercel.app/api/productos/${productoAEliminar.id_producto}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al eliminar el producto');
+      }
+      
+      // Actualizar la lista de productos
+      await cargarProductos();
+      
+      // Cerrar el modal y mostrar mensaje de éxito
+      handleCloseDeleteModal();
+      toast.success('Producto eliminado correctamente');
+    } catch (error: any) {
+      console.error('Error al eliminar producto:', error);
+      toast.error(error.message || 'Error al eliminar el producto');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Manejadores para el modal de agregar producto
@@ -208,34 +346,12 @@ export default function AdminInventario() {
         throw new Error(errorData.message || 'Error al crear el producto');
       }
       
-      // Actualizar la lista de productos (recargar)
-      const cargarProductos = async () => {
-        try {
-          const response = await fetch('https://sz-backend.vercel.app/api/productos');
-          const data = await response.json();
-          
-          if (!data.data || !Array.isArray(data.data)) {
-            throw new Error('Formato de datos no válido');
-          }
-          
-          const productosData = data.data;
-          const total = productosData.length;
-          
-          const inicio = (pagina - 1) * productosPorPagina;
-          const fin = inicio + productosPorPagina;
-          const productosPaginados = productosData.slice(inicio, fin);
-          
-          setProductos(productosPaginados);
-          setTotalProductos(total);
-        } catch (error: any) {
-          console.error('Error al recargar productos:', error);
-        }
-      };
-      
+      // Actualizar la lista de productos
       await cargarProductos();
       
-      // Cerrar el modal
+      // Cerrar el modal y mostrar mensaje de éxito
       closeModal();
+      toast.success('Producto creado correctamente');
     } catch (error: any) {
       console.error('Error al guardar producto:', error);
       setModalError(error.message || 'Error al guardar el producto. Por favor, intenta nuevamente.');
@@ -591,6 +707,182 @@ export default function AdminInventario() {
             </button>
           </div>
         </form>
+      </Modal>
+      
+      {/* Modal de Editar Producto */}
+      <Modal isOpen={isEditModalOpen} onClose={handleCloseEditModal} title="Editar Producto" size="lg">
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          {modalError && (
+            <div className="bg-red-50 text-red-700 p-3 rounded-md">
+              {modalError}
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre del Producto *
+              </label>
+              <input
+                type="text"
+                name="nombre"
+                value={datosEditados.nombre}
+                onChange={handleEditInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Marca *
+              </label>
+              <input
+                type="text"
+                name="marca"
+                value={datosEditados.marca}
+                onChange={handleEditInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Descripción
+              </label>
+              <textarea
+                name="descripcion"
+                value={datosEditados.descripcion}
+                onChange={handleEditInputChange}
+                rows={3}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categoría *
+              </label>
+              <select
+                name="categoria_id"
+                value={datosEditados.categoria_id}
+                onChange={handleEditInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                {Object.entries(categoriasMap).map(([id, nombre]) => (
+                  <option key={id} value={id}>{nombre}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Precio (CLP) *
+              </label>
+              <input
+                type="number"
+                name="precio"
+                value={datosEditados.precio}
+                onChange={handleEditInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                step="100"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Peso (kg)
+              </label>
+              <input
+                type="number"
+                name="peso"
+                value={datosEditados.peso}
+                onChange={handleEditInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                step="0.1"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Stock *
+              </label>
+              <input
+                type="number"
+                name="stock"
+                value={datosEditados.stock}
+                onChange={handleEditInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-3 border-t">
+            <button
+              type="button"
+              onClick={handleCloseEditModal}
+              className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            >
+              {isSaving ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Actualizando...
+                </>
+              ) : 'Actualizar Producto'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+      
+      {/* Modal de Confirmación de Eliminación */}
+      <Modal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} title="Confirmar Eliminación" size="sm">
+        <div className="p-4">
+          <div className="flex items-center text-amber-600 mb-4">
+            <FiAlertTriangle className="w-8 h-8 mr-3" />
+            <h3 className="text-lg font-medium">¿Estás seguro?</h3>
+          </div>
+          
+          <p className="mb-4 text-gray-600">
+            ¿Realmente deseas eliminar el producto <span className="font-medium">{productoAEliminar?.nombre}</span>?
+            Esta acción no se puede deshacer.
+          </p>
+          
+          <div className="flex justify-end gap-3 pt-3 border-t">
+            <button
+              type="button"
+              onClick={handleCloseDeleteModal}
+              className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+            >
+              {isDeleting ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Eliminando...
+                </>
+              ) : 'Eliminar Producto'}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
