@@ -7,6 +7,7 @@ import { isEmpleado, productoApi, Producto } from '@/lib/api';
 import StockEditor from '@/components/bodega/StockEditor';
 import { FaSearch, FaChevronDown } from 'react-icons/fa';
 import OrderList from '@/components/bodega/OrderList';
+import CambiarContrasenaModal from '@/components/auth/CambiarContrasenaModal';
 
 // Mapa de categorías
 const categoriasMap = {
@@ -29,6 +30,7 @@ export default function BodegaDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoria, setSelectedCategoria] = useState<number>(0);
   const [showCategorias, setShowCategorias] = useState(false);
+  const [mostrarModalCambioContrasena, setMostrarModalCambioContrasena] = useState(false);
 
   // Cerrar el menú de categorías cuando se hace clic fuera
   useEffect(() => {
@@ -44,12 +46,16 @@ export default function BodegaDashboard() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showCategorias]);
-
   // Verificar autenticación y rol
   useEffect(() => {
     if (!isLoading) {
       if (!user || !isEmpleado(user) || user.rol_id !== 4) {
         router.push('/');
+      } else {
+        // Verificar si es primer inicio de sesión
+        if (isEmpleado(user) && user.primer_login === true) {
+          setMostrarModalCambioContrasena(true);
+        }
       }
     }
   }, [user, isLoading, router]);
@@ -118,9 +124,10 @@ export default function BodegaDashboard() {
   const totalProductos = productos.length;
   const bajoStock = productos.filter(p => p.stock <= 5).length;
   const sinStock = productos.filter(p => p.stock === 0).length;
-
   return (
     <div className="container mx-auto px-4 py-8">
+      {mostrarModalCambioContrasena && <CambiarContrasenaModal />}
+      
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Panel de Bodega</h1>
       
       

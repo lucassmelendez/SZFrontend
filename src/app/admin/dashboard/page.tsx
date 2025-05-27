@@ -14,6 +14,7 @@ import {
 } from '@/lib/api';
 import { AxiosError } from 'axios';
 import { FiUsers, FiPackage, FiShoppingCart, FiDownload } from 'react-icons/fi';
+import CambiarContrasenaModal from '@/components/auth/CambiarContrasenaModal';
 
 interface ApiErrorResponse {
   detail?: string | Array<{
@@ -127,12 +128,12 @@ export default function AdminDashboard() {
     ventas_totales: 0,
     total_clientes: 0,
     ordenes_pendientes: 0
-  });
-  const [loading, setLoading] = useState(true);
+  });  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+  const [mostrarModalCambioContrasena, setMostrarModalCambioContrasena] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -235,10 +236,14 @@ export default function AdminDashboard() {
 
     fetchData();
   }, []);
-
   useEffect(() => {
     if (!isLoading && (!user || !isEmpleado(user) || user.rol_id !== 2)) {
       router.push('/');
+    } else if (!isLoading && user && isEmpleado(user)) {
+      // Verificar si es primer inicio de sesión
+      if (user.primer_login === true) {
+        setMostrarModalCambioContrasena(true);
+      }
     }
   }, [user, isLoading, router]);
 
@@ -371,9 +376,7 @@ export default function AdminDashboard() {
       if (isNaN(telefonoNum) || isNaN(rolIdNum)) {
         setError('Los campos numéricos no son válidos');
         return;
-      }
-
-      const nuevoEmpleado = {
+      }      const nuevoEmpleado = {
         nombre: formValues.nombre.trim(),
         apellido: formValues.apellido.trim(),
         rut: formValues.rut.trim() || undefined,
@@ -382,7 +385,8 @@ export default function AdminDashboard() {
         direccion: formValues.direccion.trim(),
         telefono: telefonoNum,
         rol_id: rolIdNum,
-        informe_id: 1
+        informe_id: 1,
+        primer_login: true
       };
 
       console.log('Datos a enviar a la API:', nuevoEmpleado);
@@ -569,9 +573,10 @@ export default function AdminDashboard() {
       URL.revokeObjectURL(url);
     }, 100);
   };
-
   return (
     <div className="container mx-auto px-4 py-8">
+      {mostrarModalCambioContrasena && <CambiarContrasenaModal />}
+      
       <h1 className="text-3xl font-bold mb-6">Panel de Administración</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

@@ -134,10 +134,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       // Si falla el primer intento, probar login de empleado
-      try {
-        const empleadoResponse = await authApi.loginEmpleadoFastAPI(correo, contrasena);
+      try {        const empleadoResponse = await authApi.loginEmpleadoFastAPI(correo, contrasena);
         if (empleadoResponse && empleadoResponse.empleado) {
           const empleadoData = empleadoResponse.empleado;
+          console.log('Datos de empleado en login:', empleadoData);
+          console.log('Primer login detectado:', empleadoData.primer_login);
           setUser(empleadoData);
           setUserType('empleado');
           localStorage.setItem('auth_token', empleadoResponse.token || 'empleado_session_' + Date.now());

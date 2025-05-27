@@ -125,6 +125,7 @@ export interface Cliente extends UserBase {
 export interface Empleado extends UserBase {
   id_empleado: number;
   rol_id: number;
+  primer_login?: boolean;
 }
 
 // Tipo unión para representar cualquier tipo de usuario
@@ -259,9 +260,7 @@ export const authApi = {
     } catch (error) {
       console.error('Error en login de cliente con FastAPI:', error);
       throw error;
-    }
-  },
-
+    }  },
   // Login de empleado con FastAPI
   loginEmpleadoFastAPI: async (correo: string, contrasena: string): Promise<any> => {
     try {
@@ -270,6 +269,19 @@ export const authApi = {
         correo: correo,
         contrasena: contrasena
       });
+      
+      // Verificar si es un primer inicio de sesión
+      if (response.data && response.data.empleado) {
+        // Si el backend ya envía esta información, la respetamos
+        if (response.data.empleado.hasOwnProperty('primer_login')) {
+          console.log('Primer login detectado desde el backend:', response.data.empleado.primer_login);
+        } else {
+          // Si no, usamos la lógica de respaldo: asumir que es primer login si contraseña = correo
+          response.data.empleado.primer_login = (correo === contrasena);
+          console.log('Asumiendo primer login:', response.data.empleado.primer_login, 'correo:', correo, 'contraseña igual a correo:', (correo === contrasena));
+        }
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Error en login de empleado con FastAPI:', error);

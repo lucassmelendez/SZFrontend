@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, Producto, productoApi } from '@/lib/api';
+import { isEmpleado, Empleado, Producto, productoApi } from '@/lib/api';
 import StockViewer from '../../../components/vendedor/StockViewer';
 import OrderList from '../../../components/vendedor/OrderList';
+import CambiarContrasenaModal from '@/components/auth/CambiarContrasenaModal';
 
 export default function EmpleadoDashboard() {
   const { user, isLoading } = useAuth();
@@ -13,11 +14,17 @@ export default function EmpleadoDashboard() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mostrarModalCambioContrasena, setMostrarModalCambioContrasena] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
       if (!user || !isEmpleado(user) || user.rol_id !== 3) {
         router.push('/');
+      } else {
+        // Verificar si es primer inicio de sesión
+        if (isEmpleado(user) && user.primer_login === true) {
+          setMostrarModalCambioContrasena(true);
+        }
       }
     }
   }, [user, isLoading, router]);
@@ -45,9 +52,10 @@ export default function EmpleadoDashboard() {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto px-4 py-6">
+      {mostrarModalCambioContrasena && <CambiarContrasenaModal />}
+      
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
         Panel de Vendedor
       </h1>
