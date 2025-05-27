@@ -82,9 +82,9 @@ export default function ProductCard({ producto }: ProductCardProps) {
         </h3>
         
         <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">{producto.descripcion}</p>
-        
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-xl font-bold text-blue-700">${Math.round(producto.precio)}</span>          <span className={`text-sm px-2 py-1 rounded-full ${
+          <div className="flex justify-between items-center mb-2">
+          <span className="text-xl font-bold text-blue-700">${Math.round(producto.precio)}</span>          
+          <span className={`text-sm px-2 py-1 rounded-full ${
             producto.stock === 0
               ? 'bg-red-100 text-red-500'
               : producto.stock <= 5
@@ -100,7 +100,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={isAdding || producto.stock <= 0}
-            className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg text-white ${
+            className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg text-white mt-3 ${
               producto.stock <= 0
                 ? 'bg-gray-400 cursor-not-allowed'
                 : isAdding
@@ -115,4 +115,4 @@ export default function ProductCard({ producto }: ProductCardProps) {
       </div>
     </div>
   );
-} 
+}

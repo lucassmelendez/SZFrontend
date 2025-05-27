@@ -13,9 +13,8 @@ import { useLoginModal } from '@/lib/auth/LoginModalContext';
 import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast, isEmpleado } from '@/lib/api';
 import { Suspense } from 'react';
 
-export default function CheckoutPage() {
-  const router = useRouter();
-  const { items, limpiarCarrito, calcularTotal } = useCarrito();
+export default function CheckoutPage() {  const router = useRouter();
+  const { items, limpiarCarrito, calcularTotal, calcularSubtotal, calcularDescuento } = useCarrito();
   const { closeCart } = useFloatingCartContext();
   const { user, isLoading: authLoading } = useAuth();
   const { openLoginModal, openRegisterModal } = useLoginModal();
@@ -264,8 +263,7 @@ export default function CheckoutPage() {
         try {
           // Importar el servicio de WebPay dinámicamente para evitar problemas de SSR
           const { iniciarTransaccion } = await import('@/services/webpayService');
-          
-          // Calcular monto total (ya incluye IVA)
+            // Calcular monto total con descuento si aplica (ya incluye IVA)
           const montoTotal = Math.round(calcularTotal());
           
           // Preparar información de los productos para la transacción
@@ -708,18 +706,19 @@ export default function CheckoutPage() {
                   
                   <div className="md:hidden mt-6">
                     <div className="bg-gray-100 p-4 rounded-md mb-4">
-                      <h3 className="font-semibold text-gray-800 mb-2">Resumen del pedido</h3>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-gray-600">Productos ({items.length}):</span>
-                        <span className="font-medium text-gray-800">${Math.round(calcularTotal())}</span>
-                      </div>
-                      <div className="flex justify-between mb-2">
+                      <h3 className="font-semibold text-gray-800 mb-2">Resumen del pedido</h3>                      <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
-                        <span className="font-medium text-gray-800">${Math.round(calcularTotal())}</span>
+                        <span className="font-medium text-gray-800">${Math.round(calcularSubtotal()).toLocaleString('es-CL')}</span>
                       </div>
+                      {calcularDescuento() > 0 && (
+                        <div className="flex justify-between text-sm text-green-600 mb-2">
+                          <span>Descuento (5% por más de 4 productos):</span>
+                          <span>-${Math.round(calcularSubtotal() * calcularDescuento()).toLocaleString('es-CL')}</span>
+                        </div>
+                      )}
                       <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
                         <span className="font-bold text-gray-800">Total:</span>
-                        <span className="font-bold text-gray-800">${Math.round(calcularTotal() + 10)}</span>
+                        <span className="font-bold text-gray-800">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
                       </div>
                     </div>
                   </div>
@@ -777,15 +776,20 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
-              
-              <div className="border-t border-gray-200 pt-4">
+                <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
-                  <span className="font-medium text-gray-800">${Math.round(calcularTotal())}</span>
+                  <span className="font-medium text-gray-800">${Math.round(calcularSubtotal()).toLocaleString('es-CL')}</span>
                 </div>
+                {calcularDescuento() > 0 && (
+                  <div className="flex justify-between text-sm text-green-600 mb-2">
+                    <span>Descuento (5% por más de 4 productos):</span>
+                    <span>-${Math.round(calcularSubtotal() * calcularDescuento()).toLocaleString('es-CL')}</span>
+                  </div>
+                )}
                 <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
                   <span className="font-bold text-gray-800">Total:</span>
-                  <span className="font-bold text-gray-800 text-lg">${Math.round(calcularTotal() + 10)}</span>
+                  <span className="font-bold text-gray-800 text-lg">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
                 </div>
               </div>
             </div>

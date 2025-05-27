@@ -12,7 +12,7 @@ interface FloatingCartProps {
 }
 
 export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
-  const { items, actualizarCantidad, eliminarProducto, calcularTotal } = useCarrito();
+  const { items, actualizarCantidad, eliminarProducto, calcularTotal, calcularSubtotal, calcularDescuento } = useCarrito();
   const cartRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   
@@ -183,8 +183,14 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
             <div className="mb-4 bg-gray-50 p-3 rounded-lg">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
-                <span className="font-medium text-gray-900">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
+                <span className="font-medium text-gray-900">${Math.round(calcularSubtotal()).toLocaleString('es-CL')}</span>
               </div>
+              {calcularDescuento() > 0 && (
+                <div className="flex justify-between text-sm mb-2 text-green-600">
+                  <span>Descuento (5% por más de 4 productos):</span>
+                  <span>-${Math.round(calcularSubtotal() * calcularDescuento()).toLocaleString('es-CL')}</span>
+                </div>
+              )}
               <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-200">
                 <span className="text-gray-800">Total:</span>
                 <span className="text-blue-600">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
@@ -204,4 +210,4 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
       </div>
     </div>
   );
-} 
+}
