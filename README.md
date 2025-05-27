@@ -185,13 +185,13 @@ frontend/
 
 El frontend se conecta a un backend desarrollado en FastAPI y a otro desarollado en Express. Ambos backends fueron puestos en produccion y se pueden consultar en sus respectivos enlaces:
 
-- FastApi:
-Produccion: https://szfast-api.vercel.app/      
-Github : https://github.com/lucassmelendez/SZfastApi.git
+- **FastApi**:
+  - Produccion: https://szfast-api.vercel.app/      
+  - Github : https://github.com/lucassmelendez/SZfastApi.git
 
-- Express:
-Produccion: https://sz-backend.vercel.app/    
-Github : https://github.com/lucassmelendez/SZBackend.git
+- **Express**:
+  - Produccion: https://sz-backend.vercel.app/    
+  - Github : https://github.com/lucassmelendez/SZBackend.git
 
 
 El archivo `src/lib/api.ts` contiene todos los endpoints y funciones para interactuar con los backends.
