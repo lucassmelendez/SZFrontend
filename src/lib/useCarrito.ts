@@ -169,22 +169,35 @@ export function useCarrito() {
     clearCartFromStorage();
     notifyCarritoUpdated();
   };
-  
+    // Calcular el descuento por cantidad de artículos (5% para más de 4 productos)
+  const calcularDescuento = () => {
+    const totalArticulos = items.reduce((total, item) => total + item.cantidad, 0);
+    return totalArticulos > 4 ? 0.05 : 0;
+  };
+
   // Calcular el total del carrito
   const calcularTotal = () => {
+    const subtotal = items.reduce((total, item) => total + (item.producto.precio * item.cantidad), 0);
+    const descuento = calcularDescuento();
+    return subtotal * (1 - descuento);
+  };
+  
+  // Calcular el subtotal sin descuento
+  const calcularSubtotal = () => {
     return items.reduce((total, item) => total + (item.producto.precio * item.cantidad), 0);
   };
   
   // Calcular el número total de artículos
   const cantidadTotal = items.reduce((total, item) => total + item.cantidad, 0);
-  
-  return {
+    return {
     items,
     agregarProducto,
     actualizarCantidad,
     eliminarProducto,
     limpiarCarrito,
     calcularTotal,
+    calcularSubtotal,
+    calcularDescuento,
     cantidadTotal
   };
 } 

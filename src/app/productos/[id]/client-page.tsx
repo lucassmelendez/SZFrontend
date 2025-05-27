@@ -182,8 +182,10 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
           <div className="md:w-1/2 p-6 md:p-8 flex flex-col">
             <h1 className="text-3xl font-bold text-gray-800 mb-3">{producto.nombre}</h1>
             
-            <div className="text-3xl font-bold text-blue-700 mb-4">
-              ${producto.precio.toLocaleString('es-CL')}
+            <div className="flex flex-col gap-2">
+              <div className="text-3xl font-bold text-blue-700">
+                ${producto.precio.toLocaleString('es-CL')}
+              </div>
             </div>
             
             <div className="mb-6">
@@ -281,7 +283,18 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
                 </div>
               </div>
             )}
-            
+              {/* Mensaje de descuento */}
+            {cantidad > 4 && (
+              <div className="mb-5 text-center bg-green-50 p-3 rounded-lg border border-green-100">
+                <p className="text-green-600 font-medium">¡Por llevar más de 4 productos obtienes un 5% de descuento!</p>
+              </div>
+            )}
+            {cantidad <= 4 && (
+              <div className="mb-5 text-center bg-red-50 p-3 rounded-lg border border-red-100">
+                <p className="text-red-600 font-medium">¡Por llevar más de 4 productos obtienes un 5% de descuento!</p>
+              </div>
+            )}
+
             {/* Medios de pago */}
             <div className="mb-5">
               <div className="flex flex-col items-center justify-center">
