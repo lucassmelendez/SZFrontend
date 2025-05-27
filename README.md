@@ -42,16 +42,13 @@ SpinZone es una plataforma completa de comercio electrónico especializada en ar
   - TypeScript 5.x
   - Tailwind CSS 4.x
   - Axios (para peticiones HTTP)
-  - React Hot Toast (notificaciones)
+  - React Hot Toast (alertas)
   - React Icons
   - jsPDF (generación de documentos PDF)
 
 - **Backend** (integrado con):
-  - FastAPI (integración externa)
-
-- **Autenticación**:
-  - JWT (JSON Web Tokens)
-  - bcryptjs
+  - FastAPI 
+  - Express
 
 - **Despliegue**:
   - Vercel
@@ -132,7 +129,7 @@ npm start
 
 3. Despliega:
    ```bash
-   vercel
+   vercel --prod
    ```
 
 ## 📁 Estructura del Proyecto
@@ -188,8 +185,13 @@ frontend/
 
 El frontend se conecta a un backend desarrollado en FastAPI y a otro desarollado en Express. Ambos backends fueron puestos en produccion y se pueden consultar en sus respectivos enlaces:
 
-FastApi: https://szfast-api.vercel.app/    |  Github : https://github.com/lucassmelendez/SZfastApi.git
-Express: https://sz-backend.vercel.app/    |  Github : https://github.com/lucassmelendez/SZBackend.git
+- FastApi:
+Produccion: https://szfast-api.vercel.app/      
+Github : https://github.com/lucassmelendez/SZfastApi.git
+
+- Express:
+Produccion: https://sz-backend.vercel.app/    
+Github : https://github.com/lucassmelendez/SZBackend.git
 
 
 El archivo `src/lib/api.ts` contiene todos los endpoints y funciones para interactuar con los backends.
