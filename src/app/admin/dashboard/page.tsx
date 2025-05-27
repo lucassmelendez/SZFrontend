@@ -35,6 +35,9 @@ interface Cliente {
 
 interface PedidoConDetalles extends Omit<Pedido, 'cliente'> {
   total: number;
+  total_original: number;
+  total_descuentos: number;
+  aplicar_descuento: boolean;
   cliente: Cliente;
   productos: Array<{
     id_producto: number;
@@ -177,13 +180,27 @@ export default function AdminDashboard() {
                 }
               })
             );
-            
-            // Calculamos el total sumando los subtotales
-            const total = productosConDetalles.reduce(
+              // Calculamos los totales
+            const total_original = productosConDetalles.reduce(
               (acc, curr) => acc + (curr.subtotal || curr.precio_unitario * curr.cantidad), 
               0
             );
-            console.log(`Total calculado para pedido ${idPedido}:`, total);
+            
+            // Verificar descuento (más de 4 productos)
+            const cantidad_total = productosConDetalles.reduce(
+              (acc, curr) => acc + curr.cantidad, 
+              0
+            );
+            const aplicar_descuento = cantidad_total > 4;
+            const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
+            const total = total_original - total_descuentos;
+            
+            console.log(`Total calculado para pedido ${idPedido}:`, {
+              total_original,
+              aplicar_descuento,
+              total_descuentos,
+              total
+            });
             
             // Obtenemos los datos del cliente
             const clienteResponse = await apiFast.get(`/clientes/${pedido.id_cliente}`);
@@ -191,7 +208,10 @@ export default function AdminDashboard() {
             
             const pedidoConDetalles = {
               ...pedido,
-              total: total || 0,
+              total,
+              total_original,
+              total_descuentos,
+              aplicar_descuento,
               productos: productosConDetalles,
               cliente
             };
@@ -709,10 +729,21 @@ export default function AdminDashboard() {
                             </div>
                           ) : (
                             <span className="text-gray-400 italic">Sin productos</span>
-                          )}
-                        </td>
+                          )}                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {formatCurrency(pedido.total)}
+                          <div className="space-y-1">
+                            <div className="text-gray-600">
+                              {formatCurrency(pedido.total_original)}
+                            </div>
+                            {pedido.aplicar_descuento && (
+                              <div className="text-xs text-green-600">
+                                -{formatCurrency(pedido.total_descuentos)}
+                              </div>
+                            )}
+                            <div className="font-medium text-gray-800">
+                              {formatCurrency(pedido.total)}
+                            </div>
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -815,13 +846,24 @@ export default function AdminDashboard() {
                           </div>
                         ) : (
                           <span className="text-gray-400 italic text-xs">Sin productos</span>
-                        )}
-                      </div>
+                        )}                      </div>
                       
                       {/* Total */}
-                      <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
-                        <span className="font-medium text-sm">Total:</span>
-                        <span className="font-bold text-lg">{formatCurrency(pedido.total)}</span>
+                      <div className="border-t border-gray-200 pt-2 space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Subtotal:</span>
+                          <span className="text-gray-600">{formatCurrency(pedido.total_original)}</span>
+                        </div>
+                        {pedido.aplicar_descuento && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-green-600">Descuento (5%):</span>
+                            <span className="text-green-600">-{formatCurrency(pedido.total_descuentos)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium text-sm">Total final:</span>
+                          <span className="font-bold text-lg">{formatCurrency(pedido.total)}</span>
+                        </div>
                       </div>
                     </div>
                   );

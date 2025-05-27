@@ -18,6 +18,10 @@ interface PedidoWithDetails {
   id_cliente: number;
   productos: OrderProduct[];
   cliente: Cliente;
+  total: number;
+  total_original: number;
+  total_descuentos: number;
+  aplicar_descuento: boolean;
 }
 
 export default function OrderList() {
@@ -51,14 +55,28 @@ export default function OrderList() {
             const productosConDetalles = await Promise.all(
               pedidoProductos.map(async (pp) => {
                 const producto = await productoApi.getById(pp.id_producto);
-                return {
-                  ...pp,
-                  nombre: producto.nombre
-                };
-              })
-            );
+                return {              ...pp,
+              nombre: producto.nombre
+            };
+          })
+        );
 
-            // Obtener datos del cliente
+        // Calculate original total and check if discount applies
+        const total_original = productosConDetalles.reduce(
+          (acc, curr) => acc + (curr.precio_unitario * curr.cantidad), 
+          0
+        );
+        
+        const cantidad_total = productosConDetalles.reduce(
+          (acc, curr) => acc + curr.cantidad,
+          0
+        );
+        
+        const aplicar_descuento = cantidad_total > 4;
+        const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
+        const total = total_original - total_descuentos;
+
+        // Obtener datos del cliente
             let clienteData: Cliente | null = null;
             if (pedido.cliente && 'id_cliente' in pedido.cliente) {
               clienteData = pedido.cliente as Cliente;
@@ -73,7 +91,11 @@ export default function OrderList() {
               ...pedido,
               id_pedido: pedido.id_pedido as number, // We already validated it's not null
               productos: productosConDetalles,
-              cliente: clienteData
+              cliente: clienteData,
+              total: total,
+              total_original: total_original,
+              total_descuentos: total_descuentos,
+              aplicar_descuento: aplicar_descuento
             } as PedidoWithDetails;
           } catch (error) {
             console.error('Error procesando pedido:', error);
@@ -198,12 +220,27 @@ export default function OrderList() {
                 </h4>
                 <ul className="text-sm text-gray-600 space-y-1 bg-gray-50 p-2 rounded-lg">
                   {order.productos.map(producto => (
-                    <li key={producto.id_producto} className="flex justify-between py-1 border-b border-gray-100 last:border-0">
-                      <span>{producto.nombre}</span>
+                    <li key={producto.id_producto} className="flex justify-between py-1 border-b border-gray-100 last:border-0">                      <span>{producto.nombre}</span>
                       <span className="font-medium">x{producto.cantidad}</span>
                     </li>
                   ))}
                 </ul>
+                {/* Total information */}
+                <div className="mt-4 border-t border-gray-100 pt-3">
+                  <div className="space-y-1">
+                    <div className="text-sm text-gray-600">
+                      Subtotal: ${order.total_original.toLocaleString()}
+                    </div>
+                    {order.aplicar_descuento && (
+                      <div className="text-sm text-green-600">
+                        Descuento (5%): -${order.total_descuentos.toLocaleString()}
+                      </div>
+                    )}
+                    <div className="text-base font-medium text-gray-800">
+                      Total final: ${order.total.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
