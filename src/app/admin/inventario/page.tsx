@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { isEmpleado, productoApi, Producto } from '@/lib/api';
-import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiArrowLeft } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiArrowLeft, FiPlus } from 'react-icons/fi';
+import Modal from '@/components/ui/Modal';
 
 const categoriasMap: { [key: string]: string } = {
   '1': 'Paletas',
@@ -17,7 +18,7 @@ const categoriasMap: { [key: string]: string } = {
 export default function AdminInventario() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-    // Estados
+  // Estados
   const [productos, setProductos] = useState<Producto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +27,20 @@ export default function AdminInventario() {
   const [pagina, setPagina] = useState(1);
   const [totalProductos, setTotalProductos] = useState(0);
   const productosPorPagina = 10;
+  
+  // Estado para el modal de agregar producto
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [nuevoProducto, setNuevoProducto] = useState({
+    nombre: '',
+    descripcion: '',
+    marca: '',
+    categoria_id: '1',
+    precio: '',
+    peso: '',
+    stock: ''
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   // Cargar productos
   useEffect(() => {
@@ -130,6 +145,105 @@ export default function AdminInventario() {
     alert('Funcionalidad de eliminación en desarrollo');
   };
 
+  // Manejadores para el modal de agregar producto
+  const openModal = () => {
+    setIsModalOpen(true);
+    setModalError(null);
+    setNuevoProducto({
+      nombre: '',
+      descripcion: '',
+      marca: '',
+      categoria_id: '1',
+      precio: '',
+      peso: '',
+      stock: ''
+    });
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNuevoProducto({
+      ...nuevoProducto,
+      [name]: value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setModalError(null);
+
+    // Validación básica
+    if (!nuevoProducto.nombre || !nuevoProducto.marca || !nuevoProducto.precio || !nuevoProducto.stock) {
+      setModalError('Por favor, completa todos los campos obligatorios.');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      
+      // Convertir los campos numéricos
+      const productoData = {
+        ...nuevoProducto,
+        precio: parseFloat(nuevoProducto.precio),
+        peso: parseFloat(nuevoProducto.peso) || 0,
+        stock: parseInt(nuevoProducto.stock),
+        categoria_id: parseInt(nuevoProducto.categoria_id)
+      };
+      
+      // Enviar datos a la API
+      const response = await fetch('https://sz-backend.vercel.app/api/productos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productoData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al crear el producto');
+      }
+      
+      // Actualizar la lista de productos (recargar)
+      const cargarProductos = async () => {
+        try {
+          const response = await fetch('https://sz-backend.vercel.app/api/productos');
+          const data = await response.json();
+          
+          if (!data.data || !Array.isArray(data.data)) {
+            throw new Error('Formato de datos no válido');
+          }
+          
+          const productosData = data.data;
+          const total = productosData.length;
+          
+          const inicio = (pagina - 1) * productosPorPagina;
+          const fin = inicio + productosPorPagina;
+          const productosPaginados = productosData.slice(inicio, fin);
+          
+          setProductos(productosPaginados);
+          setTotalProductos(total);
+        } catch (error: any) {
+          console.error('Error al recargar productos:', error);
+        }
+      };
+      
+      await cargarProductos();
+      
+      // Cerrar el modal
+      closeModal();
+    } catch (error: any) {
+      console.error('Error al guardar producto:', error);
+      setModalError(error.message || 'Error al guardar el producto. Por favor, intenta nuevamente.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
@@ -142,13 +256,22 @@ export default function AdminInventario() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Inventario</h1>
-        <button 
-          onClick={() => router.push('/admin/dashboard')}
-          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
-        >
-          <FiArrowLeft className="w-5 h-5" />
-          Volver
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={openModal}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
+          >
+            <FiPlus className="w-5 h-5" />
+            Agregar Producto
+          </button>
+          <button 
+            onClick={() => router.push('/admin/dashboard')}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
+          >
+            <FiArrowLeft className="w-5 h-5" />
+            Volver
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -330,6 +453,145 @@ export default function AdminInventario() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Agregar Producto */}
+      <Modal isOpen={isModalOpen} onClose={closeModal} title="Agregar Nuevo Producto" size="lg">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {modalError && (
+            <div className="bg-red-50 text-red-700 p-3 rounded-md">
+              {modalError}
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre del Producto *
+              </label>
+              <input
+                type="text"
+                name="nombre"
+                value={nuevoProducto.nombre}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Marca *
+              </label>
+              <input
+                type="text"
+                name="marca"
+                value={nuevoProducto.marca}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Descripción
+              </label>
+              <textarea
+                name="descripcion"
+                value={nuevoProducto.descripcion}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categoría *
+              </label>
+              <select
+                name="categoria_id"
+                value={nuevoProducto.categoria_id}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                {Object.entries(categoriasMap).map(([id, nombre]) => (
+                  <option key={id} value={id}>{nombre}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Precio (CLP) *
+              </label>
+              <input
+                type="number"
+                name="precio"
+                value={nuevoProducto.precio}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                step="100"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Peso (kg)
+              </label>
+              <input
+                type="number"
+                name="peso"
+                value={nuevoProducto.peso}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                step="0.1"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Stock *
+              </label>
+              <input
+                type="number"
+                name="stock"
+                value={nuevoProducto.stock}
+                onChange={handleInputChange}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-3 border-t">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            >
+              {isSaving ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Guardando...
+                </>
+              ) : 'Guardar Producto'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -643,7 +643,7 @@ export default function AdminDashboard() {
             >
               <div className="flex items-center gap-2">
                 <FiPackage className="w-5 h-5 text-white" />
-                <span className="text-white font-medium">Ver inventario</span>
+                <span className="text-white font-medium">Gestionar inventario</span>
               </div>
               <span className="text-white font-medium">→</span>
             </button>
