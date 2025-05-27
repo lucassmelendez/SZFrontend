@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
 import { pedidoApiFast, pedidoProductoApiFast, PedidoProducto, isCliente, clienteApiFast, isEmpleado } from '@/lib/api';
 import { Suspense } from 'react';
+import Price from '@/components/Price';
 
 export default function CheckoutPage() {  const router = useRouter();
   const { items, limpiarCarrito, calcularTotal, calcularSubtotal, calcularDescuento } = useCarrito();
@@ -465,7 +466,7 @@ export default function CheckoutPage() {  const router = useRouter();
               <li><span className="font-medium">RUT:</span> 12.345.678-9</li>
               <li><span className="font-medium">Nombre:</span> SpinZone SpA</li>
               <li><span className="font-medium">Correo:</span> pagos@spinzone.cl</li>
-              <li><span className="font-medium">Monto:</span> ${new Intl.NumberFormat('es-CL').format(lastOrderAmount)}</li>
+              <li><span className="font-medium">Monto:</span> <Price amount={lastOrderAmount} /></li>
               <li><span className="font-medium">Asunto:</span> Pedido #{lastOrderId || sessionStorage.getItem('lastOrderId') || 'número de pedido'}</li>
             </ul>
           </div>
@@ -708,17 +709,17 @@ export default function CheckoutPage() {  const router = useRouter();
                     <div className="bg-gray-100 p-4 rounded-md mb-4">
                       <h3 className="font-semibold text-gray-800 mb-2">Resumen del pedido</h3>                      <div className="flex justify-between mb-2">
                         <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
-                        <span className="font-medium text-gray-800">${Math.round(calcularSubtotal()).toLocaleString('es-CL')}</span>
+                        <span className="font-medium text-gray-800"><Price amount={Math.round(calcularSubtotal())} /></span>
                       </div>
                       {calcularDescuento() > 0 && (
                         <div className="flex justify-between text-sm text-green-600 mb-2">
                           <span>Descuento (5% por más de 4 productos):</span>
-                          <span>-${Math.round(calcularSubtotal() * calcularDescuento()).toLocaleString('es-CL')}</span>
+                          <span>-<Price amount={Math.round(calcularSubtotal() * calcularDescuento())} /></span>
                         </div>
                       )}
                       <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
                         <span className="font-bold text-gray-800">Total:</span>
-                        <span className="font-bold text-gray-800">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
+                        <span className="font-bold text-gray-800"><Price amount={Math.round(calcularTotal())} /></span>
                       </div>
                     </div>
                   </div>
@@ -766,7 +767,7 @@ export default function CheckoutPage() {  const router = useRouter();
                           {item.producto.nombre}
                         </h3>
                         <span className="text-sm font-medium text-gray-800">
-                          ${Math.round(item.producto.precio * item.cantidad)}
+                          <Price amount={Math.round(item.producto.precio * item.cantidad)} size="sm" />
                         </span>
                       </div>
                       <p className="text-sm text-gray-500">
@@ -779,17 +780,17 @@ export default function CheckoutPage() {  const router = useRouter();
                 <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
-                  <span className="font-medium text-gray-800">${Math.round(calcularSubtotal()).toLocaleString('es-CL')}</span>
+                  <span className="font-medium text-gray-800"><Price amount={Math.round(calcularSubtotal())} /></span>
                 </div>
                 {calcularDescuento() > 0 && (
                   <div className="flex justify-between text-sm text-green-600 mb-2">
                     <span>Descuento (5% por más de 4 productos):</span>
-                    <span>-${Math.round(calcularSubtotal() * calcularDescuento()).toLocaleString('es-CL')}</span>
+                    <span>-<Price amount={Math.round(calcularSubtotal() * calcularDescuento())} /></span>
                   </div>
                 )}
                 <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
                   <span className="font-bold text-gray-800">Total:</span>
-                  <span className="font-bold text-gray-800 text-lg">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
+                  <span className="font-bold text-gray-800 text-lg"><Price amount={Math.round(calcularTotal())} /></span>
                 </div>
               </div>
             </div>
