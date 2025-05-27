@@ -344,6 +344,9 @@ export default function Header() {
 
             {/* Sección derecha: Perfil y Carrito */}
             <div className="flex items-center space-x-4">
+              {/* Selector de moneda - ahora también en móvil */}
+              <CurrencyToggle />
+              
               {/* Botones de Perfil y Cerrar Sesión */}
               {user ? (
                 <div className="flex items-center space-x-3">
