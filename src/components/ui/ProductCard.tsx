@@ -8,6 +8,7 @@ import { useCarrito } from '@/lib/useCarrito';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
+import Price from '../Price';
 
 interface ProductCardProps {
   producto: Producto;
@@ -83,7 +84,7 @@ export default function ProductCard({ producto }: ProductCardProps) {
         
         <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">{producto.descripcion}</p>
           <div className="flex justify-between items-center mb-2">
-          <span className="text-xl font-bold text-blue-700">${Math.round(producto.precio)}</span>          
+          <Price amount={Math.round(producto.precio)} size="lg" />
           <span className={`text-sm px-2 py-1 rounded-full ${
             producto.stock === 0
               ? 'bg-red-100 text-red-500'

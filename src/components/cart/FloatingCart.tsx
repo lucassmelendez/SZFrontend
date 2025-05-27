@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaShoppingCart, FaTimes, FaTrash, FaArrowRight } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useRouter } from 'next/navigation';
+import Price from '@/components/Price';
 
 interface FloatingCartProps {
   isOpen: boolean;
@@ -134,10 +135,10 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                         </button>
                       </div>
                       <p 
-                        className="text-sm text-blue-600 font-medium mt-1 cursor-pointer"
+                        className="text-sm font-medium mt-1 cursor-pointer"
                         onClick={() => handleNavigateToProduct(item.producto.id_producto)}
                       >
-                        ${Math.round(item.producto.precio).toLocaleString('es-CL')}
+                        <Price amount={Math.round(item.producto.precio)} size="sm" />
                       </p>
                       
                       {/* Línea separadora */}
@@ -163,10 +164,10 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                           </button>
                         </div>
                         <span 
-                          className="font-semibold text-gray-900 text-right cursor-pointer"
+                          className="font-semibold text-right cursor-pointer"
                           onClick={() => handleNavigateToProduct(item.producto.id_producto)}
                         >
-                          ${Math.round(item.producto.precio * item.cantidad).toLocaleString('es-CL')}
+                          <Price amount={Math.round(item.producto.precio * item.cantidad)} size="sm" />
                         </span>
                       </div>
                     </div>
@@ -183,17 +184,21 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
             <div className="mb-4 bg-gray-50 p-3 rounded-lg">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">Subtotal (19% IVA incluido):</span>
-                <span className="font-medium text-gray-900">${Math.round(calcularSubtotal()).toLocaleString('es-CL')}</span>
+                <span className="font-medium text-gray-900">
+                  <Price amount={Math.round(calcularSubtotal())} size="sm" />
+                </span>
               </div>
               {calcularDescuento() > 0 && (
                 <div className="flex justify-between text-sm mb-2 text-green-600">
                   <span>Descuento (5% por más de 4 productos):</span>
-                  <span>-${Math.round(calcularSubtotal() * calcularDescuento()).toLocaleString('es-CL')}</span>
+                  <span>-<Price amount={Math.round(calcularSubtotal() * calcularDescuento())} size="sm" /></span>
                 </div>
               )}
               <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-200">
                 <span className="text-gray-800">Total:</span>
-                <span className="text-blue-600">${Math.round(calcularTotal()).toLocaleString('es-CL')}</span>
+                <span className="text-blue-600">
+                  <Price amount={Math.round(calcularTotal())} size="sm" />
+                </span>
               </div>
             </div>
             

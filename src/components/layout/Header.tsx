@@ -3,13 +3,15 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaUser, FaSignOutAlt, FaChevronDown, FaCogs } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaBars, FaTimes, FaUser, FaSignOutAlt, FaChevronDown, FaCogs, FaDollarSign } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import FloatingCart from '../cart/FloatingCart';
 import { productoApi, Producto, isEmpleado } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
+import CurrencyToggle from '../CurrencyToggle';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const categorias = [
   { id: 1, nombre: 'Paletas' },
@@ -38,6 +40,7 @@ export default function Header() {
   const searchRefDesktop = useRef<HTMLDivElement>(null);
   const searchRefMobile = useRef<HTMLDivElement>(null);
   const { openLoginModal } = useLoginModal();
+  const { toggleCurrency, currency } = useCurrency();
 
   // Manejar clics fuera de los menús
   useEffect(() => {
@@ -258,8 +261,19 @@ export default function Header() {
 
             {/* Sección derecha: Perfil y Carrito */}
             <div className="flex items-center space-x-6">
-              {/* Botones de Perfil y Cerrar Sesión */}
-              {user ? (
+              {/* Selector de moneda */}
+              <CurrencyToggle />
+              
+              {/* Botón de inicio de sesión o menú de perfil */}
+              {!user ? (
+                <button
+                  onClick={openLoginModal}
+                  className="flex items-center space-x-2 hover:text-blue-200"
+                >
+                  <FaUser size={20} />
+                  <span className="text-sm">Iniciar sesión</span>
+                </button>
+              ) : (
                 <div className="flex items-center space-x-3">
                   <Link
                     href="/perfil"
@@ -277,14 +291,6 @@ export default function Header() {
                     <FaSignOutAlt size={20} />
                   </button>
                 </div>
-              ) : (
-                <button
-                  onClick={openLoginModal}
-                  className="flex items-center space-x-2 hover:text-blue-200"
-                >
-                  <FaUser size={20} />
-                  <span className="text-sm">Iniciar sesión</span>
-                </button>
               )}
 
               {/* Carrito - botón que abre el carrito flotante (solo para clientes) */}
@@ -447,6 +453,19 @@ export default function Header() {
                     >
                       Productos
                     </Link>
+                    
+                    {/* Selector de moneda en el menú móvil */}
+                    <div className="py-3">
+                      <button 
+                        onClick={toggleCurrency}
+                        className="flex items-center w-full hover:text-blue-200"
+                      >
+                        <FaDollarSign className="mr-2" />
+                        <span className="flex items-center">
+                          Moneda: <span className="font-semibold ml-1">{currency}</span>
+                        </span>
+                      </button>
+                    </div>
                     
                     {/* Categorías como desplegable */}
                     <div className="py-3">
