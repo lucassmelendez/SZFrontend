@@ -2,11 +2,10 @@ import axios from 'axios';
 
 const isClient = typeof window !== 'undefined';
 
-//const API_URL = 'https://sz-backend.vercel.app/api';
-// API FastAPI - actualizada a la versión desplegada en Vercel
-const API_FASTAPI_URL = 'http://127.0.0.1:8000';
-//const API_FASTAPI_URL = 'https://szfast-api.vercel.app';
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'https://sz-backend.vercel.app/api';
+//const API_FASTAPI_URL = 'http://127.0.0.1:8000';
+const API_FASTAPI_URL = 'https://szfast-api.vercel.app';
+//const API_URL = 'http://localhost:3001/api';
 
 console.log('API URL:', API_URL);
 
