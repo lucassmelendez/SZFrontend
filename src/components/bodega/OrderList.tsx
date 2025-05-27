@@ -310,7 +310,7 @@ export default function OrderList() {
       <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
-            <tr>              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <tr><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
@@ -334,8 +334,7 @@ export default function OrderList() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {new Date(order.fecha + 'T00:00:00').toLocaleDateString('es-CL')}
-                </td>              
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                </td><td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {order.cliente ? (
                     <div>
                       <div className="font-medium">{`${order.cliente.nombre} ${order.cliente.apellido}`}</div>
@@ -351,7 +350,7 @@ export default function OrderList() {
                         {producto.nombre} x{producto.cantidad}
                       </li>
                     ))}
-                  </ul>                </td>
+                  </ul></td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <div className="space-y-1">
                     <div className="text-gray-600">
