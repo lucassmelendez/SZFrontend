@@ -1,48 +1,90 @@
-# SpinZone - Frontend
+# SpinZone - Plataforma de E-commerce para Artículos de Tenis de Mesa
 
-Frontend para la tienda de artículos de tenis de mesa SpinZone, desarrollado con Next.js.
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-brightgreen.svg)](https://github.com/lucassmelendez/SZFrontend.git)
+[![Next.js](https://img.shields.io/badge/Next.js-15.3-blue.svg)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.0-blue.svg)](https://reactjs.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.0-blue.svg)](https://tailwindcss.com/)
 
-## Características
+## 📋 Descripción
 
-- Catálogo de productos
-- Detalles de producto
-- Carrito de compras
-- Búsqueda de productos
-- Filtrado por categorías
-- Diseño responsive
+SpinZone es una plataforma completa de comercio electrónico especializada en artículos de tenis de mesa. Este repositorio contiene el frontend de la aplicación, desarrollado con Next.js, React, TypeScript y Tailwind CSS.
 
-## Tecnologías
+## ✨ Características Principales
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- Axios
+- **Tienda Online Completa**
+  - Catálogo de productos con filtrado y búsqueda
+  - Sistema de carrito de compras avanzado
+  - Detalles de productos detallados
+  - Proceso de checkout seguro
+  - Integración con WebPay (pasarela de pago)
 
-## Requisitos
+- **Panel de Administración**
+  - Gestión de productos, inventario y usuarios
+  - Dashboard para administradores
 
-- Node.js 14.x o superior
+- **Roles Específicos**
+  - Área de Empleado
+  - Área de Bodega
+  - Área de Contabilidad
+  - Área de Vendedor
+
+- **Funcionalidades Avanzadas**
+  - Autenticación y gestión de usuarios
+  - Perfil de usuario personalizable
+  - Diseño 100% responsive
+  - Generación de PDF con jsPDF
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Frontend**:
+  - Next.js 15.3.1
+  - React 19.0.0
+  - TypeScript 5.x
+  - Tailwind CSS 4.x
+  - Axios (para peticiones HTTP)
+  - React Hot Toast (notificaciones)
+  - React Icons
+  - jsPDF (generación de documentos PDF)
+
+- **Backend** (integrado con):
+  - FastAPI (integración externa)
+
+- **Autenticación**:
+  - JWT (JSON Web Tokens)
+  - bcryptjs
+
+- **Despliegue**:
+  - Vercel
+
+## 🚀 Instalación y Configuración
+
+### Requisitos Previos
+
+- Node.js 16.x o superior
 - npm 7.x o superior
+- Git
 
-## Instalación
+### Pasos de Instalación
 
-1. Clona el repositorio:
-```bash
-git clone <tu-repositorio>
-cd frontend
-```
+1. **Clonar el repositorio**:
+   ```bash
+   git clone https://github.com/lucassmelendez/SZFrontend.git
+   cd SZFrontend
+   ```
 
-2. Instala las dependencias:
-```bash
-npm install
-```
+2. **Instalar dependencias**:
+   ```bash
+   npm install
+   ```
 
-3. Crea un archivo `.env.local` con las siguientes variables:
-```
-NEXT_PUBLIC_API_URL=http://localhost:3000/api
-```
+3. **Configurar variables de entorno**:
+   Crea un archivo `.env.local` en la raíz del proyecto con el siguiente contenido:
+   ```
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   # Añadir otras variables necesarias para WebPay u otros servicios
+   ```
 
-## Desarrollo
+## 🖥️ Desarrollo Local
 
 Para iniciar el servidor de desarrollo:
 
@@ -52,7 +94,7 @@ npm run dev
 
 El servidor estará disponible en [http://localhost:3000](http://localhost:3000).
 
-## Construcción
+## 🏗️ Construcción y Producción
 
 Para construir la aplicación para producción:
 
@@ -66,38 +108,105 @@ Para iniciar la versión de producción:
 npm start
 ```
 
-## Despliegue en Vercel
+## 🚢 Despliegue
 
-### Opción 1: Despliegue automático
+### Despliegue en Vercel
 
-1. Conecta tu repositorio a Vercel.
-2. Configura las variables de entorno en el panel de Vercel.
-3. Despliega automáticamente.
+#### Opción 1: Despliegue automático
 
-### Opción 2: Despliegue manual con Vercel CLI
+1. Conecta tu repositorio GitHub a Vercel
+2. Configura las variables de entorno en el panel de Vercel
+3. Vercel detectará automáticamente la configuración de Next.js y realizará el despliegue
+
+#### Opción 2: Despliegue manual con Vercel CLI
 
 1. Instala Vercel CLI:
-```bash
-npm i -g vercel
-```
+   ```bash
+   npm i -g vercel
+   ```
 
 2. Inicia sesión:
-```bash
-vercel login
-```
+   ```bash
+   vercel login
+   ```
 
 3. Despliega:
-```bash
-vercel
+   ```bash
+   vercel
+   ```
+
+## 📁 Estructura del Proyecto
+
+```
+frontend/
+├── src/
+│   ├── app/                    # Páginas y rutas (Next.js App Router)
+│   │   ├── admin/              # Panel de administración
+│   │   ├── bodega/             # Gestión de bodega
+│   │   ├── checkout/           # Proceso de pago
+│   │   ├── contabilidad/       # Área de contabilidad
+│   │   ├── empleado/           # Área de empleados
+│   │   ├── perfil/             # Perfil de usuario
+│   │   ├── productos/          # Catálogo y detalles de productos
+│   │   ├── webpay-direct/      # Integración directa con WebPay
+│   │   ├── webpay-form/        # Formularios para WebPay
+│   │   ├── page.tsx            # Página principal
+│   │   ├── layout.tsx          # Layout principal
+│   │   └── globals.css         # Estilos globales
+│   │
+│   ├── components/             # Componentes reutilizables
+│   │   ├── auth/               # Componentes de autenticación
+│   │   ├── bodega/             # Componentes de gestión de bodega
+│   │   ├── cart/               # Componentes del carrito de compras
+│   │   ├── contabilidad/       # Componentes de contabilidad
+│   │   ├── layout/             # Componentes de estructura
+│   │   ├── ui/                 # Componentes de interfaz de usuario
+│   │   └── vendedor/           # Componentes para vendedores
+│   │
+│   ├── lib/                    # Utilidades, hooks y contextos
+│   │   ├── auth/               # Funciones de autenticación
+│   │   ├── utils/              # Utilidades generales
+│   │   ├── api.ts              # Cliente API centralizado
+│   │   ├── useCarrito.ts       # Hook para el carrito
+│   │   ├── useFloatingCart.ts  # Hook para el carrito flotante
+│   │   ├── FloatingCartContext.tsx  # Contexto del carrito flotante
+│   │   └── useTheme.tsx        # Hook para el tema de la aplicación
+│   │
+│   └── services/               # Servicios externos
+│       └── webpayService.ts    # Servicio para integración con WebPay
+|
+├── .next/                      # Directorio de build de Next.js
+├── node_modules/               # Dependencias
+├── tailwind.config.js          # Configuración de Tailwind CSS
+├── next.config.mjs             # Configuración de Next.js
+├── tsconfig.json               # Configuración de TypeScript
+├── package.json                # Dependencias y scripts
+└── vercel.json                 # Configuración de despliegue en Vercel
 ```
 
-## Estructura del proyecto
+## 🔄 Integración con Backend
 
-- `src/app` - Páginas y rutas de la aplicación
-- `src/components` - Componentes reutilizables
-- `src/lib` - Utilidades, API y hooks
-- `public` - Archivos estáticos
+El frontend se conecta a un backend desarrollado en FastAPI y a otro desarollado en Express. Ambos backends fueron puestos en produccion y se pueden consultar en sus respectivos enlaces:
 
-## Conexión con el backend
+FastApi: https://szfast-api.vercel.app/    |  Github : https://github.com/lucassmelendez/SZfastApi.git
+Express: https://sz-backend.vercel.app/    |  Github : https://github.com/lucassmelendez/SZBackend.git
 
-El frontend se conecta al backend a través de la URL especificada en la variable de entorno `NEXT_PUBLIC_API_URL`. Asegúrate de que el backend esté en funcionamiento y accesible desde el frontend.
+
+El archivo `src/lib/api.ts` contiene todos los endpoints y funciones para interactuar con los backends.
+
+## 💳 Integración con WebPay
+
+Este proyecto incluye una integración completa con WebPay (procesador de pagos) a través de nuestro backend Express que contiene:
+
+- Formularios dedicados en `src/app/webpay-form/`
+- Integración directa en `src/app/webpay-direct/`
+- Servicio específico en `src/services/webpayService.ts`
+
+## 🛒 Sistema de Carrito
+
+La aplicación incluye un sistema de carrito avanzado con:
+
+- Persistencia de datos entre sesiones
+- Carrito flotante para mejor experiencia de usuario
+- Hooks personalizados (`useCarrito.ts` y `useFloatingCart.ts`)
+- Contexto React para compartir el estado del carrito
