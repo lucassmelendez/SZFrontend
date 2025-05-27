@@ -10,6 +10,7 @@ import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import FloatingCart from '../cart/FloatingCart';
 import { productoApi, Producto, isEmpleado } from '@/lib/api';
 import { useLoginModal } from '@/lib/auth/LoginModalContext';
+import CurrencyToggle from '../CurrencyToggle';
 
 const categorias = [
   { id: 1, nombre: 'Paletas' },
@@ -258,8 +259,19 @@ export default function Header() {
 
             {/* Sección derecha: Perfil y Carrito */}
             <div className="flex items-center space-x-6">
-              {/* Botones de Perfil y Cerrar Sesión */}
-              {user ? (
+              {/* Selector de moneda */}
+              <CurrencyToggle />
+              
+              {/* Botón de inicio de sesión o menú de perfil */}
+              {!user ? (
+                <button
+                  onClick={openLoginModal}
+                  className="flex items-center space-x-2 hover:text-blue-200"
+                >
+                  <FaUser size={20} />
+                  <span className="text-sm">Iniciar sesión</span>
+                </button>
+              ) : (
                 <div className="flex items-center space-x-3">
                   <Link
                     href="/perfil"
@@ -277,14 +289,6 @@ export default function Header() {
                     <FaSignOutAlt size={20} />
                   </button>
                 </div>
-              ) : (
-                <button
-                  onClick={openLoginModal}
-                  className="flex items-center space-x-2 hover:text-blue-200"
-                >
-                  <FaUser size={20} />
-                  <span className="text-sm">Iniciar sesión</span>
-                </button>
               )}
 
               {/* Carrito - botón que abre el carrito flotante (solo para clientes) */}

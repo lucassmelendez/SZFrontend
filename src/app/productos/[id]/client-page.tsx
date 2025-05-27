@@ -8,6 +8,7 @@ import { FaShoppingCart, FaCreditCard, FaTimesCircle, FaExclamationCircle, FaChe
 import Image from 'next/image';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
+import Price from '@/components/Price';
 
 // Mapa de categorías
 const categoriasMap = {
@@ -183,9 +184,7 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
             <h1 className="text-3xl font-bold text-gray-800 mb-3">{producto.nombre}</h1>
             
             <div className="flex flex-col gap-2">
-              <div className="text-3xl font-bold text-blue-700">
-                ${producto.precio.toLocaleString('es-CL')}
-              </div>
+              <Price amount={producto.precio} size="lg" showOriginal />
             </div>
             
             <div className="mb-6">
