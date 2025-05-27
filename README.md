@@ -206,6 +206,20 @@ Este proyecto incluye una integración completa con WebPay (procesador de pagos)
 - Integración directa en `src/app/webpay-direct/`
 - Servicio específico en `src/services/webpayService.ts`
 
+- **Para hacer compras con webpay mientras esta en produccion , utilizar la siguiente tarjeta de prueba** :
+  - 4051 8856 0044 6623
+  - CVV 123
+  - Fecha expiracion : 12/34
+
+- **Luego en el simulador de pago ingresar los siguientes datos** :
+  - Rut: 11.111.111-1
+  - Clave : 123
+
+- **Por Ultimo selecionar** :
+  - Aceptar - para transacciones exitosas
+  - Rechazar - para transacciones fallidas 
+
+
 ## 🛒 Sistema de Carrito
 
 La aplicación incluye un sistema de carrito avanzado con:
