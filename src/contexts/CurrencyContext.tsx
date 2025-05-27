@@ -29,9 +29,21 @@ export const useCurrency = () => {
 
 // Proveedor del contexto
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Inicializar con el valor de localStorage o 'CLP' por defecto
   const [currency, setCurrency] = useState<Currency>('CLP');
   const [exchangeRate, setExchangeRate] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Cargar la preferencia de moneda desde localStorage al iniciar
+  useEffect(() => {
+    // Verificar si estamos en el navegador para evitar errores en SSR
+    if (typeof window !== 'undefined') {
+      const savedCurrency = localStorage.getItem('preferredCurrency');
+      if (savedCurrency === 'USD' || savedCurrency === 'CLP') {
+        setCurrency(savedCurrency);
+      }
+    }
+  }, []);
 
   // Cargar el tipo de cambio al iniciar
   useEffect(() => {
@@ -53,7 +65,14 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Función para alternar entre monedas
   const toggleCurrency = () => {
-    setCurrency(prev => prev === 'CLP' ? 'USD' : 'CLP');
+    setCurrency(prev => {
+      const newCurrency = prev === 'CLP' ? 'USD' : 'CLP';
+      // Guardar en localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('preferredCurrency', newCurrency);
+      }
+      return newCurrency;
+    });
   };
 
   // Función para convertir precios de CLP a USD
