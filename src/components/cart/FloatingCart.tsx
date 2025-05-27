@@ -134,12 +134,12 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
                           <FaTrash size={14} />
                         </button>
                       </div>
-                      <p 
+                      <div 
                         className="text-sm font-medium mt-1 cursor-pointer"
                         onClick={() => handleNavigateToProduct(item.producto.id_producto)}
                       >
                         <Price amount={Math.round(item.producto.precio)} size="sm" />
-                      </p>
+                      </div>
                       
                       {/* Línea separadora */}
                       <div className="border-t border-gray-100 my-2"></div>

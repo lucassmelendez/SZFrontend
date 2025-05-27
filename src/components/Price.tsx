@@ -27,7 +27,7 @@ export default function Price({
   const convertedAmount = convertPrice(amount);
   
   return (
-    <div className={`${className}`}>
+    <span className={`${className} inline-block`}>
       <span className={`${sizeClasses[size]}`}>
         {currency === 'CLP' 
           ? `$${amount.toLocaleString('es-CL')}` 
@@ -39,6 +39,6 @@ export default function Price({
           (${amount.toLocaleString('es-CL')} CLP)
         </span>
       )}
-    </div>
+    </span>
   );
 } 
