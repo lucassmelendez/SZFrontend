@@ -99,7 +99,12 @@ export default function OrderList() {
         })
       );
 
-      setOrders(pedidosConProductos.filter((p: OrderWithDetails | null): p is OrderWithDetails => p !== null));
+      // Filtrar órdenes nulas y ordenar por ID descendente (más recientes primero)
+      const ordersList = pedidosConProductos
+        .filter((p: OrderWithDetails | null): p is OrderWithDetails => p !== null)
+        .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0));
+
+      setOrders(ordersList);
       setError(null);
     } catch (err) {
       console.error('Error al cargar las órdenes:', err);
