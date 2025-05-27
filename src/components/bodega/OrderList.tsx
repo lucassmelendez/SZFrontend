@@ -288,16 +288,16 @@ export default function OrderList() {
                         Procesando...
                       </span>
                     ) : (
-                      'Despachar'
+                      'Preparar pedido'
                     )}
                   </button>
                 ) : order.id_estado_envio === 1 ? (
                   <span className="block text-center text-green-600 font-medium">
-                    Enviado
+                    Preparado
                   </span>
                 ) : (
                   <span className="block text-center text-gray-600 font-medium">
-                    No disponible
+                    Preparado
                   </span>
                 )}
               </div>
@@ -412,16 +412,16 @@ export default function OrderList() {
                           Procesando...
                         </span>
                       ) : (
-                        'Despachar'
+                        'Preparar pedido'
                       )}
                     </button>
                   ) : order.id_estado_envio === 1 ? (
                     <span className="text-green-600 font-medium">
-                      Enviado
+                      Preparado
                     </span>
                   ) : (
                     <span className="text-gray-600 font-medium">
-                      No disponible
+                      Preparado
                     </span>
                   )}
                 </td>
