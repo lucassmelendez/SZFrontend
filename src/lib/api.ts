@@ -269,16 +269,25 @@ export const authApi = {
         correo: correo,
         contrasena: contrasena
       });
-      
-      // Verificar si es un primer inicio de sesión
+        // Verificar si es un primer inicio de sesión
       if (response.data && response.data.empleado) {
         // Si el backend ya envía esta información, la respetamos
         if (response.data.empleado.hasOwnProperty('primer_login')) {
           console.log('Primer login detectado desde el backend:', response.data.empleado.primer_login);
         } else {
-          // Si no, usamos la lógica de respaldo: asumir que es primer login si contraseña = correo
-          response.data.empleado.primer_login = (correo === contrasena);
-          console.log('Asumiendo primer login:', response.data.empleado.primer_login, 'correo:', correo, 'contraseña igual a correo:', (correo === contrasena));
+          // Lógica de detección del primer inicio de sesión:
+          // Es primer inicio si la contraseña es igual al RUT (sin formatear)
+          const empleado = response.data.empleado;
+          const rutSinFormato = empleado.rut ? empleado.rut.replace(/\s/g, '').replace(/\./g, '').replace(/-/g, '') : '';
+          const esPrimerLogin = (rutSinFormato && contrasena === rutSinFormato);
+          
+          response.data.empleado.primer_login = esPrimerLogin;
+          console.log('Detectando primer login:', {
+            rut: empleado.rut,
+            rutSinFormato,
+            contrasena,
+            esPrimerLogin
+          });
         }
       }
       

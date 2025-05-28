@@ -234,12 +234,38 @@ export default function EmpleadosPage() {
         setError('Las contraseñas no coinciden');
         setIsSubmitting(false);
         return;
-      }
-
-      // Validar formato de correo
+      }      // Validar formato de correo
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formValues.correo)) {
         setError('El formato del correo electrónico no es válido');
+        setIsSubmitting(false);
+        return;
+      }      // Función para normalizar texto (quitar acentos y convertir a minúsculas)
+      const normalizeText = (text: string) => {
+        return text
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+      };      // Validar que el correo siga el formato específico para empleados: nombre.apellido@spinzone.com
+      const normalizedNombre = normalizeText(formValues.nombre);
+      const normalizedApellido = normalizeText(formValues.apellido);
+      const expectedEmail = `${normalizedNombre}.${normalizedApellido}@spinzone.com`;
+      
+      // Normalizar también el correo ingresado para la comparación
+      const normalizedCorreo = normalizeText(formValues.correo);
+      
+      if (normalizedCorreo !== expectedEmail) {
+        // Mostrar el formato esperado con los nombres originales (con acentos) para que sea más claro
+        const displayExpectedEmail = `${formValues.nombre.toLowerCase()}.${formValues.apellido.toLowerCase()}@spinzone.com`;
+        setError(`El correo debe seguir el formato: ${displayExpectedEmail}`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validar que la contraseña sea igual al RUT (sin formatear)
+      const rutSinFormato = formValues.rut.replace(/\s/g, '').replace(/\./g, '').replace(/-/g, '');
+      if (formValues.contrasena !== rutSinFormato) {
+        setError('La contraseña inicial debe ser igual al RUT (sin puntos ni guiones)');
         setIsSubmitting(false);
         return;
       }
@@ -264,9 +290,7 @@ export default function EmpleadosPage() {
         setError('El rol seleccionado no es válido');
         setIsSubmitting(false);
         return;
-      }
-
-      // Log de los datos que se van a enviar
+      }      // Log de los datos que se van a enviar
       console.log('Datos del empleado a crear:', {
         ...formValues,
         rut: rutFormateado // Usar el RUT formateado
@@ -274,10 +298,14 @@ export default function EmpleadosPage() {
 
       // Crear el empleado usando la API, omitiendo el campo confirmarContrasena
       const { confirmarContrasena, ...datosEmpleado } = formValues;
-      const nuevoEmpleado = await empleadoApiFast.create({
+      const datosFinales = {
         ...datosEmpleado,
         rut: rutFormateado // Usar el RUT formateado
-      });
+      };
+      
+      console.log('Datos finales a enviar al servidor:', datosFinales);
+      
+      const nuevoEmpleado = await empleadoApiFast.create(datosFinales);
 
       console.log('Empleado creado:', nuevoEmpleado);
       setIsAddModalOpen(false);
@@ -286,22 +314,36 @@ export default function EmpleadosPage() {
       alert('Empleado creado con éxito');
       
       // Recargar la página para mostrar el nuevo empleado
-      window.location.reload();
-    } catch (error: any) {
+      window.location.reload();    } catch (error: any) {
       console.error('Error detallado al crear empleado:', error);
       
       let mensajeError = 'Error al crear el empleado';
       
-      // Extraer mensaje de error detallado si existe
-      if (error.message) {
-        mensajeError = error.message;
-      }
-      
-      // Si es un error de validación (422) o conflicto (409), mostrar el detalle
+      // Si es un error de axios con respuesta del servidor
       if (error.response) {
-        if (error.response.data && error.response.data.detail) {
+        const status = error.response.status;
+        console.log('Status del error:', status);
+        console.log('Datos del error:', error.response.data);
+        
+        if (status === 409) {
+          // Conflicto - ya existe el empleado
+          if (error.response.data && error.response.data.detail) {
+            mensajeError = error.response.data.detail;
+          } else {
+            mensajeError = 'Ya existe un empleado con ese correo o RUT. Por favor, verifica los datos.';
+          }
+        } else if (status === 422) {
+          // Error de validación
+          if (error.response.data && error.response.data.detail) {
+            mensajeError = error.response.data.detail;
+          } else {
+            mensajeError = 'Error de validación en los datos del empleado.';
+          }
+        } else if (error.response.data && error.response.data.detail) {
           mensajeError = error.response.data.detail;
         }
+      } else if (error.message) {
+        mensajeError = error.message;
       }
       
       setError(mensajeError);
@@ -537,9 +579,7 @@ export default function EmpleadosPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              </div>
-
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   RUT <span className="text-red-500">*</span>
                 </label>
@@ -549,10 +589,10 @@ export default function EmpleadosPage() {
                   required
                   placeholder="12345678-9"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
+                />                <p className="text-xs text-gray-500 mt-1 bg-blue-50 p-2 rounded-md border border-blue-100">
+                  <strong>Nota:</strong> Para cuentas de empleados, el correo debe seguir el formato nombre.apellido@spinzone.com y la contraseña inicial será el RUT
+                </p>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Correo <span className="text-red-500">*</span>
                 </label>
@@ -560,8 +600,11 @@ export default function EmpleadosPage() {
                   type="email"
                   name="correo"
                   required
+                  placeholder="nombre.apellido@spinzone.com"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                />                <p className="text-xs text-gray-500 mt-1">
+                  Debe seguir el formato: nombre.apellido@spinzone.com
+                </p>
               </div>
 
               <div>
@@ -572,11 +615,13 @@ export default function EmpleadosPage() {
                   type="password"
                   name="contrasena"
                   required
+                  placeholder="Ingrese el RUT sin puntos ni guiones"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
-
-              <div>
+                <p className="text-xs text-gray-500 mt-1">
+                  La contraseña inicial debe ser igual al RUT (sin puntos ni guiones)
+                </p>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Confirmar Contraseña <span className="text-red-500">*</span>
                 </label>
@@ -584,8 +629,12 @@ export default function EmpleadosPage() {
                   type="password"
                   name="confirmarContrasena"
                   required
+                  placeholder="Confirme la contraseña"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Debe coincidir con la contraseña anterior
+                </p>
               </div>
 
               <div>
