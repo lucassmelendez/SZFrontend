@@ -14,7 +14,6 @@ import {
 } from '@/lib/api';
 import { AxiosError } from 'axios';
 import { FiUsers, FiPackage, FiShoppingCart, FiDownload } from 'react-icons/fi';
-import CambiarContrasenaModal from '@/components/auth/CambiarContrasenaModal';
 
 interface ApiErrorResponse {
   detail?: string | Array<{
@@ -137,7 +136,6 @@ export default function AdminDashboard() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
-  const [mostrarModalCambioContrasena, setMostrarModalCambioContrasena] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -257,22 +255,10 @@ export default function AdminDashboard() {
 
     fetchData();
   }, []);
+
   useEffect(() => {
-    if (!isLoading) {
-      // Verificar si el usuario es un administrador
-      if (!user || !isEmpleado(user) || user.rol_id !== 2) {
-        router.push('/');
-      } else {
-        // Verificar si es primer inicio de sesión
-        if (isEmpleado(user) && user.primer_login === true) {
-          console.log("Mostrando modal de cambio de contraseña para primer inicio de sesión");
-          setMostrarModalCambioContrasena(true);
-          // Mostrar alerta adicional
-          setTimeout(() => {
-            alert("Por seguridad, debes cambiar tu contraseña antes de continuar.");
-          }, 500);
-        }
-      }
+    if (!isLoading && (!user || !isEmpleado(user) || user.rol_id !== 2)) {
+      router.push('/');
     }
   }, [user, isLoading, router]);
 
@@ -522,105 +508,69 @@ export default function AdminDashboard() {
         <p className="mt-1 text-sm text-red-500">{fieldErrors[name]}</p>
       )}
     </div>
-  );  const generateFinancialReport = () => {
+  );
+
+  const generateFinancialReport = () => {
     // Crear un archivo CSV que se pueda abrir con Excel
     const fecha = new Date().toLocaleDateString('es-CL');
     const hora = new Date().toLocaleTimeString('es-CL');
     
-    // Usamos punto y coma como separador para mayor compatibilidad con Excel en español
-    const separator = ';';
+    // Encabezados del CSV
+    let csvContent = 'INFORME FINANCIERO - SPINZONE\n';
+    csvContent += 'Generado el:,' + fecha + ' ' + hora + '\n\n';
     
-    // Añadir BOM (Byte Order Mark) para que Excel reconozca correctamente los caracteres UTF-8
-    const BOM = "\uFEFF";
+    // Sección de resumen
+    csvContent += 'RESUMEN DE VENTAS\n';
+    csvContent += 'Concepto,Valor\n';
+    csvContent += 'Ventas totales,' + estadisticas.ventas_totales + '\n';
+    csvContent += 'Total de clientes,' + estadisticas.total_clientes + '\n';
+    csvContent += 'Órdenes pendientes,' + estadisticas.ordenes_pendientes + '\n\n';
     
-    // Función para formatear valores monetarios
-    const formatMoney = (amount: number): string => {
-      return new Intl.NumberFormat('es-CL', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      }).format(amount);
-    };
+    // Sección de pedidos
+    csvContent += 'DETALLE DE PEDIDOS RECIENTES\n';
+    csvContent += 'ID Pedido,Cliente,Correo,Fecha,Estado Pago,Estado Envío,Medio de Pago,Monto Total\n';
     
-    // Función para manejar caracteres especiales en CSV
-    const escapeCSV = (text: string | number | undefined): string => {
-      if (text === undefined || text === null) return '';
-      
-      const strText = String(text);
-      // Si contiene punto y coma, comillas o saltos de línea, envolver en comillas
-      if (strText.includes(separator) || strText.includes('"') || strText.includes('\n')) {
-        return `"${strText.replace(/"/g, '""')}"`;
-      }
-      return strText;
-    };
-    
-    // Encabezados del CSV con formato mejorado
-    let csvContent = `INFORME FINANCIERO - SPINZONE\r\n`;
-    csvContent += `Generado el${separator}${escapeCSV(fecha + ' ' + hora)}\r\n\r\n`;
-    
-    // Sección de resumen con formato mejorado
-    csvContent += `RESUMEN DE VENTAS\r\n`;
-    csvContent += `Concepto${separator}Valor\r\n`;
-    csvContent += `Ventas totales${separator}${escapeCSV(formatMoney(estadisticas.ventas_totales))}\r\n`;
-    csvContent += `Total de clientes${separator}${estadisticas.total_clientes}\r\n`;
-    csvContent += `Órdenes pendientes${separator}${estadisticas.ordenes_pendientes}\r\n\r\n`;
-    
-    // Sección de pedidos con formato mejorado
-    csvContent += `DETALLE DE PEDIDOS RECIENTES\r\n`;
-    csvContent += `ID Pedido${separator}Fecha${separator}Cliente${separator}Correo${separator}Teléfono${separator}Dirección${separator}Estado Pago${separator}Estado Envío${separator}Medio de Pago${separator}Subtotal${separator}Descuento${separator}Total Final\r\n`;
-    
-    // Detalles de los pedidos con formato mejorado
+    // Detalles de los pedidos
     pedidos
       .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
       .forEach((pedido) => {
         const fechaPedido = new Date(pedido.fecha + 'T00:00:00').toLocaleDateString('es-CL');
-        const cliente = pedido.cliente;
-        const nombreCompleto = `${cliente.nombre} ${cliente.apellido}`;
-        
-        // Escapar campos que puedan contener punto y coma
-        const csvRow = [
-          pedido.id_pedido || '',
-          fechaPedido,
-          escapeCSV(nombreCompleto),
-          escapeCSV(cliente.correo),
-          escapeCSV(cliente.telefono),
-          escapeCSV(cliente.direccion),
-          getEstadoPago(pedido.id_estado).texto,
-          getEstadoPedido(pedido.id_estado, pedido.id_estado_envio).texto,
-          mediosPago[pedido.medio_pago_id] || "Desconocido",
-          escapeCSV(formatMoney(pedido.total_original)),
-          pedido.aplicar_descuento ? escapeCSV(formatMoney(pedido.total_descuentos)) : "0",
-          escapeCSV(formatMoney(pedido.total))
-        ].join(separator);
-        
-        csvContent += csvRow + '\r\n';
+        csvContent += `${pedido.id_pedido || ''},`;
+        csvContent += `"${pedido.cliente.nombre} ${pedido.cliente.apellido}",`;
+        csvContent += `${pedido.cliente.correo},`;
+        csvContent += `${fechaPedido},`;
+        csvContent += `${getEstadoPago(pedido.id_estado).texto},`;
+        csvContent += `${getEstadoPedido(pedido.id_estado, pedido.id_estado_envio).texto},`;
+        csvContent += `${mediosPago[pedido.medio_pago_id] || "Desconocido"},`;
+        csvContent += `${pedido.total}\n`;
       });
     
-    // Agregar una sección de productos con formato mejorado
-    csvContent += `\r\nDETALLE DE PRODUCTOS POR PEDIDO\r\n`;
-    csvContent += `ID Pedido${separator}Cliente${separator}Producto${separator}Cantidad${separator}Precio Unitario${separator}Subtotal\r\n`;
+    // Agregar una sección de productos
+    csvContent += '\nDETALLE DE PRODUCTOS POR PEDIDO\n';
+    csvContent += 'ID Pedido,Producto,Cantidad,Precio Unitario,Subtotal\n';
     
-    // Detalles de productos por pedido con formato mejorado
+    // Detalles de productos por pedido
     pedidos
       .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
       .forEach((pedido) => {
-        const cliente = `${pedido.cliente.nombre} ${pedido.cliente.apellido}`;
-        
         pedido.productos.forEach(producto => {
-          const csvRow = [
-            pedido.id_pedido || '',
-            escapeCSV(cliente),
-            escapeCSV(producto.nombre),
-            producto.cantidad,
-            escapeCSV(formatMoney(producto.precio_unitario)),
-            escapeCSV(formatMoney(producto.subtotal || producto.precio_unitario * producto.cantidad))
-          ].join(separator);
-          
-          csvContent += csvRow + '\r\n';
+          csvContent += `${pedido.id_pedido || ''},`;
+          csvContent += `"${producto.nombre}",`;
+          csvContent += `${producto.cantidad},`;
+          csvContent += `${producto.precio_unitario},`;
+          csvContent += `${producto.subtotal || producto.precio_unitario * producto.cantidad}\n`;
         });
       });
-    
-    // Aplicar BOM al inicio del contenido
-    csvContent = BOM + csvContent;
+
+    // Función para manejar caracteres especiales en CSV
+    const escapeCSV = (text: string | number | undefined): string | number | undefined => {
+      if (typeof text !== 'string') return text;
+      // Si contiene comas, comillas o saltos de línea, envolver en comillas
+      if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    };
     
     // Crear el blob con el contenido CSV
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -642,7 +592,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {mostrarModalCambioContrasena && <CambiarContrasenaModal onComplete={() => setMostrarModalCambioContrasena(false)} />}
       <h1 className="text-3xl font-bold mb-6">Panel de Administración</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

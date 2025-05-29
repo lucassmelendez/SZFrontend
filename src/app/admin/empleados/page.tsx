@@ -58,31 +58,11 @@ export default function EmpleadosPage() {
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedEmpleado, setSelectedEmpleado] = useState<Empleado | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    correo: '',
-    rut: '',
-    contrasena: '',
-    confirmarContrasena: ''
-  });
-
-  // Restablecer el formulario cuando se abre el modal
-  const handleOpenAddModal = () => {
-    setFormData({
-      nombre: '',
-      apellido: '',
-      correo: '',
-      rut: '',
-      contrasena: '',
-      confirmarContrasena: ''
-    });
-    setError(null);
-    setIsAddModalOpen(true);
-  };
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchEmpleados = async () => {
@@ -254,26 +234,12 @@ export default function EmpleadosPage() {
         setError('Las contraseñas no coinciden');
         setIsSubmitting(false);
         return;
-      }      // Validar formato de correo
+      }
+
+      // Validar formato de correo
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formValues.correo)) {
         setError('El formato del correo electrónico no es válido');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validar que el correo siga el formato nombre.apellido@spinzone.com
-      const spinzoneRegex = /^[a-zA-Z]+\.[a-zA-Z]+@spinzone\.com$/;
-      if (!spinzoneRegex.test(formValues.correo)) {
-        setError('El correo debe seguir el formato nombre.apellido@spinzone.com');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validar que la contraseña sea igual al RUT sin puntos ni guiones
-      const rutLimpio = formValues.rut.replace(/\./g, '').replace(/-/g, '');
-      if (formValues.contrasena !== rutLimpio) {
-        setError('La contraseña inicial debe ser igual al RUT sin puntos ni guiones');
         setIsSubmitting(false);
         return;
       }
@@ -304,11 +270,12 @@ export default function EmpleadosPage() {
       console.log('Datos del empleado a crear:', {
         ...formValues,
         rut: rutFormateado // Usar el RUT formateado
-      });      // Crear el empleado usando la API, omitiendo el campo confirmarContrasena
+      });
+
+      // Crear el empleado usando la API, omitiendo el campo confirmarContrasena
       const { confirmarContrasena, ...datosEmpleado } = formValues;
       const nuevoEmpleado = await empleadoApiFast.create({
         ...datosEmpleado,
-        primer_login: true, // Marcar como primer login para obligar cambio de contraseña
         rut: rutFormateado // Usar el RUT formateado
       });
 
@@ -339,51 +306,6 @@ export default function EmpleadosPage() {
       
       setError(mensajeError);
       setIsSubmitting(false);
-    }  };
-
-  // Función para manejar cambios en los campos de formulario y actualizar automáticamente el correo y contraseña
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    // Actualizar el estado del formulario con el nuevo valor
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Si se cambia el nombre o apellido, actualizar el correo automáticamente
-    if (name === 'nombre' || name === 'apellido') {
-      const nombre = name === 'nombre' ? value.toLowerCase() : formData.nombre.toLowerCase();
-      const apellido = name === 'apellido' ? value.toLowerCase() : formData.apellido.toLowerCase();
-      
-      // Solo generar correo si ambos campos tienen valor
-      if (nombre && apellido) {
-        const nombreSinEspacios = nombre.trim().replace(/\s+/g, '');
-        const apellidoSinEspacios = apellido.trim().replace(/\s+/g, '');
-        const correoGenerado = `${nombreSinEspacios}.${apellidoSinEspacios}@spinzone.com`;
-        
-        // Actualizar el campo de correo
-        setFormData(prev => ({ ...prev, correo: correoGenerado }));
-        
-        // Si hay un elemento de formulario para el correo, actualizarlo también
-        const correoInput = document.querySelector('input[name="correo"]') as HTMLInputElement;
-        if (correoInput) correoInput.value = correoGenerado;
-      }
-    }
-    
-    // Si se cambia el RUT, actualizar la contraseña automáticamente
-    if (name === 'rut') {
-      const rutSinFormato = value.replace(/\./g, '').replace(/-/g, '');
-      
-      // Actualizar el campo de contraseña y confirmación
-      setFormData(prev => ({ 
-        ...prev, 
-        contrasena: rutSinFormato,
-        confirmarContrasena: rutSinFormato 
-      }));
-      
-      // Si hay elementos de formulario para la contraseña, actualizarlos también
-      const contrasenaInput = document.querySelector('input[name="contrasena"]') as HTMLInputElement;
-      const confirmarInput = document.querySelector('input[name="confirmarContrasena"]') as HTMLInputElement;
-      if (contrasenaInput) contrasenaInput.value = rutSinFormato;
-      if (confirmarInput) confirmarInput.value = rutSinFormato;
     }
   };
 
@@ -407,10 +329,11 @@ export default function EmpleadosPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">        <h1 className="text-3xl font-bold">Gestión de Empleados</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Gestión de Empleados</h1>
         <div className="flex gap-4">
           <button 
-            onClick={handleOpenAddModal}
+            onClick={() => setIsAddModalOpen(true)}
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
           >
             <FiPlus className="w-5 h-5" />
@@ -582,7 +505,8 @@ export default function EmpleadosPage() {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>            <h2 className="text-xl font-bold mb-4">Añadir Nuevo Empleado</h2>
+            </button>
+            <h2 className="text-xl font-bold mb-4">Añadir Nuevo Empleado</h2>
             <form onSubmit={handleCreateEmpleado} className="space-y-3">
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
@@ -594,12 +518,11 @@ export default function EmpleadosPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre <span className="text-red-500">*</span>
-                  </label>                  <input
+                  </label>
+                  <input
                     type="text"
                     name="nombre"
                     required
-                    value={formData.nombre}
-                    onChange={handleFormChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -611,8 +534,6 @@ export default function EmpleadosPage() {
                     type="text"
                     name="apellido"
                     required
-                    value={formData.apellido}
-                    onChange={handleFormChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -621,18 +542,14 @@ export default function EmpleadosPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   RUT <span className="text-red-500">*</span>
-                </label>                <input
+                </label>
+                <input
                   type="text"
                   name="rut"
                   required
-                  value={formData.rut}
-                  onChange={handleFormChange}
                   placeholder="12345678-9"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Nota: Para cuentas de empleados, el correo debe seguir el formato nombre.apellido@spinzone.com y la contraseña inicial será el RUT
-                </p>
               </div>
 
               <div>
@@ -643,14 +560,8 @@ export default function EmpleadosPage() {
                   type="email"
                   name="correo"
                   required
-                  value={formData.correo}
-                  onChange={handleFormChange}
-                  placeholder="nombre.apellido@spinzone.com"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Debe seguir el formato: nombre.apellido@spinzone.com
-                </p>
               </div>
 
               <div>
@@ -661,16 +572,8 @@ export default function EmpleadosPage() {
                   type="password"
                   name="contrasena"
                   required
-                  value={formData.contrasena}
-                  onChange={handleFormChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Ingrese el RUT sin puntos ni guiones
-                </p>
-                <p className="text-xs text-gray-500">
-                  La contraseña inicial debe ser igual al RUT (sin puntos ni guiones)
-                </p>
               </div>
 
               <div>
@@ -681,16 +584,8 @@ export default function EmpleadosPage() {
                   type="password"
                   name="confirmarContrasena"
                   required
-                  value={formData.confirmarContrasena}
-                  onChange={handleFormChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Confirme la contraseña
-                </p>
-                <p className="text-xs text-gray-500">
-                  Debe coincidir con la contraseña anterior
-                </p>
               </div>
 
               <div>
