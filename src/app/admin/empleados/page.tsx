@@ -100,6 +100,20 @@ export default function EmpleadosPage() {
         const newApellido = name === 'apellido' ? value : prev.apellido;
         updatedData.correo = generateEmail(newNombre, newApellido);
       }
+
+      // Si el cambio es en el RUT y el rol es Admin (2), actualizar la contraseña
+      if (name === 'rut' && prev.rol_id === '2') {
+        const rutSinFormato = value.replace(/\s/g, '').replace(/\./g, '');
+        updatedData.contrasena = rutSinFormato;
+        updatedData.confirmarContrasena = rutSinFormato;
+      }
+
+      // Si el cambio es en el rol y se selecciona Admin (2), usar RUT como contraseña
+      if (name === 'rol_id' && value === '2' && prev.rut) {
+        const rutSinFormato = prev.rut.replace(/\s/g, '').replace(/\./g, '');
+        updatedData.contrasena = rutSinFormato;
+        updatedData.confirmarContrasena = rutSinFormato;
+      }
       
       return updatedData;
     });
@@ -364,7 +378,7 @@ export default function EmpleadosPage() {
 
   // Función para abrir el modal de añadir empleado
   const openAddModal = () => {
-    // Resetear el formulario
+    // Resetear el formulario con Admin preseleccionado
     setNewEmpleadoData({
       nombre: '',
       apellido: '',
@@ -374,7 +388,7 @@ export default function EmpleadosPage() {
       confirmarContrasena: '',
       direccion: '',
       telefono: '',
-      rol_id: ''
+      rol_id: '2' // Preseleccionar Admin (rol_id = 2)
     });
     setError(null);
     setIsAddModalOpen(true);
@@ -646,6 +660,11 @@ export default function EmpleadosPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Contraseña <span className="text-red-500">*</span>
+                  {newEmpleadoData.rol_id === '2' && (
+                    <span className="text-xs ml-2 text-blue-600">
+                      (Se usará el RUT como contraseña inicial)
+                    </span>
+                  )}
                 </label>
                 <input
                   type="password"
@@ -654,6 +673,7 @@ export default function EmpleadosPage() {
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  readOnly={newEmpleadoData.rol_id === '2'}
                 />
               </div>
 
@@ -668,7 +688,13 @@ export default function EmpleadosPage() {
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  readOnly={newEmpleadoData.rol_id === '2'}
                 />
+                {newEmpleadoData.rol_id === '2' && (
+                  <p className="mt-1 text-sm text-gray-500 italic">
+                    Para administradores, la contraseña será el RUT inicialmente
+                  </p>
+                )}
               </div>
 
               <div>
@@ -710,7 +736,6 @@ export default function EmpleadosPage() {
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Seleccione un rol</option>
                   <option value="2">Administrador</option>
                   <option value="3">Vendedor</option>
                   <option value="4">Bodeguero</option>
