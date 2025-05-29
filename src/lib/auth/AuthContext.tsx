@@ -76,8 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const userData = JSON.parse(savedUserData);
             setUser(userData);
             
-            // Verificar si cualquier empleado tiene contraseña igual al RUT
-            if (isEmpleado(userData)) {
+            // Verificar si es un administrador con contraseña igual al RUT
+            if (isEmpleado(userData) && userData.rol_id === 2) { // Si es admin (rol_id 2)
               // Verificar si tiene datos en localStorage sobre necesidad de cambio
               const passwordCheckDone = localStorage.getItem('password_check_done');
               if (!passwordCheckDone) {
@@ -211,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('empleado_data', JSON.stringify(empleadoData));
           
           // Verificar si es un administrador (rol_id 2) con contraseña igual al RUT
-          if (empleadoData.rol_id === 2 || empleadoData.rol_id === 3 || empleadoData.rol_id === 4 || empleadoData.rol_id === 5) {
+          if (empleadoData.rol_id === 2) {
             try {
               // Limpiar marca de verificación previa
               localStorage.removeItem('password_check_done');
