@@ -172,7 +172,7 @@ export function useCarrito() {
     // Calcular el descuento por cantidad de artículos (5% para más de 4 productos)
   const calcularDescuento = () => {
     const totalArticulos = items.reduce((total, item) => total + item.cantidad, 0);
-    return totalArticulos > 5 ? 0.05 : 0;
+    return totalArticulos > 4 ? 0.05 : 0;
   };
 
   // Calcular el total del carrito

@@ -41,9 +41,9 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
 
   // Calcular cuántos productos faltan para el descuento
   const totalProductosConNuevos = cantidadTotal + cantidad;
-  const productosFaltantes = totalProductosConNuevos >= 6 ? 0 : 6 - totalProductosConNuevos;
-  const tieneDescuento = totalProductosConNuevos >= 6;
-  const tieneDescuentoActual = cantidadTotal >= 6; // Ya tiene descuento sin agregar nuevos productos
+  const productosFaltantes = totalProductosConNuevos >= 5 ? 0 : 5 - totalProductosConNuevos;
+  const tieneDescuento = totalProductosConNuevos >= 5;
+  const tieneDescuentoActual = cantidadTotal >= 5; // Ya tiene descuento sin agregar nuevos productos
 
   useEffect(() => {
     const fetchProducto = async () => {
