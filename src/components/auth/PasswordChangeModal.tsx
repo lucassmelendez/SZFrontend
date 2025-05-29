@@ -58,7 +58,15 @@ export default function PasswordChangeModal({ isOpen, onClose, rut }: PasswordCh
           localStorage.setItem('empleado_data', JSON.stringify(response.data));
         }
         
+        // Marcar que ya se realizó el cambio de contraseña
+        localStorage.setItem('password_check_done', 'true');
+        
         onClose();
+        
+        // Redirigir al dashboard de administrador
+        setTimeout(() => {
+          window.location.href = '/admin/dashboard';
+        }, 500); // Pequeño delay para que el toast sea visible
       } else {
         throw new Error(response.message || 'Error al actualizar la contraseña');
       }
@@ -91,7 +99,7 @@ export default function PasswordChangeModal({ isOpen, onClose, rut }: PasswordCh
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                Tu contraseña actual es igual a tu RUT. Por motivos de seguridad, debes cambiarla ahora.
+                <strong>¡Atención!</strong> Tu contraseña actual es igual a tu RUT. Por motivos de seguridad, debes cambiarla ahora para poder acceder al sistema. No podrás continuar hasta que completes este paso.
               </p>
             </div>
           </div>

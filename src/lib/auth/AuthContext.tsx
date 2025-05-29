@@ -186,6 +186,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (contrasena === empleadoData.rut) {
                 setNeedsPasswordChange(true);
                 setShowPasswordChangeModal(true);
+                // No redirigir al dashboard hasta que cambie la contraseña
+                return; // Importante: no continuamos con la redirección
               } else {
                 // Marcar que el chequeo ya se realizó
                 localStorage.setItem('password_check_done', 'true');

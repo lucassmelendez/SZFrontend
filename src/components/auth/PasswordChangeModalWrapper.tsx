@@ -16,14 +16,22 @@ export default function PasswordChangeModalWrapper() {
     return null;
   }
 
+  const handleClose = () => {
+    setShowPasswordChangeModal(false);
+    
+    // Al cerrar el modal, marcamos en localStorage que ya se hizo el cambio
+    localStorage.setItem('password_check_done', 'true');
+    
+    // Redirigir al dashboard de administración
+    if (isAdmin) {
+      window.location.href = '/admin/dashboard';
+    }
+  };
+
   return (
     <PasswordChangeModal
       isOpen={showPasswordChangeModal}
-      onClose={() => {
-        setShowPasswordChangeModal(false);
-        // Al cerrar el modal, marcamos en localStorage que ya se hizo el cambio
-        localStorage.setItem('password_check_done', 'true');
-      }}
+      onClose={handleClose}
       rut={user.rut}
     />
   );
