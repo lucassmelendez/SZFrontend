@@ -25,40 +25,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
   const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
 
-  // Efecto para prevenir la navegación mientras se requiere cambio de contraseña
-  useEffect(() => {
-    // Si el usuario necesita cambiar la contraseña, no permitir que cierre el navegador
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (needsPasswordChange) {
-        const message = 'Debes cambiar tu contraseña antes de continuar';
-        e.preventDefault();
-        e.returnValue = message;
-        return message;
-      }
-    };
-
-    // Si el usuario intenta navegar mediante la navegación del navegador, mostrar advertencia
-    const handlePopState = () => {
-      if (needsPasswordChange) {
-        // Reabrir el modal
-        setShowPasswordChangeModal(true);
-        
-        // Mostrar alerta
-        alert('Debes cambiar tu contraseña antes de continuar navegando');
-      }
-    };
-
-    if (needsPasswordChange) {
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      window.addEventListener('popstate', handlePopState);
-    }
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [needsPasswordChange, setShowPasswordChangeModal]);
-
   useEffect(() => {
     const checkSession = async () => {
       try {
