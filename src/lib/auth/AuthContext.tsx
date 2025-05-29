@@ -11,6 +11,9 @@ interface AuthContextType {
   login: (correo: string, contrasena: string) => Promise<void>;
   register: (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string) => Promise<void>;
   logout: () => Promise<void>;
+  showPasswordChangeModal: boolean;
+  setShowPasswordChangeModal: (show: boolean) => void;
+  needsPasswordChange: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +22,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userType, setUserType] = useState<'cliente' | 'empleado' | null>(null);
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
+  const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -36,6 +41,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Restaurar los datos del usuario
             const userData = JSON.parse(savedUserData);
             setUser(userData);
+            
+            // Verificar si es un administrador con contraseña igual al RUT
+            if (isEmpleado(userData) && userData.rol_id === 2) { // Si es admin (rol_id 2)
+              // Verificar si tiene datos en localStorage sobre necesidad de cambio
+              const passwordCheckDone = localStorage.getItem('password_check_done');
+              if (!passwordCheckDone) {
+                try {
+                  // Verificar con el servidor si la contraseña es igual al RUT
+                  const checkResponse = await authApi.checkPasswordEqualsRut();
+                  if (checkResponse.needsChange) {
+                    setNeedsPasswordChange(true);
+                    setShowPasswordChangeModal(true);
+                  } else {
+                    // Marcar que el chequeo ya se realizó
+                    localStorage.setItem('password_check_done', 'true');
+                  }
+                } catch (error) {
+                  console.error('Error al verificar si la contraseña es igual al RUT:', error);
+                  // Si no podemos verificar, asumimos que no necesita cambio
+                  localStorage.setItem('password_check_done', 'true');
+                }
+              }
+            }
             
             // Si es un token de sesión normal (no interno), verificar con el servidor
             if (!token.startsWith('empleado_session_') && !token.startsWith('cliente_fastapi_')) {
@@ -62,8 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.removeItem('user_type');
             localStorage.removeItem('cliente_data');
             localStorage.removeItem('empleado_data');
+            localStorage.removeItem('password_check_done');
             setUser(null);
             setUserType(null);
+            setNeedsPasswordChange(false);
           }
         }
       } catch (error) {
@@ -73,8 +103,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user_type');
         localStorage.removeItem('cliente_data');
         localStorage.removeItem('empleado_data');
+        localStorage.removeItem('password_check_done');
         setUser(null);
         setUserType(null);
+        setNeedsPasswordChange(false);
       } finally {
         setIsLoading(false);
       }
@@ -143,6 +175,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('auth_token', empleadoResponse.token || 'empleado_session_' + Date.now());
           localStorage.setItem('user_type', 'empleado');
           localStorage.setItem('empleado_data', JSON.stringify(empleadoData));
+          
+          // Verificar si es un administrador (rol_id 2) con contraseña igual al RUT
+          if (empleadoData.rol_id === 2) {
+            try {
+              // Limpiar marca de verificación previa
+              localStorage.removeItem('password_check_done');
+              
+              // Si la contraseña usada para iniciar sesión es igual al RUT
+              if (contrasena === empleadoData.rut) {
+                setNeedsPasswordChange(true);
+                setShowPasswordChangeModal(true);
+                // No redirigir al dashboard hasta que cambie la contraseña
+                return; // Importante: no continuamos con la redirección
+              } else {
+                // Marcar que el chequeo ya se realizó
+                localStorage.setItem('password_check_done', 'true');
+              }
+            } catch (error) {
+              console.error('Error al verificar si la contraseña es igual al RUT:', error);
+              // Si no podemos verificar, asumimos que no necesita cambio
+              localStorage.setItem('password_check_done', 'true');
+            }
+          }
+          
           redirectUserBasedOnRole(empleadoData);
           return; // Salir si el login fue exitoso
         }
@@ -264,7 +320,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, userType, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        userType,
+        login,
+        register,
+        logout,
+        showPasswordChangeModal,
+        setShowPasswordChangeModal,
+        needsPasswordChange
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
