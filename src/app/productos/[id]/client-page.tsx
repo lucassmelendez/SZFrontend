@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { productoApi, Producto, isEmpleado } from '@/lib/api';
 import { useCarrito } from '@/lib/useCarrito';
-import { FaShoppingCart, FaCreditCard, FaTimesCircle, FaExclamationCircle, FaCheckCircle, FaShieldAlt, FaTruck } from 'react-icons/fa';
+import { FaShoppingCart, FaCreditCard, FaTimesCircle, FaExclamationCircle, FaCheckCircle, FaShieldAlt, FaTruck, FaGift } from 'react-icons/fa';
 import Image from 'next/image';
 import { useFloatingCartContext } from '@/lib/FloatingCartContext';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -26,7 +26,7 @@ interface ProductoDetailClientProps {
 
 export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
   const router = useRouter();
-  const { agregarProducto } = useCarrito();
+  const { agregarProducto, cantidadTotal } = useCarrito();
   const { openCart, isCartOpen } = useFloatingCartContext();
   const [producto, setProducto] = useState<Producto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +38,12 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
 
   // Verificar si el usuario es un empleado
   const isUserEmpleado = user && isEmpleado(user);
+
+  // Calcular cuántos productos faltan para el descuento
+  const totalProductosConNuevos = cantidadTotal + cantidad;
+  const productosFaltantes = totalProductosConNuevos >= 6 ? 0 : 6 - totalProductosConNuevos;
+  const tieneDescuento = totalProductosConNuevos >= 6;
+  const tieneDescuentoActual = cantidadTotal >= 6; // Ya tiene descuento sin agregar nuevos productos
 
   useEffect(() => {
     const fetchProducto = async () => {
@@ -283,16 +289,27 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
               </div>
             )}
               {/* Mensaje de descuento */}
-            {cantidad > 4 && (
-              <div className="mb-5 text-center bg-green-50 p-3 rounded-lg border border-green-100">
-                <p className="text-green-600 font-medium">¡Por llevar más de 4 productos obtienes un 5% de descuento!</p>
+            <div className={`mb-5 text-center p-3 rounded-lg border ${tieneDescuento ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-200'}`}>
+              <div className="flex items-center justify-center">
+                <FaGift className={`mr-2 ${tieneDescuento ? 'text-green-500' : 'text-blue-500'}`} />
+                <p className={`font-medium ${tieneDescuento ? 'text-green-600' : 'text-gray-700'}`}>
+                  {tieneDescuentoActual 
+                    ? '¡Ya has obtenido 5% de descuento!'
+                    : tieneDescuento 
+                      ? '¡Agrega al carrito y obtendrás un 5% de descuento!'
+                      : productosFaltantes === 1
+                        ? `Agrega ${productosFaltantes} producto más para obtener 5% de descuento`
+                        : `Agrega ${productosFaltantes} productos más para obtener 5% de descuento`
+                  }
+                </p>
               </div>
-            )}
-            {cantidad <= 4 && (
-              <div className="mb-5 text-center bg-red-50 p-3 rounded-lg border border-red-100">
-                <p className="text-red-600 font-medium">¡Por llevar más de 4 productos obtienes un 5% de descuento!</p>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                <div 
+                  className={`h-2.5 rounded-full transition-all duration-500 ${tieneDescuento || tieneDescuentoActual ? 'bg-green-500' : 'bg-blue-500'}`}
+                  style={{ width: `${Math.min(totalProductosConNuevos / 6 * 100, 100)}%` }}
+                ></div>
               </div>
-            )}
+            </div>
 
             {/* Medios de pago */}
             <div className="mb-5">

@@ -59,8 +59,8 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
   }, [isOpen]);
 
   // Calcular el progreso hacia el descuento
-  const progress = Math.min(cantidadTotal / 5 * 100, 100);
-  const productosFaltantes = cantidadTotal >= 5 ? 0 : 5 - cantidadTotal;
+  const progress = Math.min(cantidadTotal / 6 * 100, 100);
+  const productosFaltantes = cantidadTotal >= 6 ? 0 : 6 - cantidadTotal;
 
   if (!isOpen) return null;
 
@@ -94,14 +94,14 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
           <div className="flex items-center mb-2">
             <FaGift className="text-blue-500 mr-2" />
             <span className="text-sm font-medium text-gray-700">
-              {cantidadTotal >= 5 
-                ? '¡Has obtenido 5% de descuento!' 
+              {cantidadTotal >= 6 
+                ? '¡Ya has obtenido 5% de descuento!' 
                 : `Te ${productosFaltantes === 1 ? 'falta' : 'faltan'} ${productosFaltantes} ${productosFaltantes === 1 ? 'producto' : 'productos'} para obtener 5% de descuento`}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5">
             <div 
-              className={`h-2.5 rounded-full transition-all duration-500 ${cantidadTotal >= 5 ? 'bg-green-500' : 'bg-blue-500'}`}
+              className={`h-2.5 rounded-full transition-all duration-500 ${cantidadTotal >= 6 ? 'bg-green-500' : 'bg-blue-500'}`}
               style={{ width: `${progress}%` }}
             ></div>
           </div>
