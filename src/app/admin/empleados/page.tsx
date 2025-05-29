@@ -63,6 +63,47 @@ export default function EmpleadosPage() {
   const [selectedEmpleado, setSelectedEmpleado] = useState<Empleado | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [newEmpleadoData, setNewEmpleadoData] = useState({
+    nombre: '',
+    apellido: '',
+    correo: '',
+    rut: '',
+    contrasena: '',
+    confirmarContrasena: '',
+    direccion: '',
+    telefono: '',
+    rol_id: ''
+  });
+
+  // Función para generar el correo automáticamente
+  const generateEmail = (nombre: string, apellido: string) => {
+    if (!nombre && !apellido) return '';
+    
+    const formattedNombre = nombre.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const formattedApellido = apellido.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    if (!formattedNombre || !formattedApellido) return '';
+    
+    return `${formattedNombre}.${formattedApellido}@spinzone.cl`;
+  };
+
+  // Manejar cambios en los campos del formulario
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    setNewEmpleadoData(prev => {
+      const updatedData = { ...prev, [name]: value };
+      
+      // Si el cambio es en nombre o apellido, actualizar el correo
+      if (name === 'nombre' || name === 'apellido') {
+        const newNombre = name === 'nombre' ? value : prev.nombre;
+        const newApellido = name === 'apellido' ? value : prev.apellido;
+        updatedData.correo = generateEmail(newNombre, newApellido);
+      }
+      
+      return updatedData;
+    });
+  };
 
   useEffect(() => {
     const fetchEmpleados = async () => {
@@ -206,18 +247,17 @@ export default function EmpleadosPage() {
     setIsSubmitting(true);
 
     try {
-      // Obtener los valores directamente de los inputs
-      const target = e.currentTarget;
+      // Usar los valores del estado
       const formValues = {
-        nombre: String(target.nombre.value).trim(),
-        apellido: String(target.apellido.value).trim(),
-        rut: String(target.rut.value).trim(),
-        correo: String(target.correo.value).trim(),
-        contrasena: String(target.contrasena.value),
-        confirmarContrasena: String(target.confirmarContrasena.value),
-        direccion: String(target.direccion.value).trim(),
-        telefono: String(target.telefono.value).trim(),
-        rol_id: Number(target.rol_id.value)
+        nombre: newEmpleadoData.nombre.trim(),
+        apellido: newEmpleadoData.apellido.trim(),
+        rut: newEmpleadoData.rut.trim(),
+        correo: newEmpleadoData.correo.trim(),
+        contrasena: newEmpleadoData.contrasena,
+        confirmarContrasena: newEmpleadoData.confirmarContrasena,
+        direccion: newEmpleadoData.direccion.trim(),
+        telefono: newEmpleadoData.telefono.trim(),
+        rol_id: Number(newEmpleadoData.rol_id)
       };
 
       // Validación básica
@@ -282,6 +322,19 @@ export default function EmpleadosPage() {
       console.log('Empleado creado:', nuevoEmpleado);
       setIsAddModalOpen(false);
       
+      // Resetear el formulario
+      setNewEmpleadoData({
+        nombre: '',
+        apellido: '',
+        correo: '',
+        rut: '',
+        contrasena: '',
+        confirmarContrasena: '',
+        direccion: '',
+        telefono: '',
+        rol_id: ''
+      });
+      
       // Mostrar mensaje de éxito
       alert('Empleado creado con éxito');
       
@@ -309,6 +362,24 @@ export default function EmpleadosPage() {
     }
   };
 
+  // Función para abrir el modal de añadir empleado
+  const openAddModal = () => {
+    // Resetear el formulario
+    setNewEmpleadoData({
+      nombre: '',
+      apellido: '',
+      correo: '',
+      rut: '',
+      contrasena: '',
+      confirmarContrasena: '',
+      direccion: '',
+      telefono: '',
+      rol_id: ''
+    });
+    setError(null);
+    setIsAddModalOpen(true);
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Cargando...</div>;
   }
@@ -333,7 +404,7 @@ export default function EmpleadosPage() {
         <h1 className="text-3xl font-bold">Gestión de Empleados</h1>
         <div className="flex gap-4">
           <button 
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={openAddModal}
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
           >
             <FiPlus className="w-5 h-5" />
@@ -522,6 +593,8 @@ export default function EmpleadosPage() {
                   <input
                     type="text"
                     name="nombre"
+                    value={newEmpleadoData.nombre}
+                    onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -533,6 +606,8 @@ export default function EmpleadosPage() {
                   <input
                     type="text"
                     name="apellido"
+                    value={newEmpleadoData.apellido}
+                    onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -546,6 +621,8 @@ export default function EmpleadosPage() {
                 <input
                   type="text"
                   name="rut"
+                  value={newEmpleadoData.rut}
+                  onChange={handleInputChange}
                   required
                   placeholder="12345678-9"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -559,6 +636,8 @@ export default function EmpleadosPage() {
                 <input
                   type="email"
                   name="correo"
+                  value={newEmpleadoData.correo}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -571,6 +650,8 @@ export default function EmpleadosPage() {
                 <input
                   type="password"
                   name="contrasena"
+                  value={newEmpleadoData.contrasena}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -583,6 +664,8 @@ export default function EmpleadosPage() {
                 <input
                   type="password"
                   name="confirmarContrasena"
+                  value={newEmpleadoData.confirmarContrasena}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -595,6 +678,8 @@ export default function EmpleadosPage() {
                 <input
                   type="text"
                   name="direccion"
+                  value={newEmpleadoData.direccion}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -607,6 +692,8 @@ export default function EmpleadosPage() {
                 <input
                   type="tel"
                   name="telefono"
+                  value={newEmpleadoData.telefono}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -618,6 +705,8 @@ export default function EmpleadosPage() {
                 </label>
                 <select
                   name="rol_id"
+                  value={newEmpleadoData.rol_id}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
