@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { FaShoppingCart, FaTimes, FaTrash, FaArrowRight } from 'react-icons/fa';
+import { FaShoppingCart, FaTimes, FaTrash, FaArrowRight, FaGift } from 'react-icons/fa';
 import { useCarrito } from '@/lib/useCarrito';
 import { useRouter } from 'next/navigation';
 import Price from '@/components/Price';
@@ -13,7 +13,7 @@ interface FloatingCartProps {
 }
 
 export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
-  const { items, actualizarCantidad, eliminarProducto, calcularTotal, calcularSubtotal, calcularDescuento } = useCarrito();
+  const { items, actualizarCantidad, eliminarProducto, calcularTotal, calcularSubtotal, calcularDescuento, cantidadTotal } = useCarrito();
   const cartRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   
@@ -58,6 +58,10 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
     };
   }, [isOpen]);
 
+  // Calcular el progreso hacia el descuento
+  const progress = Math.min(cantidadTotal / 6 * 100, 100);
+  const productosFaltantes = cantidadTotal >= 6 ? 0 : 6 - cantidadTotal;
+
   if (!isOpen) return null;
 
   return (
@@ -83,6 +87,24 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
           >
             <FaTimes size={18} />
           </button>
+        </div>
+
+        {/* Barra de progreso para descuento */}
+        <div className="bg-gray-100 p-3 border-b border-gray-200">
+          <div className="flex items-center mb-2">
+            <FaGift className="text-blue-500 mr-2" />
+            <span className="text-sm font-medium text-gray-700">
+              {cantidadTotal >= 6 
+                ? '¡Ya has obtenido 5% de descuento!' 
+                : `Te ${productosFaltantes === 1 ? 'falta' : 'faltan'} ${productosFaltantes} ${productosFaltantes === 1 ? 'producto' : 'productos'} para obtener 5% de descuento`}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div 
+              className={`h-2.5 rounded-full transition-all duration-500 ${cantidadTotal >= 6 ? 'bg-green-500' : 'bg-blue-500'}`}
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
         </div>
 
         {/* Contenido */}
@@ -190,7 +212,7 @@ export default function FloatingCart({ isOpen, onClose }: FloatingCartProps) {
               </div>
               {calcularDescuento() > 0 && (
                 <div className="flex justify-between text-sm mb-2 text-green-600">
-                  <span>Descuento (5% por más de 4 productos):</span>
+                  <span>5% de descuento:</span>
                   <span>-<Price amount={Math.round(calcularSubtotal() * calcularDescuento())} size="sm" /></span>
                 </div>
               )}

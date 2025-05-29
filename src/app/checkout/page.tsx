@@ -713,7 +713,7 @@ export default function CheckoutPage() {  const router = useRouter();
                       </div>
                       {calcularDescuento() > 0 && (
                         <div className="flex justify-between text-sm text-green-600 mb-2">
-                          <span>Descuento (5% por más de 4 productos):</span>
+                          <span>5% de descuento:</span>
                           <span>-<Price amount={Math.round(calcularSubtotal() * calcularDescuento())} /></span>
                         </div>
                       )}
