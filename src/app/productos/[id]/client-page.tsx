@@ -289,23 +289,47 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
               </div>
             )}
               {/* Mensaje de descuento */}
-            <div className={`mb-5 text-center p-3 rounded-lg border ${tieneDescuento ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-200'}`}>
+            <div className={`mb-5 text-center p-3 rounded-lg border ${
+              tieneDescuentoActual 
+                ? 'bg-green-50 border-green-100' 
+                : tieneDescuento
+                  ? 'bg-blue-50 border-blue-100'
+                  : 'bg-gray-50 border-gray-200'
+            }`}>
               <div className="flex items-center justify-center">
-                <FaGift className={`mr-2 ${tieneDescuento ? 'text-green-500' : 'text-blue-500'}`} />
-                <p className={`font-medium ${tieneDescuento ? 'text-green-600' : 'text-gray-700'}`}>
+                <FaGift className={`mr-2 ${
+                  tieneDescuentoActual 
+                    ? 'text-green-500' 
+                    : tieneDescuento
+                      ? 'text-blue-500'
+                      : 'text-blue-500'
+                }`} />
+                <p className={`font-medium ${
+                  tieneDescuentoActual 
+                    ? 'text-green-600' 
+                    : tieneDescuento
+                      ? 'text-blue-600'
+                      : 'text-gray-700'
+                }`}>
                   {tieneDescuentoActual 
                     ? '¡Ya has obtenido 5% de descuento!'
                     : tieneDescuento 
                       ? '¡Agrega al carrito y obtendrás un 5% de descuento!'
                       : productosFaltantes === 1
-                        ? `Agrega ${productosFaltantes} producto más para obtener 5% de descuento`
-                        : `Agrega ${productosFaltantes} productos más para obtener 5% de descuento`
+                        ? `Agrega ${productosFaltantes} producto mas para obtener 5% de descuento`
+                        : `Agrega ${productosFaltantes} productos mas para obtener 5% de descuento`
                   }
                 </p>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                 <div 
-                  className={`h-2.5 rounded-full transition-all duration-500 ${tieneDescuento || tieneDescuentoActual ? 'bg-green-500' : 'bg-blue-500'}`}
+                  className={`h-2.5 rounded-full transition-all duration-500 ${
+                    tieneDescuentoActual 
+                      ? 'bg-green-500' 
+                      : tieneDescuento
+                        ? 'bg-blue-500'
+                        : 'bg-blue-500'
+                  }`}
                   style={{ width: `${Math.min(totalProductosConNuevos / 6 * 100, 100)}%` }}
                 ></div>
               </div>
