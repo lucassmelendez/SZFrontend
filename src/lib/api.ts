@@ -248,6 +248,33 @@ export const authApi = {
     }
   },
 
+  // Método para verificar si la contraseña de un administrador es igual a su RUT
+  checkPasswordEqualsRut: async (): Promise<{ needsChange: boolean }> => {
+    try {
+      // Verificar si tenemos datos del empleado en localStorage
+      const empleadoData = localStorage.getItem('empleado_data');
+      if (!empleadoData) {
+        return { needsChange: false };
+      }
+      
+      const empleado = JSON.parse(empleadoData);
+      
+      // Verificar si es un administrador (rol_id 2)
+      if (!empleado || !empleado.rol_id || empleado.rol_id !== 2) {
+        return { needsChange: false };
+      }
+      
+      // En lugar de hacer una llamada al servidor, podemos simular esta verificación
+      // ya que en el login ya tenemos la lógica que comprueba si contraseña === rut
+      // Este método se deja aquí para posible implementación futura que consulte al servidor
+      
+      return { needsChange: false };
+    } catch (error) {
+      console.error('Error al verificar contraseña igual a RUT:', error);
+      return { needsChange: false };
+    }
+  },
+
   // Login de cliente con FastAPI
   loginClienteFastAPI: async (correo: string, contrasena: string): Promise<any> => {
     try {

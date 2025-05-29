@@ -8,6 +8,7 @@ import { AuthProvider } from '@/lib/auth/AuthContext';
 import { LoginModalProvider } from '@/lib/auth/LoginModalContext';
 import AppProvider from './_app';
 import LoginModalWrapper from '@/components/auth/LoginModalWrapper';
+import PasswordChangeModalWrapper from '@/components/auth/PasswordChangeModalWrapper';
 import { Toaster } from 'react-hot-toast';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 
@@ -35,6 +36,7 @@ export default function RootLayout({
                   <main className="flex-grow pb-12">{children}</main>
                   <Footer />
                   <LoginModalWrapper />
+                  <PasswordChangeModalWrapper />
                   <Toaster />
                 </AppProvider>
               </CurrencyProvider>
