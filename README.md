@@ -10,7 +10,7 @@
 SpinZone es una plataforma completa de comercio electrónico especializada en artículos de tenis de mesa. Este repositorio contiene el frontend de la aplicación, desarrollado con Next.js, React, TypeScript y Tailwind CSS.
 
   - Link de produccion del proyecto : https://sz-frontend.vercel.app/
-  - Usuario Admin: admin@admin.admin
+  - Usuario Admin: admin.admin@spinzone.cl
   - Contraseña: admin123
 
 ## ✨ Características Principales
