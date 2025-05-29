@@ -8,6 +8,7 @@ import StockEditor from '@/components/bodega/StockEditor';
 import { FaSearch, FaChevronDown, FaPlus } from 'react-icons/fa';
 import OrderList from '@/components/bodega/OrderList';
 import Modal from '@/components/ui/Modal';
+import CambiarContrasenaModal from '@/components/auth/CambiarContrasenaModal';
 
 // Mapa de categorías
 const categoriasMap = {
@@ -26,10 +27,10 @@ export default function BodegaDashboard() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [filteredProductos, setFilteredProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState<string | null>(null);  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoria, setSelectedCategoria] = useState<number>(0);
   const [showCategorias, setShowCategorias] = useState(false);
+  const [mostrarModalCambioContrasena, setMostrarModalCambioContrasena] = useState(false);
 
   // Estado para el modal de agregar producto
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,12 +60,20 @@ export default function BodegaDashboard() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showCategorias]);
-
-  // Verificar autenticación y rol
-  useEffect(() => {
+  // Verificar autenticación y rol  useEffect(() => {
     if (!isLoading) {
       if (!user || !isEmpleado(user) || user.rol_id !== 4) {
         router.push('/');
+      } else {
+        // Verificar si es primer inicio de sesión
+        if (isEmpleado(user) && user.primer_login === true) {
+          console.log("Mostrando modal de cambio de contraseña para primer inicio de sesión (Bodega)");
+          setMostrarModalCambioContrasena(true);
+          // Mostrar alerta adicional
+          setTimeout(() => {
+            alert("Por seguridad, debes cambiar tu contraseña antes de continuar.");
+          }, 500);
+        }
       }
     }
   }, [user, isLoading, router]);
@@ -210,9 +219,10 @@ export default function BodegaDashboard() {
   const totalProductos = productos.length;
   const bajoStock = productos.filter(p => p.stock <= 5).length;
   const sinStock = productos.filter(p => p.stock === 0).length;
-
   return (
     <div className="container mx-auto px-4 py-8">
+      {mostrarModalCambioContrasena && <CambiarContrasenaModal onComplete={() => setMostrarModalCambioContrasena(false)} />}
+      
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Panel de Bodega</h1>
       </div>

@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { isEmpleado, pedidoApiFast, pedidoProductoApiFast, productoApi, clienteApiFast } from '@/lib/api';
 import { toast } from 'react-hot-toast';
 import { FaCheckCircle, FaSearch } from 'react-icons/fa';
+import CambiarContrasenaModal from '@/components/auth/CambiarContrasenaModal';
 
 interface OrderWithDetails {
   id_pedido: number;
@@ -55,11 +56,21 @@ export default function ContabilidadDashboard() {
   const [updatingOrder, setUpdatingOrder] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState<'todos' | 'pagado' | 'no_pagado'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [mostrarModalCambioContrasena, setMostrarModalCambioContrasena] = useState(false);
   useEffect(() => {
     if (!isLoading) {
       if (!user || !isEmpleado(user) || user.rol_id !== 5) {
         router.push('/');
+      } else {
+        // Verificar si es primer inicio de sesión
+        if (isEmpleado(user) && user.primer_login === true) {
+          console.log("Mostrando modal de cambio de contraseña para primer inicio de sesión (Contabilidad)");
+          setMostrarModalCambioContrasena(true);
+          // Mostrar alerta adicional
+          setTimeout(() => {
+            alert("Por seguridad, debes cambiar tu contraseña antes de continuar.");
+          }, 500);
+        }
       }
     }
   }, [user, isLoading, router]);
@@ -191,6 +202,7 @@ export default function ContabilidadDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {mostrarModalCambioContrasena && <CambiarContrasenaModal onComplete={() => setMostrarModalCambioContrasena(false)} />}
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Panel de Contabilidad</h1>
       
       {error && (

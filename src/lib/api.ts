@@ -126,6 +126,7 @@ export interface Cliente extends UserBase {
 export interface Empleado extends UserBase {
   id_empleado: number;
   rol_id: number;
+  primer_login?: boolean;
 }
 
 // Tipo unión para representar cualquier tipo de usuario
@@ -262,7 +263,6 @@ export const authApi = {
       throw error;
     }
   },
-
   // Login de empleado con FastAPI
   loginEmpleadoFastAPI: async (correo: string, contrasena: string): Promise<any> => {
     try {
@@ -271,6 +271,24 @@ export const authApi = {
         correo: correo,
         contrasena: contrasena
       });
+      
+      // Verificar si es primer inicio de sesión
+      if (response.data && response.data.empleado) {
+        // Si el backend ya envía esta información, la respetamos
+        if (response.data.empleado.hasOwnProperty('primer_login')) {
+          console.log('Primer login detectado desde el backend:', response.data.empleado.primer_login);
+        } else {
+          // Lógica de detección del primer inicio de sesión:
+          // Es primer inicio si la contraseña es igual al RUT (sin formatear)
+          const empleado = response.data.empleado;
+          const rutSinFormato = empleado.rut ? empleado.rut.replace(/\s/g, '').replace(/\./g, '').replace(/-/g, '') : '';
+          const esPrimerLogin = (rutSinFormato && contrasena === rutSinFormato);
+          
+          response.data.empleado.primer_login = esPrimerLogin;
+          console.log('Detectado primer login:', esPrimerLogin, 'RUT sin formato:', rutSinFormato);
+        }
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Error en login de empleado con FastAPI:', error);
@@ -397,34 +415,35 @@ export const authApi = {
           throw new Error('No se encontraron datos del empleado');
         }
         
-        const empleado = JSON.parse(empleadoData);
-        
+        const empleado = JSON.parse(empleadoData);        
         // Para los empleados, solo permitimos actualizar la contraseña
         if (data.newPassword || data.contrasena) {
-          // Usar la función de actualización de empleado
-          const updateData = new URLSearchParams();
-          
-          // Asegurar que enviamos la contraseña con el nombre correcto
-          if (data.newPassword) {
-            updateData.append('contrasena', data.newPassword);
-          } else if (data.contrasena) {
-            updateData.append('contrasena', data.contrasena);
-          }
-          
-          // Actualizar el empleado con su contraseña
-          const response = await apiFast.put(`/empleados/${empleado.id_empleado}?${updateData.toString()}`);
-          
-          if (response.data && response.data.empleado) {
+          try {
+            // Usar el nuevo método específico para cambiar la contraseña
+            const contrasena = data.newPassword || data.contrasena || '';
+            
+            // Validar que tenemos una contraseña para actualizar
+            if (!contrasena) {
+              throw new Error('No se proporcionó una contraseña válida');
+            }
+            
+            // Llamar a nuestro nuevo método específico
+            const empleadoActualizado = await empleadoApiFast.cambiarContrasena(
+              empleado.id_empleado, 
+              contrasena
+            );
+            
             // Actualizar datos en localStorage
-            localStorage.setItem('empleado_data', JSON.stringify(response.data.empleado));
+            localStorage.setItem('empleado_data', JSON.stringify(empleadoActualizado));
             
             // Retornar en el formato esperado
             return {
               success: true,
-              data: response.data.empleado
+              data: empleadoActualizado
             };
-          } else {
-            throw new Error('Respuesta inesperada del servidor');
+          } catch (error) {
+            console.error('Error al actualizar la contraseña:', error);
+            throw error;
           }
         } else {
           throw new Error('Para empleados, solo se permite cambiar la contraseña');
@@ -666,8 +685,7 @@ export const empleadoApiFast = {
         
         console.error(`Detalles del error HTTP (${status}):`, data);
       }
-      
-      throw new Error(mensajeError);
+        throw new Error(mensajeError);
     }
   },
   
@@ -676,6 +694,36 @@ export const empleadoApiFast = {
       await apiFast.delete(`/empleados/${id}`);
     } catch (error) {
       console.error(`Error al eliminar empleado ${id} en FastAPI:`, error);
+      throw error;
+    }
+  },
+  
+  // Método específico para cambiar la contraseña
+  cambiarContrasena: async (idEmpleado: number, nuevaContrasena: string): Promise<Empleado> => {
+    try {
+      console.log(`Cambiando contraseña del empleado ${idEmpleado}`);
+      
+      // Crear los parámetros con el formato que espera la API
+      const params = new URLSearchParams();
+      params.append('contrasena', nuevaContrasena);
+      
+      // También establecer primer_login a false explícitamente
+      params.append('primer_login', 'false');
+      
+      const response = await apiFast.put(`/empleados/${idEmpleado}?${params.toString()}`);
+      
+      if (response.data && response.data.empleado) {
+        // Asegurarse de que primer_login sea false en el objeto retornado
+        const empleadoActualizado = {
+          ...response.data.empleado,
+          primer_login: false
+        };
+        return empleadoActualizado;
+      }
+      
+      throw new Error('Respuesta inesperada del servidor');
+    } catch (error: any) {
+      console.error(`Error al cambiar contraseña del empleado ${idEmpleado}:`, error);
       throw error;
     }
   }
