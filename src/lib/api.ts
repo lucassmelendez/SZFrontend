@@ -248,7 +248,7 @@ export const authApi = {
     }
   },
 
-  // Método para verificar si la contraseña de un administrador es igual a su RUT
+  // Método para verificar si la contraseña de un empleado es igual a su RUT
   checkPasswordEqualsRut: async (): Promise<{ needsChange: boolean }> => {
     try {
       // Verificar si tenemos datos del empleado en localStorage
@@ -259,8 +259,14 @@ export const authApi = {
       
       const empleado = JSON.parse(empleadoData);
       
-      // Verificar si es un administrador (rol_id 2)
-      if (!empleado || !empleado.rol_id || empleado.rol_id !== 2) {
+      // Verificar si es cualquier tipo de empleado (rol_id 2, 3, 4 o 5)
+      if (!empleado || !empleado.rol_id) {
+        return { needsChange: false };
+      }
+      
+      // Verificar que sea alguno de los roles de empleados
+      const validRoles = [2, 3, 4, 5]; // Admin, Vendedor, Bodeguero, Contador
+      if (!validRoles.includes(empleado.rol_id)) {
         return { needsChange: false };
       }
       
