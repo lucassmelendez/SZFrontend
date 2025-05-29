@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (correo: string, contrasena: string) => Promise<void>;
   register: (correo: string, contrasena: string, nombre: string, apellido: string, telefono: string, direccion: string, rut: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -132,12 +133,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.log('Login de cliente con FastAPI falló, intentando login de empleado');
       }
-      
-      // Si falla el primer intento, probar login de empleado
+        // Si falla el primer intento, probar login de empleado
       try {
         const empleadoResponse = await authApi.loginEmpleadoFastAPI(correo, contrasena);
         if (empleadoResponse && empleadoResponse.empleado) {
           const empleadoData = empleadoResponse.empleado;
+          
+          // Verificamos si debemos mostrar alerta de primer inicio de sesión
+          if (empleadoData.primer_login === true) {
+            console.log("Detectado primer inicio de sesión del empleado. Debe cambiar su contraseña.");
+            // La alerta se mostrará en el dashboard basado en esta propiedad
+          }
+          
           setUser(empleadoData);
           setUserType('empleado');
           localStorage.setItem('auth_token', empleadoResponse.token || 'empleado_session_' + Date.now());
@@ -260,11 +267,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
       throw error;
+    }  };
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    console.log('Actualizando usuario:', updatedUser);
+
+    // También actualizar en localStorage según el tipo de usuario
+    if (isCliente(updatedUser)) {
+      localStorage.setItem('cliente_data', JSON.stringify(updatedUser));
+      console.log('Cliente actualizado en localStorage');
+    } else if (isEmpleado(updatedUser)) {
+      localStorage.setItem('empleado_data', JSON.stringify(updatedUser));
+      console.log('Empleado actualizado en localStorage con primer_login:', updatedUser.primer_login);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, userType, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, userType, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
