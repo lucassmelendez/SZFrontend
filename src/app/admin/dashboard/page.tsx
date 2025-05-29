@@ -508,69 +508,93 @@ export default function AdminDashboard() {
         <p className="mt-1 text-sm text-red-500">{fieldErrors[name]}</p>
       )}
     </div>
-  );
-
-  const generateFinancialReport = () => {
+  );  const generateFinancialReport = () => {
     // Crear un archivo CSV que se pueda abrir con Excel
     const fecha = new Date().toLocaleDateString('es-CL');
     const hora = new Date().toLocaleTimeString('es-CL');
     
+    // Usamos punto y coma como separador para mayor compatibilidad con Excel en español
+    const separator = ';';
+    
+    // Función para formatear montos en formato chileno sin símbolo de moneda
+    const formatMoneyForCSV = (amount: number): string => {
+      return new Intl.NumberFormat('es-CL', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    };
+    
+    // Función para manejar caracteres especiales en CSV
+    const escapeCSV = (text: string | number | undefined): string => {
+      if (text === undefined || text === null) return '';
+      
+      const stringValue = typeof text !== 'string' ? String(text) : text;
+      
+      // Si contiene punto y coma, comillas o saltos de línea, envolver en comillas
+      if (stringValue.includes(separator) || stringValue.includes('"') || stringValue.includes('\n')) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      
+      return stringValue;
+    };
+    
+    // Agregar BOM para que Excel reconozca correctamente los caracteres UTF-8
+    const BOM = "\uFEFF";
+    let csvContent = BOM;
+    
     // Encabezados del CSV
-    let csvContent = 'INFORME FINANCIERO - SPINZONE\n';
-    csvContent += 'Generado el:,' + fecha + ' ' + hora + '\n\n';
+    csvContent += 'INFORME FINANCIERO - SPINZONE\n';
+    csvContent += `Generado el:${separator}${fecha} ${hora}\n\n`;
     
     // Sección de resumen
     csvContent += 'RESUMEN DE VENTAS\n';
-    csvContent += 'Concepto,Valor\n';
-    csvContent += 'Ventas totales,' + estadisticas.ventas_totales + '\n';
-    csvContent += 'Total de clientes,' + estadisticas.total_clientes + '\n';
-    csvContent += 'Órdenes pendientes,' + estadisticas.ordenes_pendientes + '\n\n';
+    csvContent += `Concepto${separator}Valor\n`;
+    csvContent += `Ventas totales${separator}${formatMoneyForCSV(estadisticas.ventas_totales)}\n`;
+    csvContent += `Total de clientes${separator}${estadisticas.total_clientes}\n`;
+    csvContent += `Órdenes pendientes${separator}${estadisticas.ordenes_pendientes}\n\n`;
     
     // Sección de pedidos
     csvContent += 'DETALLE DE PEDIDOS RECIENTES\n';
-    csvContent += 'ID Pedido,Cliente,Correo,Fecha,Estado Pago,Estado Envío,Medio de Pago,Monto Total\n';
+    csvContent += `ID Pedido${separator}Cliente${separator}Correo${separator}Fecha${separator}Estado Pago${separator}Estado Envío${separator}Medio de Pago${separator}Monto Total\n`;
     
     // Detalles de los pedidos
     pedidos
       .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
       .forEach((pedido) => {
         const fechaPedido = new Date(pedido.fecha + 'T00:00:00').toLocaleDateString('es-CL');
-        csvContent += `${pedido.id_pedido || ''},`;
-        csvContent += `"${pedido.cliente.nombre} ${pedido.cliente.apellido}",`;
-        csvContent += `${pedido.cliente.correo},`;
-        csvContent += `${fechaPedido},`;
-        csvContent += `${getEstadoPago(pedido.id_estado).texto},`;
-        csvContent += `${getEstadoPedido(pedido.id_estado, pedido.id_estado_envio).texto},`;
-        csvContent += `${mediosPago[pedido.medio_pago_id] || "Desconocido"},`;
-        csvContent += `${pedido.total}\n`;
+        const row = [
+          escapeCSV(pedido.id_pedido || ''),
+          escapeCSV(`${pedido.cliente.nombre} ${pedido.cliente.apellido}`),
+          escapeCSV(pedido.cliente.correo),
+          escapeCSV(fechaPedido),
+          escapeCSV(getEstadoPago(pedido.id_estado).texto),
+          escapeCSV(getEstadoPedido(pedido.id_estado, pedido.id_estado_envio).texto),
+          escapeCSV(mediosPago[pedido.medio_pago_id] || "Desconocido"),
+          escapeCSV(formatMoneyForCSV(pedido.total))
+        ].join(separator);
+        csvContent += row + '\n';
       });
     
     // Agregar una sección de productos
     csvContent += '\nDETALLE DE PRODUCTOS POR PEDIDO\n';
-    csvContent += 'ID Pedido,Producto,Cantidad,Precio Unitario,Subtotal\n';
+    csvContent += `ID Pedido${separator}Producto${separator}Cantidad${separator}Precio Unitario${separator}Subtotal\n`;
     
     // Detalles de productos por pedido
     pedidos
       .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0))
       .forEach((pedido) => {
         pedido.productos.forEach(producto => {
-          csvContent += `${pedido.id_pedido || ''},`;
-          csvContent += `"${producto.nombre}",`;
-          csvContent += `${producto.cantidad},`;
-          csvContent += `${producto.precio_unitario},`;
-          csvContent += `${producto.subtotal || producto.precio_unitario * producto.cantidad}\n`;
+          const subtotal = producto.subtotal || producto.precio_unitario * producto.cantidad;
+          const row = [
+            escapeCSV(pedido.id_pedido || ''),
+            escapeCSV(producto.nombre),
+            escapeCSV(producto.cantidad),
+            escapeCSV(formatMoneyForCSV(producto.precio_unitario)),
+            escapeCSV(formatMoneyForCSV(subtotal))
+          ].join(separator);
+          csvContent += row + '\n';
         });
       });
-
-    // Función para manejar caracteres especiales en CSV
-    const escapeCSV = (text: string | number | undefined): string | number | undefined => {
-      if (typeof text !== 'string') return text;
-      // Si contiene comas, comillas o saltos de línea, envolver en comillas
-      if (text.includes(',') || text.includes('"') || text.includes('\n')) {
-        return `"${text.replace(/"/g, '""')}"`;
-      }
-      return text;
-    };
     
     // Crear el blob con el contenido CSV
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
