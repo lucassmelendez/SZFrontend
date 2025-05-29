@@ -63,27 +63,9 @@ export default function PasswordChangeModal({ isOpen, onClose, rut }: PasswordCh
         
         onClose();
         
-        // Obtener el tipo de usuario desde localStorage
-        const empleadoData = localStorage.getItem('empleado_data');
-        let redirectPath = '/admin/dashboard'; // Por defecto, dashboard de admin
-        
-        if (empleadoData) {
-          const empleado = JSON.parse(empleadoData);
-          // Redirigir según el rol del empleado
-          if (empleado.rol_id === 2) {
-            redirectPath = '/admin/dashboard';
-          } else if (empleado.rol_id === 3) {
-            redirectPath = '/empleado/dashboard';
-          } else if (empleado.rol_id === 4) {
-            redirectPath = '/bodega/dashboard';
-          } else if (empleado.rol_id === 5) {
-            redirectPath = '/contabilidad/dashboard';
-          }
-        }
-        
-        // Redirigir al dashboard correspondiente
+        // Redirigir al dashboard de administrador
         setTimeout(() => {
-          window.location.href = redirectPath;
+          window.location.href = '/admin/dashboard';
         }, 500); // Pequeño delay para que el toast sea visible
       } else {
         throw new Error(response.message || 'Error al actualizar la contraseña');
@@ -98,10 +80,10 @@ export default function PasswordChangeModal({ isOpen, onClose, rut }: PasswordCh
 
   return (
     <Modal isOpen={isOpen} onClose={() => {}} size="sm" closeable={false}>
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 -mx-6 -mt-4 px-6 py-4 pt-8 rounded-t-lg">
+      <div className="bg-gradient-to-br from-red-600 to-red-800 -mx-6 -mt-4 px-6 py-4 pt-8 rounded-t-lg">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white">Cambio de Contraseña Requerido</h2>
-          <p className="mt-2 text-blue-100">
+          <p className="mt-2 text-red-100">
             Por seguridad, debes cambiar tu contraseña para continuar
           </p>
         </div>
