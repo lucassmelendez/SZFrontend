@@ -625,6 +625,81 @@ class ApiCacheService {
   }
 
   /**
+   * Función optimizada para cargar todos los datos del dashboard de vendedor/empleado de una vez
+   * Minimiza el número de peticiones HTTP y incluye clientes
+   */
+  async getVendedorDashboardData(options: CacheOptions = {}): Promise<{
+    pedidos: Pedido[];
+    clientes: Cliente[];
+    productos: Map<number, Producto | { nombre: string }>;
+    todosPedidosProductos: any[][];
+  }> {
+    return this.withCache(
+      '/vendedor-dashboard-data',
+      async () => {
+        console.log('Vendedor: Cargando datos optimizados...');
+        
+        // 1. Cargar pedidos y clientes en paralelo
+        const [pedidos, clientes] = await Promise.all([
+          pedidoApiFast.getAll(),
+          apiFast.get('/clientes').then((res: any) => res.data)
+        ]);
+        
+        console.log(`Vendedor: Obtenidos ${pedidos.length} pedidos y ${clientes.length} clientes`);
+        
+        // 2. Filtrar pedidos preparados (id_estado_envio === 1) y pagados
+        const pedidosValidos = pedidos.filter(p => 
+          p.id_pedido != null && p.id_estado_envio === 1 && p.id_estado === 1
+        );
+        const pedidosProductosPromises = pedidosValidos.map(pedido => 
+          pedidoProductoApiFast.getByPedido(pedido.id_pedido!)
+            .catch((err: any) => {
+              console.error(`Vendedor: Error al obtener productos del pedido ${pedido.id_pedido}:`, err);
+              return [];
+            })
+        );
+        
+        const todosPedidosProductos = await Promise.all(pedidosProductosPromises);
+        
+        // 3. Obtener productos únicos
+        const productosIdsUnicos = new Set<number>();
+        todosPedidosProductos.forEach((pedidoProductos: any) => {
+          pedidoProductos.forEach((pp: any) => productosIdsUnicos.add(pp.id_producto));
+        });
+        
+        console.log(`Vendedor: Cargando ${productosIdsUnicos.size} productos únicos...`);
+        
+        // 4. Cargar productos en paralelo
+        const productosPromises = Array.from(productosIdsUnicos).map(async (idProducto) => {
+          try {
+            const producto = await this.getProductoById(idProducto, {
+              cacheType: 'static',
+              ttl: 30 * 60 * 1000
+            });
+            return [idProducto, producto as Producto | { nombre: string }] as const;
+          } catch (err: any) {
+            console.error(`Vendedor: Error al obtener producto ${idProducto}:`, err);
+            return [idProducto, { nombre: `Producto #${idProducto}` } as Producto | { nombre: string }] as const;
+          }
+        });
+        
+        const productosResults = await Promise.all(productosPromises);
+        const productos = new Map<number, Producto | { nombre: string }>(productosResults);
+        
+        console.log(`Vendedor: Datos cargados - ${pedidosValidos.length} pedidos preparados, ${clientes.length} clientes, ${productos.size} productos`);
+        
+        return {
+          pedidos: pedidosValidos,
+          clientes,
+          productos,
+          todosPedidosProductos
+        };
+      },
+      { cacheType: 'dynamic', ttl: 1 * 60 * 1000, ...options } // Cache por 1 minuto
+    );
+  }
+
+  /**
    * Precargar datos críticos en el caché (optimizado para evitar duplicados)
    */
   async preloadCriticalData(skipDashboard: boolean = false): Promise<void> {
@@ -663,6 +738,19 @@ class ApiCacheService {
     this.invalidateOrdersCache();
     
     console.log('Bodega: Caché del dashboard invalidado');
+  }
+
+  /**
+   * Invalida específicamente el caché del dashboard de vendedor
+   */
+  invalidateVendedorDashboardCache(): void {
+    // Invalidar caché específico de vendedor
+    dynamicCache.invalidatePattern('*vendedor-dashboard-data*');
+    
+    // Invalidar pedidos (datos dinámicos)
+    this.invalidateOrdersCache();
+    
+    console.log('Vendedor: Caché del dashboard invalidado');
   }
 }
 

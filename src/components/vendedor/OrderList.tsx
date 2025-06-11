@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { pedidoApiFast, pedidoProductoApiFast, productoApi, clienteApiFast, type Cliente, type Pedido as ApiPedido, type PedidoProducto } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import { FaTruck, FaCheckCircle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -38,77 +39,77 @@ export default function OrderList() {
   }, []);
 
   const fetchOrders = async () => {
-    try {      const allPedidos = await pedidoApiFast.getAll();
-      // Filtrar pedidos preparados (id_estado_envio === 1)
-      const pedidosListos = allPedidos.filter((pedido): pedido is ApiPedido => 
-        pedido.id_pedido != null && pedido.id_estado_envio === 1 && pedido.id_estado === 1
-      );
+    try {
+      console.log('Vendedor: Iniciando carga optimizada de pedidos...');
       
-      const pedidosConDetalles = await Promise.all(
-        pedidosListos.map(async (pedido): Promise<PedidoWithDetails | null> => {
-          try {
-            // Validar que el pedido tenga un ID
-            if (!pedido.id_pedido) return null;
+      // Usar la función optimizada del caché
+      const { pedidos, clientes, productos, todosPedidosProductos } = await apiCache.getVendedorDashboardData();
+      
+      console.log(`Vendedor: Procesando ${pedidos.length} pedidos preparados con datos precargados`);
+      
+      // Crear mapas para acceso rápido
+      const clientesMap = new Map(clientes.map(c => [c.id_cliente, c]));
+      
+      // Procesar pedidos con datos precargados
+      const pedidosConDetalles = pedidos.map((pedido, index) => {
+        try {
+          // Validar que el pedido tenga un ID
+          if (!pedido.id_pedido) return null;
 
-            // Obtener productos y detalles
-            const pedidoProductos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido);
-            const productosConDetalles = await Promise.all(
-              pedidoProductos.map(async (pp) => {
-                const producto = await productoApi.getById(pp.id_producto);
-                return {              ...pp,
-              nombre: producto.nombre
+          const pedidoProductos = todosPedidosProductos[index] || [];
+          const productosConDetalles = pedidoProductos.map((pp: any) => {
+            const producto = productos.get(pp.id_producto);
+            return {
+              ...pp,
+              nombre: producto?.nombre || `Producto #${pp.id_producto}`
             };
-          })
-        );
+          });
 
-        // Calculate original total and check if discount applies
-        const total_original = productosConDetalles.reduce(
-          (acc, curr) => acc + (curr.precio_unitario * curr.cantidad), 
-          0
-        );
-        
-        const cantidad_total = productosConDetalles.reduce(
-          (acc, curr) => acc + curr.cantidad,
-          0
-        );
-        
-        const aplicar_descuento = cantidad_total > 4;
-        const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
-        const total = total_original - total_descuentos;
+          // Calcular totales
+          const total_original = productosConDetalles.reduce(
+            (acc, curr) => acc + (curr.precio_unitario * curr.cantidad), 
+            0
+          );
+          
+          const cantidad_total = productosConDetalles.reduce(
+            (acc, curr) => acc + curr.cantidad,
+            0
+          );
+          
+          const aplicar_descuento = cantidad_total > 4;
+          const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
+          const total = total_original - total_descuentos;
 
-        // Obtener datos del cliente
-            let clienteData: Cliente | null = null;
-            if (pedido.cliente && 'id_cliente' in pedido.cliente) {
-              clienteData = pedido.cliente as Cliente;
-            } else {
-              const clienteFetched = await clienteApiFast.getById(pedido.id_cliente);
-              if (!clienteFetched) {
-                console.error('No se pudo obtener la información del cliente:', pedido.id_cliente);
-                return null;
-              }
-              clienteData = clienteFetched;
-            }            return {
-              ...pedido,
-              id_pedido: pedido.id_pedido as number, // We already validated it's not null
-              productos: productosConDetalles,
-              cliente: clienteData,
-              total: total,
-              total_original: total_original,
-              total_descuentos: total_descuentos,
-              aplicar_descuento: aplicar_descuento
-            } as PedidoWithDetails;
-          } catch (error) {
-            console.error('Error procesando pedido:', error);
+          // Obtener datos del cliente del mapa
+          const clienteData = clientesMap.get(pedido.id_cliente);
+          if (!clienteData) {
+            console.error('Vendedor: No se pudo obtener información del cliente:', pedido.id_cliente);
             return null;
           }
-        })
-      );
+
+          return {
+            ...pedido,
+            id_pedido: pedido.id_pedido as number, // We already validated it's not null
+            productos: productosConDetalles,
+            cliente: clienteData,
+            total: total,
+            total_original: total_original,
+            total_descuentos: total_descuentos,
+            aplicar_descuento: aplicar_descuento
+          } as PedidoWithDetails;
+        } catch (error) {
+          console.error('Vendedor: Error procesando pedido:', error);
+          return null;
+        }
+      });
 
       // Filtrar pedidos nulos y actualizar estado
-      setPedidos(pedidosConDetalles.filter((p): p is PedidoWithDetails => p !== null));
+      const pedidosValidos = pedidosConDetalles.filter((p): p is PedidoWithDetails => p !== null);
+      console.log(`Vendedor: ${pedidosValidos.length} pedidos procesados exitosamente`);
+      setPedidos(pedidosValidos);
       setError(null);
     } catch (err) {
-      console.error('Error al cargar pedidos:', err);
+      console.error('Vendedor: Error al cargar pedidos:', err);
       setError('Error al cargar los pedidos. Por favor, recarga la página.');
     } finally {
       setLoading(false);
@@ -118,7 +119,12 @@ export default function OrderList() {
   const handleUpdateOrderStatus = async (orderId: number, newStatus: number) => {
     try {
       setUpdatingOrder(orderId);
-      await pedidoApiFast.updateEstadoEnvio(orderId, newStatus);        const statusMessages: Record<3 | 4, string> = {
+      await pedidoApiFast.updateEstadoEnvio(orderId, newStatus);
+      
+      // Invalidar caché del vendedor
+      apiCache.invalidateVendedorDashboardCache();
+      
+      const statusMessages: Record<3 | 4, string> = {
         4: '¡Orden despachada con éxito!',
         3: '¡Orden marcada como entregada!'
       };

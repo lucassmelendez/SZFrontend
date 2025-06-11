@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { isEmpleado, Producto, productoApi } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import StockViewer from '../../../components/vendedor/StockViewer';
 import OrderList from '../../../components/vendedor/OrderList';
 
@@ -25,11 +26,17 @@ export default function EmpleadoDashboard() {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const data = await productoApi.getAll();
+        console.log('Vendedor Dashboard: Cargando productos optimizados...');
+        // Usar caché optimizado para productos
+        const data = await apiCache.getProductos({
+          cacheType: 'static',
+          ttl: 10 * 60 * 1000 // 10 minutos para datos de inventario
+        });
+        console.log(`Vendedor Dashboard: ${data.length} productos cargados desde caché`);
         setProductos(data);
         setLoading(false);
       } catch (err) {
-        console.error('Error al cargar productos:', err);
+        console.error('Vendedor Dashboard: Error al cargar productos:', err);
         setError('Error al cargar los productos. Por favor, intenta de nuevo.');
         setLoading(false);
       }
