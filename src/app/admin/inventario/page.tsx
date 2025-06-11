@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, productoApi, Producto } from '@/lib/api';
+import { isEmpleado, Producto } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiArrowLeft, FiPlus, FiAlertTriangle } from 'react-icons/fi';
 import Modal from '@/components/ui/Modal';
 import toast from 'react-hot-toast';
@@ -75,13 +76,11 @@ export default function AdminInventario() {
     try {
       setIsLoading(true);
       setError(null);
-      let productosData: Producto[] = [];        if (searchTerm || categoriaSeleccionada) {
-        const response = await fetch('https://sz-backend.vercel.app/api/productos');
-        const data = await response.json();
-        let allProducts = data.data;
-        if (!allProducts || !Array.isArray(allProducts)) {
-          throw new Error('Formato de datos no válido');
-        }
+      let productosData: Producto[] = [];
+
+      if (searchTerm || categoriaSeleccionada) {
+        // Para búsquedas y filtros, obtener todos los productos (con caché)
+        const allProducts = await apiCache.getProductos();
         
         // Filtrar productos según los criterios
         productosData = allProducts.filter(producto => {
@@ -95,24 +94,11 @@ export default function AdminInventario() {
           return matchesSearch && matchesCategoria;
         });
       } else {
-        console.log('Obteniendo todos los productos...');
-        try {
-          const response = await fetch('https://sz-backend.vercel.app/api/productos');
-          const data = await response.json();
-          console.log('Respuesta completa de la API:', data);
-          
-          if (!data.data || !Array.isArray(data.data)) {
-            throw new Error('Formato de datos no válido');
-          }
-          
-          productosData = data.data;
-          console.log('Productos procesados:', productosData);
-          if (!productosData.length) {
-            console.warn('No se encontraron productos');
-          }
-        } catch (error: any) {
-          console.error('Error detallado:', error);
-          throw new Error('Error al obtener productos: ' + (error.message || 'Error desconocido'));
+        console.log('Obteniendo todos los productos con caché...');
+        productosData = await apiCache.getProductos();
+        console.log('Productos procesados desde caché:', productosData);
+        if (!productosData.length) {
+          console.warn('No se encontraron productos');
         }
       }
 
@@ -225,7 +211,8 @@ export default function AdminInventario() {
         throw new Error(errorData.message || 'Error al actualizar el producto');
       }
       
-      // Actualizar la lista de productos
+      // Invalidar caché de productos y recargar
+      apiCache.invalidateProductsCache();
       await cargarProductos();
       
       // Cerrar el modal y mostrar mensaje de éxito
@@ -269,7 +256,8 @@ export default function AdminInventario() {
         throw new Error(errorData.message || 'Error al eliminar el producto');
       }
       
-      // Actualizar la lista de productos
+      // Invalidar caché de productos y recargar
+      apiCache.invalidateProductsCache();
       await cargarProductos();
       
       // Cerrar el modal y mostrar mensaje de éxito
@@ -346,7 +334,8 @@ export default function AdminInventario() {
         throw new Error(errorData.message || 'Error al crear el producto');
       }
       
-      // Actualizar la lista de productos
+      // Invalidar caché de productos y recargar
+      apiCache.invalidateProductsCache();
       await cargarProductos();
       
       // Cerrar el modal y mostrar mensaje de éxito

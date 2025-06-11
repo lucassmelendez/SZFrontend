@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { setupCacheInterceptors } from './apiInterceptors';
 
 const isClient = typeof window !== 'undefined';
 
@@ -1031,5 +1032,15 @@ export const pedidoProductoApiFast = {
     }
   }
 };
+
+// Configurar interceptores de caché
+if (typeof window !== 'undefined') {
+  // Solo configurar interceptores en el cliente
+  try {
+    setupCacheInterceptors(api, apiFast);
+  } catch (error) {
+    console.warn('Error al configurar interceptores de caché:', error);
+  }
+}
 
 export default api;

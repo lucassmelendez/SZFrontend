@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { isEmpleado, productoApi, Producto } from '@/lib/api';
+import { isEmpleado, Producto } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import StockEditor from '@/components/bodega/StockEditor';
 import { FaSearch, FaChevronDown, FaPlus } from 'react-icons/fa';
 import OrderList from '@/components/bodega/OrderList';
@@ -77,7 +78,8 @@ export default function BodegaDashboard() {
   const fetchProductos = async () => {
     try {
       setLoading(true);
-      const data = await productoApi.getAll();
+      // Usar caché para obtener productos con TTL más corto para datos de stock
+      const data = await apiCache.getProductos({ cacheType: 'dynamic', ttl: 2 * 60 * 1000 });
       // Ordenar productos por stock (ascendente) para mostrar primero los de bajo stock
       const sortedProductos = data.sort((a, b) => a.stock - b.stock);
       setProductos(sortedProductos);
@@ -185,7 +187,8 @@ export default function BodegaDashboard() {
         throw new Error(errorData.message || 'Error al crear el producto');
       }
       
-      // Recargar productos
+      // Invalidar caché y recargar productos
+      apiCache.invalidateProductsCache();
       await fetchProductos();
       
       // Cerrar el modal
