@@ -2,7 +2,8 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { productoApi, Producto } from '@/lib/api';
+import { Producto } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import ProductGrid from '@/components/ui/ProductGrid';
 import Link from 'next/link';
 import { FaArrowLeft } from 'react-icons/fa';
@@ -25,7 +26,8 @@ function SearchResults() {
 
       try {
         setLoading(true);
-        const resultados = await productoApi.search(query);
+        // Usar caché para búsquedas con TTL dinámico (corta duración)
+        const resultados = await apiCache.searchProductos(query);
         setProductos(resultados);
         setLoading(false);
       } catch (error) {

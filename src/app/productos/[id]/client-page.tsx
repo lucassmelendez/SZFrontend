@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { productoApi, Producto, isEmpleado } from '@/lib/api';
+import { Producto, isEmpleado } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import { useCarrito } from '@/lib/useCarrito';
 import { FaShoppingCart, FaCreditCard, FaTimesCircle, FaExclamationCircle, FaCheckCircle, FaShieldAlt, FaTruck, FaGift } from 'react-icons/fa';
 import Image from 'next/image';
@@ -53,7 +54,8 @@ export function ProductoDetailClient({ id }: ProductoDetailClientProps) {
           throw new Error('ID de producto inválido');
         }
         
-        const data = await productoApi.getById(productoId);
+        // Usar caché para producto individual con TTL estático
+        const data = await apiCache.getProductoById(productoId);
         setProducto(data);
         setLoading(false);
       } catch (error) {

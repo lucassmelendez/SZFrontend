@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { productoApi, Producto } from '@/lib/api';
+import { Producto } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
@@ -31,7 +32,8 @@ export function CategoriaClient({ categoriaId }: CategoriaClientProps) {
           throw new Error('ID de categoría inválido');
         }
         
-        const data = await productoApi.getByCategoria(id);
+        // Usar caché para productos por categoría con TTL estático
+        const data = await apiCache.getProductosByCategoria(id);
         setProductos(data);
         setLoading(false);
       } catch (error) {

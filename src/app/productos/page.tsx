@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { productoApi, Producto } from '@/lib/api';
+import { Producto } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { FaSearch, FaFilter } from 'react-icons/fa';
 
@@ -15,7 +16,8 @@ export default function ProductosPage() {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const data = await productoApi.getAll();
+        // Usar caché para productos con TTL estático (30 minutos)
+        const data = await apiCache.getProductos();
         setProductos(data);
         setFilteredProductos(data);
         setLoading(false);

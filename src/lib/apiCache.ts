@@ -111,6 +111,47 @@ class ApiCacheService {
     );
   }
 
+  async getProductosRelacionados(categoriaId: number, excludeId?: number, limit: number = 4, options: CacheOptions = {}): Promise<Producto[]> {
+    return this.withCache(
+      `/productos/relacionados/${categoriaId}_${excludeId}_${limit}`,
+      async () => {
+        const productos = await productoApi.getByCategoria(categoriaId);
+        let filtered = excludeId ? productos.filter(p => p.id_producto !== excludeId) : productos;
+        return filtered.slice(0, limit);
+      },
+      { cacheType: 'static', ttl: 25 * 60 * 1000, ...options }
+    );
+  }
+
+  async getProductosDestacados(limit: number = 8, options: CacheOptions = {}): Promise<Producto[]> {
+    return this.withCache(
+      `/productos/destacados_${limit}`,
+      async () => {
+        // Combinar productos más vendidos con productos normales si no hay suficientes
+        try {
+          const masVendidos = await productoApi.getMasVendidos(limit);
+          if (masVendidos.length >= limit) {
+            return masVendidos.slice(0, limit);
+          }
+          
+          // Si no hay suficientes productos más vendidos, completar con productos normales
+          const todosProductos = await productoApi.getAll();
+          const productosRestantes = todosProductos
+            .filter(p => !masVendidos.some(mv => mv.id_producto === p.id_producto))
+            .slice(0, limit - masVendidos.length);
+          
+          return [...masVendidos, ...productosRestantes];
+        } catch (error) {
+          console.error('Error al obtener productos destacados:', error);
+          // Fallback a productos normales
+          const productos = await productoApi.getAll();
+          return productos.slice(0, limit);
+        }
+      },
+      { cacheType: 'static', ttl: 15 * 60 * 1000, ...options }
+    );
+  }
+
   async updateProductoStock(id: number, stock: number): Promise<Producto> {
     return this.withCache(
       `/productos/${id}/stock`,
