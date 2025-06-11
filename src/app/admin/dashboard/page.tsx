@@ -157,96 +157,114 @@ export default function AdminDashboard() {
         console.log('Dashboard: Pedidos obtenidos:', pedidosResponse.length);
         console.log('Dashboard: Clientes obtenidos:', clientesResponse.length);
         
-        // Procesamos cada pedido para obtener más detalles
-        const pedidosConDetalles = await Promise.all(
-          pedidosResponse.map(async (pedido) => {
-            const idPedido = pedido.id_pedido || 0;
-            console.log(`Dashboard: Procesando pedido ${idPedido}`);
+        // OPTIMIZACIÓN: Obtener todos los productos de todos los pedidos en paralelo
+        console.log('Dashboard: Obteniendo productos de pedidos en lote...');
+        
+        // 1. Obtener todos los pedido-productos en paralelo
+        const pedidosProductosPromises = pedidosResponse.map(pedido => 
+          pedidoProductoApiFast.getByPedido(pedido.id_pedido || 0)
+            .catch(err => {
+              console.error(`Dashboard: Error al obtener productos del pedido ${pedido.id_pedido}:`, err);
+              return [];
+            })
+        );
+        
+        const todosPedidosProductos = await Promise.all(pedidosProductosPromises);
+        
+        // 2. Recopilar todos los IDs de productos únicos
+        const productosIdsUnicos = new Set<number>();
+        todosPedidosProductos.forEach(pedidoProductos => {
+          pedidoProductos.forEach(pp => productosIdsUnicos.add(pp.id_producto));
+        });
+        
+        console.log(`Dashboard: Productos únicos encontrados: ${productosIdsUnicos.size}`);
+        
+        // 3. Obtener todos los productos únicos en paralelo
+        const productosPromises = Array.from(productosIdsUnicos).map(async (idProducto) => {
+          try {
+            const producto = await apiCache.getProductoById(idProducto, {
+              cacheType: 'static',
+              ttl: 30 * 60 * 1000
+            });
+            return [idProducto, producto] as const;
+          } catch (err) {
+            console.error(`Dashboard: Error al obtener producto ${idProducto}:`, err);
+            return [idProducto, { nombre: `Producto #${idProducto}` }] as const;
+          }
+        });
+        
+        const productosResults = await Promise.all(productosPromises);
+        const productosMap = new Map(productosResults);
+        
+        console.log(`Dashboard: Productos cargados: ${productosMap.size}`);
+        
+        // 4. Procesar pedidos con datos ya disponibles
+        const pedidosConDetalles = pedidosResponse.map((pedido, index) => {
+          try {
+            const pedidoProductos = todosPedidosProductos[index];
             
-            try {
-              // Obtener productos del pedido usando caché dinámico
-              const pedidoProductos = await pedidoProductoApiFast.getByPedido(idPedido);
-              
-              // Obtener información de productos usando el caché estático
-              const productosConDetalles = await Promise.all(
-                pedidoProductos.map(async (pp) => {
-                  try {
-                    // Usar apiCache con caché estático para productos (30 minutos)
-                    const producto = await apiCache.getProductoById(pp.id_producto, {
-                      cacheType: 'static',
-                      ttl: 30 * 60 * 1000
-                    });
-                    
-                    return { 
-                      ...pp, 
-                      nombre: producto.nombre || `Producto #${pp.id_producto}`,
-                      subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
-                    };
-                  } catch (err) {
-                    console.error(`Dashboard: Error al obtener producto ${pp.id_producto}:`, err);
-                    return { 
-                      ...pp, 
-                      nombre: `Producto #${pp.id_producto}`,
-                      subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
-                    };
-                  }
-                })
-              );
+            // Agregar información de productos usando el mapa
+            const productosConDetalles = pedidoProductos.map(pp => {
+              const producto = productosMap.get(pp.id_producto);
+              return {
+                ...pp,
+                nombre: producto?.nombre || `Producto #${pp.id_producto}`,
+                subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
+              };
+            });
 
-              // Calculamos los totales
-              const total_original = productosConDetalles.reduce(
-                (acc, curr) => acc + (curr.subtotal || curr.precio_unitario * curr.cantidad), 
-                0
-              );
-              
-              // Verificar descuento (más de 4 productos)
-              const cantidad_total = productosConDetalles.reduce(
-                (acc, curr) => acc + curr.cantidad, 
-                0
-              );
-              const aplicar_descuento = cantidad_total > 4;
-              const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
-              const total = total_original - total_descuentos;
-              
-              // Obtener datos del cliente (usando caché si está disponible)
-              const cliente = clientesResponse.find((c: any) => c.id_cliente === pedido.id_cliente) || {
+            // Calculamos los totales
+            const total_original = productosConDetalles.reduce(
+              (acc, curr) => acc + (curr.subtotal || curr.precio_unitario * curr.cantidad), 
+              0
+            );
+            
+            // Verificar descuento (más de 4 productos)
+            const cantidad_total = productosConDetalles.reduce(
+              (acc, curr) => acc + curr.cantidad, 
+              0
+            );
+            const aplicar_descuento = cantidad_total > 4;
+            const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
+            const total = total_original - total_descuentos;
+            
+            // Obtener datos del cliente (usando caché si está disponible)
+            const cliente = clientesResponse.find((c: any) => c.id_cliente === pedido.id_cliente) || {
+              nombre: 'Cliente',
+              apellido: 'Desconocido',
+              correo: '',
+              telefono: '',
+              direccion: ''
+            };
+            
+            return {
+              ...pedido,
+              total,
+              total_original,
+              total_descuentos,
+              aplicar_descuento,
+              productos: productosConDetalles,
+              cliente
+            };
+          } catch (err) {
+            console.error(`Dashboard: Error al procesar pedido ${pedido.id_pedido}:`, err);
+            return {
+              ...pedido,
+              total: 0,
+              total_original: 0,
+              total_descuentos: 0,
+              aplicar_descuento: false,
+              productos: [],
+              cliente: {
                 nombre: 'Cliente',
                 apellido: 'Desconocido',
                 correo: '',
                 telefono: '',
                 direccion: ''
-              };
-              
-              return {
-                ...pedido,
-                total,
-                total_original,
-                total_descuentos,
-                aplicar_descuento,
-                productos: productosConDetalles,
-                cliente
-              };
-            } catch (err) {
-              console.error(`Dashboard: Error al procesar pedido ${idPedido}:`, err);
-              // Devolver pedido con datos básicos en caso de error
-              return {
-                ...pedido,
-                total: 0,
-                total_original: 0,
-                total_descuentos: 0,
-                aplicar_descuento: false,
-                productos: [],
-                cliente: {
-                  nombre: 'Cliente',
-                  apellido: 'Desconocido',
-                  correo: '',
-                  telefono: '',
-                  direccion: ''
-                }
-              };
-            }
-          })
-        );
+              }
+            };
+          }
+        });
         
         setPedidos(pedidosConDetalles);
         console.log('Dashboard: Todos los pedidos procesados:', pedidosConDetalles.length);
