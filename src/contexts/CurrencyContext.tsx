@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getDollarRate } from '@/services/exchangeService';
+import { sessionCache } from '@/lib/cache';
 
 // Definir tipos
 type Currency = 'CLP' | 'USD';
@@ -49,8 +50,20 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const loadExchangeRate = async () => {
       try {
+        // Intentar obtener del caché primero
+        const cachedRate = sessionCache.get<{value: number}>('/exchange/dollar');
+        if (cachedRate) {
+          setExchangeRate(cachedRate.value);
+          setIsLoading(false);
+          return;
+        }
+
+        // Si no está en caché, hacer la llamada a la API
         const data = await getDollarRate();
         setExchangeRate(data.value);
+        
+        // Guardar en caché por 1 hora
+        sessionCache.set('/exchange/dollar', data, 60 * 60 * 1000);
       } catch (error) {
         console.error('Error al cargar el tipo de cambio:', error);
         // Valor de respaldo si falla la API

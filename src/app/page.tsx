@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { productoApi, Producto } from '@/lib/api';
+import { Producto } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import ProductCarousel from '@/components/ui/ProductCarousel';
 import { FaArrowRight } from 'react-icons/fa';
 import { GiPingPongBat, GiTable, GiBallPyramid } from 'react-icons/gi';
@@ -15,9 +16,9 @@ export default function Home() {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        // Intentar obtener los productos más vendidos primero
+        // Intentar obtener los productos más vendidos primero (con caché)
         try {
-          const productosVendidos = await productoApi.getMasVendidos(15);
+          const productosVendidos = await apiCache.getProductosMasVendidos(15);
           // Si hay productos vendidos, mostrarlos
           if (productosVendidos && productosVendidos.length > 0) {
             setProductos(productosVendidos);
@@ -29,8 +30,8 @@ export default function Home() {
           // Si falla, continuamos con la carga normal
         }
 
-        // Carga normal como fallback
-        const data = await productoApi.getAll();
+        // Carga normal como fallback (con caché)
+        const data = await apiCache.getProductos();
         // Mostrar hasta 15 productos para el carrusel
         setProductos(data.slice(0, 15));
         setLoading(false);
