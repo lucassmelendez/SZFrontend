@@ -6,6 +6,7 @@ import {
   authApi, 
   pedidoApiFast,
   empleadoApiFast,
+  pedidoProductoApiFast,
   apiFast,
   Producto, 
   Pedido, 
@@ -406,21 +407,98 @@ class ApiCacheService {
   }
 
   /**
-   * Precargar datos críticos en el caché
+   * Función optimizada para cargar todos los datos del dashboard de una vez
+   * Minimiza el número de peticiones HTTP
    */
-  async preloadCriticalData(): Promise<void> {
+  async getDashboardData(options: CacheOptions = {}): Promise<{
+    pedidos: Pedido[];
+    clientes: Cliente[];
+    productos: Map<number, Producto | { nombre: string }>;
+    todosPedidosProductos: any[][];
+  }> {
+    return this.withCache(
+      '/dashboard-data',
+      async () => {
+        console.log('Dashboard: Cargando datos optimizados...');
+        
+        // 1. Cargar pedidos y clientes en paralelo
+        const [pedidos, clientes] = await Promise.all([
+          pedidoApiFast.getAll(),
+          apiFast.get('/clientes').then((res: any) => res.data)
+        ]);
+        
+        console.log(`Dashboard: Obtenidos ${pedidos.length} pedidos y ${clientes.length} clientes`);
+        
+        // 2. Obtener productos de pedidos en paralelo (máximo 21 peticiones)
+        const pedidosProductosPromises = pedidos.map(pedido => 
+          pedidoProductoApiFast.getByPedido(pedido.id_pedido || 0)
+            .catch((err: any) => {
+              console.error(`Dashboard: Error al obtener productos del pedido ${pedido.id_pedido}:`, err);
+              return [];
+            })
+        );
+        
+        const todosPedidosProductos = await Promise.all(pedidosProductosPromises);
+        
+        // 3. Obtener productos únicos
+        const productosIdsUnicos = new Set<number>();
+        todosPedidosProductos.forEach((pedidoProductos: any) => {
+          pedidoProductos.forEach((pp: any) => productosIdsUnicos.add(pp.id_producto));
+        });
+        
+        console.log(`Dashboard: Cargando ${productosIdsUnicos.size} productos únicos...`);
+        
+        // 4. Cargar productos en paralelo
+        const productosPromises = Array.from(productosIdsUnicos).map(async (idProducto) => {
+          try {
+            const producto = await this.getProductoById(idProducto, {
+              cacheType: 'static',
+              ttl: 30 * 60 * 1000
+            });
+            return [idProducto, producto as Producto | { nombre: string }] as const;
+          } catch (err: any) {
+            console.error(`Dashboard: Error al obtener producto ${idProducto}:`, err);
+            return [idProducto, { nombre: `Producto #${idProducto}` } as Producto | { nombre: string }] as const;
+          }
+        });
+        
+        const productosResults = await Promise.all(productosPromises);
+        const productos = new Map<number, Producto | { nombre: string }>(productosResults);
+        
+        console.log(`Dashboard: Datos cargados - ${pedidos.length} pedidos, ${clientes.length} clientes, ${productos.size} productos`);
+        
+        return {
+          pedidos,
+          clientes,
+          productos,
+          todosPedidosProductos
+        };
+      },
+      { cacheType: 'dynamic', ttl: 1 * 60 * 1000, ...options } // Cache por 1 minuto
+    );
+  }
+
+  /**
+   * Precargar datos críticos en el caché (optimizado para evitar duplicados)
+   */
+  async preloadCriticalData(skipDashboard: boolean = false): Promise<void> {
     console.log('Precargando datos críticos...');
     
     try {
-      // Precargar productos (datos más accedidos)
-      await Promise.allSettled([
+      const promises: Promise<any>[] = [
         this.getProductos(),
         this.getProductosMasVendidos(),
-        // Precargar datos del dashboard para admin
-        this.getPedidos({ cacheType: 'dynamic' }),
-        this.getClientes({ cacheType: 'user' }),
-        // Añadir más precargas según necesidades
-      ]);
+      ];
+      
+      // Solo precargar datos del dashboard si no se está cargando desde el dashboard
+      if (!skipDashboard) {
+        promises.push(
+          this.getPedidos({ cacheType: 'dynamic' }),
+          this.getClientes({ cacheType: 'user' })
+        );
+      }
+      
+      await Promise.allSettled(promises);
       
       console.log('Datos críticos precargados exitosamente');
     } catch (error) {

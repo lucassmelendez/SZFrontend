@@ -144,67 +144,23 @@ export default function AdminDashboard() {
         setLoading(true);
         setError(null);
 
-        console.log('Dashboard: Iniciando carga de datos con caché');
+        console.log('Dashboard: Iniciando carga de datos con caché optimizado');
 
-        // Obtener datos en paralelo usando el sistema de caché
-        const [pedidosResponse, clientesResponse] = await Promise.all([
-          // Pedidos con caché dinámico (2 minutos) ya que cambian frecuentemente
-          apiCache.getPedidos({ cacheType: 'dynamic', ttl: 2 * 60 * 1000 }),
-          // Clientes con caché de usuario (15 minutos) ya que cambian menos frecuentemente
-          apiCache.getClientes({ cacheType: 'user', ttl: 15 * 60 * 1000 })
-        ]);
+        // NUEVA OPTIMIZACIÓN: Usar función agregada que minimiza peticiones
+        const { pedidos: pedidosResponse, clientes: clientesResponse, productos: productosMap, todosPedidosProductos } = await apiCache.getDashboardData({
+          cacheType: 'dynamic',
+          ttl: 1 * 60 * 1000 // Cache por 1 minuto para datos del dashboard
+        });
 
-        console.log('Dashboard: Pedidos obtenidos:', pedidosResponse.length);
-        console.log('Dashboard: Clientes obtenidos:', clientesResponse.length);
+        console.log('Dashboard: Datos obtenidos del caché optimizado');
         
-        // OPTIMIZACIÓN: Obtener todos los productos de todos los pedidos en paralelo
-        console.log('Dashboard: Obteniendo productos de pedidos en lote...');
-        
-        // 1. Obtener todos los pedido-productos en paralelo
-        const pedidosProductosPromises = pedidosResponse.map(pedido => 
-          pedidoProductoApiFast.getByPedido(pedido.id_pedido || 0)
-            .catch(err => {
-              console.error(`Dashboard: Error al obtener productos del pedido ${pedido.id_pedido}:`, err);
-              return [];
-            })
-        );
-        
-        const todosPedidosProductos = await Promise.all(pedidosProductosPromises);
-        
-        // 2. Recopilar todos los IDs de productos únicos
-        const productosIdsUnicos = new Set<number>();
-        todosPedidosProductos.forEach(pedidoProductos => {
-          pedidoProductos.forEach(pp => productosIdsUnicos.add(pp.id_producto));
-        });
-        
-        console.log(`Dashboard: Productos únicos encontrados: ${productosIdsUnicos.size}`);
-        
-        // 3. Obtener todos los productos únicos en paralelo
-        const productosPromises = Array.from(productosIdsUnicos).map(async (idProducto) => {
-          try {
-            const producto = await apiCache.getProductoById(idProducto, {
-              cacheType: 'static',
-              ttl: 30 * 60 * 1000
-            });
-            return [idProducto, producto] as const;
-          } catch (err) {
-            console.error(`Dashboard: Error al obtener producto ${idProducto}:`, err);
-            return [idProducto, { nombre: `Producto #${idProducto}` }] as const;
-          }
-        });
-        
-        const productosResults = await Promise.all(productosPromises);
-        const productosMap = new Map(productosResults);
-        
-        console.log(`Dashboard: Productos cargados: ${productosMap.size}`);
-        
-        // 4. Procesar pedidos con datos ya disponibles
+        // Procesar pedidos con datos ya disponibles (sin peticiones adicionales)
         const pedidosConDetalles = pedidosResponse.map((pedido, index) => {
           try {
             const pedidoProductos = todosPedidosProductos[index];
             
             // Agregar información de productos usando el mapa
-            const productosConDetalles = pedidoProductos.map(pp => {
+            const productosConDetalles = pedidoProductos.map((pp: any) => {
               const producto = productosMap.get(pp.id_producto);
               return {
                 ...pp,
@@ -228,7 +184,7 @@ export default function AdminDashboard() {
             const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
             const total = total_original - total_descuentos;
             
-            // Obtener datos del cliente (usando caché si está disponible)
+            // Obtener datos del cliente (usando datos ya cargados)
             const cliente = clientesResponse.find((c: any) => c.id_cliente === pedido.id_cliente) || {
               nombre: 'Cliente',
               apellido: 'Desconocido',
