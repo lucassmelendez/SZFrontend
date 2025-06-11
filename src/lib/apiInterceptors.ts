@@ -119,13 +119,19 @@ function requestInterceptor(config: InternalAxiosRequestConfig): InternalAxiosRe
   
   if (cachedData) {
     console.log(`Cache hit para: ${url}`);
-    // Crear una respuesta falsa para evitar la petición HTTP
-    (config as any).__cached_response = {
-      data: cachedData,
-      status: 200,
-      statusText: 'OK (Cached)',
-      headers: {},
-      config,
+    // Marcar el config como que tiene datos cacheados y cancelar la petición
+    (config as any).__cache_hit = true;
+    (config as any).__cached_data = cachedData;
+    // Usar un adaptador personalizado que devuelve los datos cacheados sin hacer petición HTTP
+    config.adapter = () => {
+      return Promise.resolve({
+        data: cachedData,
+        status: 200,
+        statusText: 'OK (Cached)',
+        headers: {},
+        config: config,
+        request: {}
+      } as AxiosResponse);
     };
   }
   
@@ -134,9 +140,9 @@ function requestInterceptor(config: InternalAxiosRequestConfig): InternalAxiosRe
 
 // Interceptor de response para cachear respuestas
 function responseInterceptor(response: AxiosResponse): AxiosResponse {
-  // Si es una respuesta cacheada, devolverla directamente
-  if ((response.config as any).__cached_response) {
-    return (response.config as any).__cached_response;
+  // Si es una respuesta cacheada, no necesitamos hacer nada más
+  if ((response.config as any).__cache_hit) {
+    return response;
   }
   
   if (!shouldCacheResponse(response)) {
@@ -181,8 +187,9 @@ function errorInterceptor(error: any) {
           status: 200,
           statusText: 'OK (Cached - Network Error)',
           headers: {},
-          config,
-        });
+          config: config,
+          request: {},
+        } as AxiosResponse);
       }
     }
   }
@@ -222,8 +229,7 @@ export function setupCacheInterceptors(apiInstance: typeof axios, apiFastInstanc
   // Interceptores para la API principal
   apiInstance.interceptors.request.use(
     (config) => {
-      const result = requestInterceptor(config);
-      return result;
+      return requestInterceptor(config);
     },
     (error) => Promise.reject(error)
   );
@@ -239,8 +245,7 @@ export function setupCacheInterceptors(apiInstance: typeof axios, apiFastInstanc
   // Interceptores para FastAPI
   apiFastInstance.interceptors.request.use(
     (config) => {
-      const result = requestInterceptor(config);
-      return result;
+      return requestInterceptor(config);
     },
     (error) => Promise.reject(error)
   );
