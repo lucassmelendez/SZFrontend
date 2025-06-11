@@ -407,7 +407,7 @@ class ApiCacheService {
   }
 
   /**
-   * Función optimizada para cargar todos los datos del dashboard de una vez
+   * Función optimizada para cargar todos los datos del dashboard admin de una vez
    * Minimiza el número de peticiones HTTP
    */
   async getDashboardData(options: CacheOptions = {}): Promise<{
@@ -469,6 +469,79 @@ class ApiCacheService {
         
         return {
           pedidos,
+          clientes,
+          productos,
+          todosPedidosProductos
+        };
+      },
+      { cacheType: 'dynamic', ttl: 1 * 60 * 1000, ...options } // Cache por 1 minuto
+    );
+  }
+
+  /**
+   * Función optimizada para cargar todos los datos del dashboard de contabilidad de una vez
+   * Minimiza el número de peticiones HTTP y incluye clientes
+   */
+  async getContabilidadDashboardData(options: CacheOptions = {}): Promise<{
+    pedidos: Pedido[];
+    clientes: Cliente[];
+    productos: Map<number, Producto | { nombre: string }>;
+    todosPedidosProductos: any[][];
+  }> {
+    return this.withCache(
+      '/contabilidad-dashboard-data',
+      async () => {
+        console.log('Contabilidad: Cargando datos optimizados...');
+        
+        // 1. Cargar pedidos y clientes en paralelo
+        const [pedidos, clientes] = await Promise.all([
+          pedidoApiFast.getAll(),
+          apiFast.get('/clientes').then((res: any) => res.data)
+        ]);
+        
+        console.log(`Contabilidad: Obtenidos ${pedidos.length} pedidos y ${clientes.length} clientes`);
+        
+        // 2. Filtrar pedidos válidos y obtener productos de pedidos en paralelo
+        const pedidosValidos = pedidos.filter(p => p.id_pedido != null);
+        const pedidosProductosPromises = pedidosValidos.map(pedido => 
+          pedidoProductoApiFast.getByPedido(pedido.id_pedido!)
+            .catch((err: any) => {
+              console.error(`Contabilidad: Error al obtener productos del pedido ${pedido.id_pedido}:`, err);
+              return [];
+            })
+        );
+        
+        const todosPedidosProductos = await Promise.all(pedidosProductosPromises);
+        
+        // 3. Obtener productos únicos
+        const productosIdsUnicos = new Set<number>();
+        todosPedidosProductos.forEach((pedidoProductos: any) => {
+          pedidoProductos.forEach((pp: any) => productosIdsUnicos.add(pp.id_producto));
+        });
+        
+        console.log(`Contabilidad: Cargando ${productosIdsUnicos.size} productos únicos...`);
+        
+        // 4. Cargar productos en paralelo
+        const productosPromises = Array.from(productosIdsUnicos).map(async (idProducto) => {
+          try {
+            const producto = await this.getProductoById(idProducto, {
+              cacheType: 'static',
+              ttl: 30 * 60 * 1000
+            });
+            return [idProducto, producto as Producto | { nombre: string }] as const;
+          } catch (err: any) {
+            console.error(`Contabilidad: Error al obtener producto ${idProducto}:`, err);
+            return [idProducto, { nombre: `Producto #${idProducto}` } as Producto | { nombre: string }] as const;
+          }
+        });
+        
+        const productosResults = await Promise.all(productosPromises);
+        const productos = new Map<number, Producto | { nombre: string }>(productosResults);
+        
+        console.log(`Contabilidad: Datos cargados - ${pedidosValidos.length} pedidos, ${clientes.length} clientes, ${productos.size} productos`);
+        
+        return {
+          pedidos: pedidosValidos,
           clientes,
           productos,
           todosPedidosProductos

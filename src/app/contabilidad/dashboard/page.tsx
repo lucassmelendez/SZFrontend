@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { isEmpleado, pedidoApiFast, pedidoProductoApiFast, productoApi, clienteApiFast } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import { toast } from 'react-hot-toast';
 import { FaCheckCircle, FaSearch } from 'react-icons/fa';
 
@@ -73,23 +74,34 @@ export default function ContabilidadDashboard() {
 
   const fetchOrders = async () => {
     try {
-      const pedidos = await pedidoApiFast.getAll();
+      console.log('Contabilidad: Iniciando carga optimizada de datos...');
+
+      // NUEVA OPTIMIZACIÓN: Usar función agregada que minimiza peticiones
+      const { pedidos, clientes, productos: productosMap, todosPedidosProductos } = await apiCache.getContabilidadDashboardData({
+        cacheType: 'dynamic',
+        ttl: 1 * 60 * 1000 // Cache por 1 minuto para datos de contabilidad
+      });
+
+      console.log('Contabilidad: Datos obtenidos del caché optimizado');
       
-      const pedidosConProductos = await Promise.all(
-        pedidos.filter(p => p.id_pedido != null).map(async (pedido) => {
-          const pedidoProductos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido!);
-          const productosConDetalles = await Promise.all(
-            pedidoProductos.map(async (pp) => {
-              const producto = await productoApi.getById(pp.id_producto);
-              return {
-                id_producto: pp.id_producto,
-                nombre: producto.nombre,
-                cantidad: pp.cantidad,
-                precio_unitario: pp.precio_unitario
-              };
-            })
-          );
-            const total_original = productosConDetalles.reduce(
+      // Procesar pedidos con datos ya disponibles (sin peticiones adicionales)
+      const pedidosConProductos = pedidos.map((pedido, index) => {
+        try {
+          const pedidoProductos = todosPedidosProductos[index];
+          
+          // Agregar información de productos usando el mapa
+          const productosConDetalles = pedidoProductos.map((pp: any) => {
+            const producto = productosMap.get(pp.id_producto);
+            return {
+              id_producto: pp.id_producto,
+              nombre: producto?.nombre || `Producto #${pp.id_producto}`,
+              cantidad: pp.cantidad,
+              precio_unitario: pp.precio_unitario
+            };
+          });
+
+          // Calculamos los totales
+          const total_original = productosConDetalles.reduce(
             (acc, curr) => acc + (curr.precio_unitario * curr.cantidad),
             0
           );
@@ -103,45 +115,46 @@ export default function ContabilidadDashboard() {
           const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
           const total = total_original - total_descuentos;
 
-          try {            const clienteData = pedido.cliente || await clienteApiFast.getById(pedido.id_cliente);
+          // Obtener datos del cliente (usando datos ya cargados)
+          const clienteData = clientes.find((c: any) => c.id_cliente === pedido.id_cliente);
 
-            const orderWithDetails: OrderWithDetails = {
-              id_pedido: pedido.id_pedido!,
-              fecha: pedido.fecha,
-              total,
-              total_original,
-              total_descuentos,
-              aplicar_descuento,
-              estado_envio: estadosEnvio[pedido.id_estado_envio] || "Desconocido",
-              id_estado: pedido.id_estado,
-              id_estado_envio: pedido.id_estado_envio,
-              medio_pago: mediosPago[pedido.medio_pago_id] || "Desconocido",
-              medio_pago_id: pedido.medio_pago_id,
-              productos: productosConDetalles,
-              cliente: clienteData ? {
-                correo: clienteData.correo,
-                nombre: clienteData.nombre,
-                apellido: clienteData.apellido,
-                telefono: String(clienteData.telefono),
-                direccion: clienteData.direccion
-              } : undefined
-            };
+          const orderWithDetails: OrderWithDetails = {
+            id_pedido: pedido.id_pedido!,
+            fecha: pedido.fecha,
+            total,
+            total_original,
+            total_descuentos,
+            aplicar_descuento,
+            estado_envio: estadosEnvio[pedido.id_estado_envio] || "Desconocido",
+            id_estado: pedido.id_estado,
+            id_estado_envio: pedido.id_estado_envio,
+            medio_pago: mediosPago[pedido.medio_pago_id] || "Desconocido",
+            medio_pago_id: pedido.medio_pago_id,
+            productos: productosConDetalles,
+            cliente: clienteData ? {
+              correo: clienteData.correo,
+              nombre: clienteData.nombre,
+              apellido: clienteData.apellido,
+              telefono: String(clienteData.telefono),
+              direccion: clienteData.direccion
+            } : undefined
+          };
 
-            return orderWithDetails;
-          } catch (error) {
-            console.error('Error al obtener información del cliente:', error);
-            return null;
-          }
-        })
-      );
+          return orderWithDetails;
+        } catch (error) {
+          console.error(`Contabilidad: Error al procesar pedido ${pedido.id_pedido}:`, error);
+          return null;
+        }
+      });
 
       const validPedidos = pedidosConProductos.filter((p): p is OrderWithDetails => p !== null);
       // Ordenar pedidos de más reciente a más antiguo basado en id_pedido
       const ordenados = validPedidos.sort((a, b) => b.id_pedido - a.id_pedido);
       setOrders(ordenados);
       setError(null);
+      console.log(`Contabilidad: ${ordenados.length} pedidos procesados exitosamente`);
     } catch (err) {
-      console.error('Error al cargar los pedidos:', err);
+      console.error('Contabilidad: Error al cargar los pedidos:', err);
       setError('Error al cargar los pedidos');
     } finally {
       setLoading(false);
@@ -152,11 +165,15 @@ export default function ContabilidadDashboard() {
       setUpdatingOrder(orderId);
       // Actualizar el estado del pedido a pagado (id_estado = 1)
       const result = await pedidoApiFast.update(orderId, { id_estado: 1 });
-      console.log('Respuesta de actualización de estado:', result);
+      console.log('Contabilidad: Respuesta de actualización de estado:', result);
+      
+      // Invalidar caché después de la actualización
+      apiCache.invalidateOrdersCache();
+      
       toast.success('Pago aprobado correctamente');
       await fetchOrders();
     } catch (err) {
-      console.error('Error al aprobar el pago:', err);
+      console.error('Contabilidad: Error al aprobar el pago:', err);
       toast.error('Error al aprobar el pago');
     } finally {
       setUpdatingOrder(null);
