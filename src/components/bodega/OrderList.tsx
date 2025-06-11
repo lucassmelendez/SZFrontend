@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { pedidoApiFast, pedidoProductoApiFast, Pedido, PedidoProducto, productoApi, clienteApiFast } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 
 // Extender la interfaz Pedido con campos adicionales necesarios
 interface OrderWithDetails extends Pedido {
@@ -38,92 +39,89 @@ export default function OrderList() {
 
   const fetchOrders = async () => {
     try {
-      const pedidos = await pedidoApiFast.getAll();
-      console.log('Pedidos obtenidos:', pedidos);
-      // Filtrar solo los pedidos pagados (id_estado === 1)
-      const pedidosPagados = pedidos.filter(pedido => pedido.id_estado === 1);
-      console.log('Pedidos pagados:', pedidosPagados);
+      console.log('Bodega: Iniciando carga optimizada de órdenes...');
       
-      const pedidosConProductos = await Promise.all(
-        pedidosPagados.map(async (pedido: Pedido) => {
-          if (!pedido.id_pedido) return null;
-          console.log('Procesando pedido:', pedido);
-          
-          const pedidoProductos = await pedidoProductoApiFast.getByPedido(pedido.id_pedido);
-          const productosConDetalles = await Promise.all(
-            pedidoProductos.map(async (pp) => {
-              const producto = await productoApi.getById(pp.id_producto);
-              return { ...pp, nombre: producto.nombre };
-            })
-          );
-          
-          // Calculate original total and check if discount applies
-          const total_original = productosConDetalles.reduce(
-            (acc, curr) => acc + (curr.precio_unitario * curr.cantidad), 
-            0
-          );
-          
-          const cantidad_total = productosConDetalles.reduce(
-            (acc, curr) => acc + curr.cantidad,
-            0
-          );
-          
-          const aplicar_descuento = cantidad_total > 4;
-          const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
-          const total = total_original - total_descuentos;
+      // Usar la función optimizada del caché
+      const { pedidos, clientes, productos, todosPedidosProductos } = await apiCache.getBodegaDashboardData();
+      
+      console.log(`Bodega: Procesando ${pedidos.length} pedidos con datos precargados`);
+      
+      // Crear mapas para acceso rápido
+      const clientesMap = new Map(clientes.map(c => [c.id_cliente, c]));
+      
+      // Procesar pedidos con datos precargados
+      const pedidosConProductos = pedidos.map((pedido, index) => {
+        if (!pedido.id_pedido) return null;
+        
+        const pedidoProductos = todosPedidosProductos[index] || [];
+        const productosConDetalles = pedidoProductos.map((pp: any) => {
+          const producto = productos.get(pp.id_producto);
+          return { 
+            ...pp, 
+            nombre: producto?.nombre || `Producto #${pp.id_producto}`
+          };
+        });
+        
+        // Calcular totales
+        const total_original = productosConDetalles.reduce(
+          (acc, curr) => acc + (curr.precio_unitario * curr.cantidad), 
+          0
+        );
+        
+        const cantidad_total = productosConDetalles.reduce(
+          (acc, curr) => acc + curr.cantidad,
+          0
+        );
+        
+        const aplicar_descuento = cantidad_total > 4;
+        const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
+        const total = total_original - total_descuentos;
 
-          try {
-            console.log('Obteniendo datos del cliente para pedido:', pedido.id_pedido, 'ID Cliente:', pedido.id_cliente);
-            // Si el cliente ya viene en la respuesta, usarlo directamente
-            const clienteData = pedido.cliente || await clienteApiFast.getById(pedido.id_cliente);
-            console.log('Datos del cliente obtenidos:', clienteData);
+        // Obtener datos del cliente del mapa
+        const clienteData = clientesMap.get(pedido.id_cliente);
 
-            // Mapeo de estados
-            const estadosEnvio = {
-              1: "Preparado",
-              2: "Pendiente",
-              3: "Entregado",
-              4: "Despachado"
-            };
+        // Mapeo de estados
+        const estadosEnvio = {
+          1: "Preparado",
+          2: "Pendiente",
+          3: "Entregado",
+          4: "Despachado"
+        };
 
-            const mediosPago = {
-              1: "Transferencia",
-              2: "Webpay"
-            };
+        const mediosPago = {
+          1: "Transferencia",
+          2: "Webpay"
+        };
 
-            return { 
-              ...pedido, 
-              productos: productosConDetalles,
-              total_original,
-              total_descuentos,
-              total,
-              aplicar_descuento,
-              cliente: clienteData ? {
-                correo: clienteData.correo,
-                nombre: clienteData.nombre,
-                apellido: clienteData.apellido,
-                telefono: clienteData.telefono,
-                direccion: clienteData.direccion
-              } : undefined,
-              estado_envio: estadosEnvio[pedido.id_estado_envio as keyof typeof estadosEnvio] || "Desconocido",
-              medio_pago: mediosPago[pedido.medio_pago_id as keyof typeof mediosPago] || "Desconocido",
-            } as OrderWithDetails;
-          } catch (error) {
-            console.error('Error al obtener información del cliente:', error);
-            return null;
-          }
-        })
-      );
+        return { 
+          ...pedido, 
+          productos: productosConDetalles,
+          total_original,
+          total_descuentos,
+          total,
+          aplicar_descuento,
+          cliente: clienteData ? {
+            correo: clienteData.correo,
+            nombre: clienteData.nombre,
+            apellido: clienteData.apellido,
+            telefono: clienteData.telefono,
+            direccion: clienteData.direccion
+          } : undefined,
+          estado_envio: estadosEnvio[pedido.id_estado_envio as keyof typeof estadosEnvio] || "Desconocido",
+          medio_pago: mediosPago[pedido.medio_pago_id as keyof typeof mediosPago] || "Desconocido",
+        } as OrderWithDetails;
+      });
 
       // Filtrar órdenes nulas y ordenar por ID descendente (más recientes primero)
       const ordersList = pedidosConProductos
         .filter((p: OrderWithDetails | null): p is OrderWithDetails => p !== null)
         .sort((a, b) => (b.id_pedido || 0) - (a.id_pedido || 0));
 
+      console.log(`Bodega: ${ordersList.length} órdenes procesadas exitosamente`);
       setOrders(ordersList);
       setError(null);
     } catch (err) {
-      console.error('Error al cargar las órdenes:', err);
+      console.error('Bodega: Error al cargar las órdenes:', err);
       setError('Error al cargar las órdenes');
     } finally {
       setLoading(false);
@@ -134,6 +132,10 @@ export default function OrderList() {
     try {
       setUpdatingOrder(orderId);      // Actualizar la orden a id_estado_envio = 2 (Listo para envío)
       await pedidoApiFast.updateEstadoEnvio(orderId, 2);
+      
+      // Invalidar caché de bodega
+      apiCache.invalidateBodegaDashboardCache();
+      
       toast.success('Orden marcada como lista para envío');
       // Recargar órdenes
       await fetchOrders();
@@ -151,6 +153,9 @@ export default function OrderList() {
       
       // Actualizar a estado_envio = 1 (Enviado)
       await pedidoApiFast.updateEstadoEnvio(orderId, 1);
+      
+      // Invalidar caché de bodega
+      apiCache.invalidateBodegaDashboardCache();
       
       toast.success('¡Orden despachada con éxito!');
       await fetchOrders();
