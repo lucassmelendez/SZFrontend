@@ -6,6 +6,7 @@ import {
   authApi, 
   pedidoApiFast,
   empleadoApiFast,
+  apiFast,
   Producto, 
   Pedido, 
   Cliente, 
@@ -298,6 +299,24 @@ class ApiCacheService {
     );
   }
 
+  // === CLIENTES ===
+
+  async getClientes(options: CacheOptions = {}): Promise<Cliente[]> {
+    return this.withCache(
+      '/clientes',
+      () => apiFast.get('/clientes').then((res: any) => res.data),
+      { cacheType: 'user', ttl: 15 * 60 * 1000, ...options }
+    );
+  }
+
+  async getClienteById(id: number, options: CacheOptions = {}): Promise<Cliente> {
+    return this.withCache(
+      `/clientes/${id}`,
+      () => apiFast.get(`/clientes/${id}`).then((res: any) => res.data),
+      { cacheType: 'user', ttl: 15 * 60 * 1000, ...options }
+    );
+  }
+
   // === AUTENTICACIÓN ===
 
   async login(correo: string, contrasena: string, userType?: 'cliente' | 'empleado') {
@@ -373,6 +392,20 @@ class ApiCacheService {
   }
 
   /**
+   * Invalida caché específico del dashboard de admin
+   */
+  invalidateDashboardCache(): void {
+    // Invalidar pedidos (datos dinámicos del dashboard)
+    dynamicCache.invalidatePattern('pedidos*');
+    
+    // Invalidar usuarios/clientes (datos del dashboard)
+    userCache.invalidatePattern('empleados*');
+    userCache.invalidatePattern('clientes*');
+    
+    console.log('Caché del dashboard invalidado');
+  }
+
+  /**
    * Precargar datos críticos en el caché
    */
   async preloadCriticalData(): Promise<void> {
@@ -383,6 +416,9 @@ class ApiCacheService {
       await Promise.allSettled([
         this.getProductos(),
         this.getProductosMasVendidos(),
+        // Precargar datos del dashboard para admin
+        this.getPedidos({ cacheType: 'dynamic' }),
+        this.getClientes({ cacheType: 'user' }),
         // Añadir más precargas según necesidades
       ]);
       

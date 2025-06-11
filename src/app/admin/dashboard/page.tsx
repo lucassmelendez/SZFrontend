@@ -12,6 +12,7 @@ import {
   Pedido,
   productoApi
 } from '@/lib/api';
+import { apiCache } from '@/lib/apiCache';
 import { AxiosError } from 'axios';
 import { FiUsers, FiPackage, FiShoppingCart, FiDownload } from 'react-icons/fi';
 
@@ -143,90 +144,112 @@ export default function AdminDashboard() {
         setLoading(true);
         setError(null);
 
-        // Obtener pedidos recientes
-        const pedidosResponse = await pedidoApiFast.getAll();
-        console.log('Pedidos obtenidos del servidor:', pedidosResponse);
+        console.log('Dashboard: Iniciando carga de datos con caché');
+
+        // Obtener datos en paralelo usando el sistema de caché
+        const [pedidosResponse, clientesResponse] = await Promise.all([
+          // Pedidos con caché dinámico (2 minutos) ya que cambian frecuentemente
+          apiCache.getPedidos({ cacheType: 'dynamic', ttl: 2 * 60 * 1000 }),
+          // Clientes con caché de usuario (15 minutos) ya que cambian menos frecuentemente
+          apiCache.getClientes({ cacheType: 'user', ttl: 15 * 60 * 1000 })
+        ]);
+
+        console.log('Dashboard: Pedidos obtenidos:', pedidosResponse.length);
+        console.log('Dashboard: Clientes obtenidos:', clientesResponse.length);
         
         // Procesamos cada pedido para obtener más detalles
         const pedidosConDetalles = await Promise.all(
           pedidosResponse.map(async (pedido) => {
-            // Obtenemos los productos del pedido
             const idPedido = pedido.id_pedido || 0;
-            console.log(`Obteniendo productos para pedido ${idPedido}`);
+            console.log(`Dashboard: Procesando pedido ${idPedido}`);
             
-            const pedidoProductos = await pedidoProductoApiFast.getByPedido(idPedido);
-            console.log(`Productos obtenidos para pedido ${idPedido}:`, pedidoProductos);
-            
-            // Obtener información de productos utilizando productoApi (NO apiFast)
-            const productosConDetalles = await Promise.all(
-              pedidoProductos.map(async (pp) => {
-                try {
-                  // Usar productoApi que sabemos que funciona
-                  const producto = await productoApi.getById(pp.id_producto);
-                  console.log(`Producto ${pp.id_producto} obtenido correctamente con nombre:`, producto.nombre);
-                  
-                  return { 
-                    ...pp, 
-                    nombre: producto.nombre || `Producto #${pp.id_producto}`,
-                    subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
-                  };
-                } catch (err) {
-                  console.error(`Error al obtener producto ${pp.id_producto}:`, err);
-                  return { 
-                    ...pp, 
-                    nombre: `Producto #${pp.id_producto}`,
-                    subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
-                  };
-                }
-              })
-            );
+            try {
+              // Obtener productos del pedido usando caché dinámico
+              const pedidoProductos = await pedidoProductoApiFast.getByPedido(idPedido);
+              
+              // Obtener información de productos usando el caché estático
+              const productosConDetalles = await Promise.all(
+                pedidoProductos.map(async (pp) => {
+                  try {
+                    // Usar apiCache con caché estático para productos (30 minutos)
+                    const producto = await apiCache.getProductoById(pp.id_producto, {
+                      cacheType: 'static',
+                      ttl: 30 * 60 * 1000
+                    });
+                    
+                    return { 
+                      ...pp, 
+                      nombre: producto.nombre || `Producto #${pp.id_producto}`,
+                      subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
+                    };
+                  } catch (err) {
+                    console.error(`Dashboard: Error al obtener producto ${pp.id_producto}:`, err);
+                    return { 
+                      ...pp, 
+                      nombre: `Producto #${pp.id_producto}`,
+                      subtotal: pp.subtotal || pp.precio_unitario * pp.cantidad
+                    };
+                  }
+                })
+              );
+
               // Calculamos los totales
-            const total_original = productosConDetalles.reduce(
-              (acc, curr) => acc + (curr.subtotal || curr.precio_unitario * curr.cantidad), 
-              0
-            );
-            
-            // Verificar descuento (más de 4 productos)
-            const cantidad_total = productosConDetalles.reduce(
-              (acc, curr) => acc + curr.cantidad, 
-              0
-            );
-            const aplicar_descuento = cantidad_total > 4;
-            const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
-            const total = total_original - total_descuentos;
-            
-            console.log(`Total calculado para pedido ${idPedido}:`, {
-              total_original,
-              aplicar_descuento,
-              total_descuentos,
-              total
-            });
-            
-            // Obtenemos los datos del cliente
-            const clienteResponse = await apiFast.get(`/clientes/${pedido.id_cliente}`);
-            const cliente = clienteResponse.data as Cliente;
-            
-            const pedidoConDetalles = {
-              ...pedido,
-              total,
-              total_original,
-              total_descuentos,
-              aplicar_descuento,
-              productos: productosConDetalles,
-              cliente
-            };
-            
-            console.log(`Pedido ${idPedido} procesado:`, pedidoConDetalles);
-            return pedidoConDetalles;
+              const total_original = productosConDetalles.reduce(
+                (acc, curr) => acc + (curr.subtotal || curr.precio_unitario * curr.cantidad), 
+                0
+              );
+              
+              // Verificar descuento (más de 4 productos)
+              const cantidad_total = productosConDetalles.reduce(
+                (acc, curr) => acc + curr.cantidad, 
+                0
+              );
+              const aplicar_descuento = cantidad_total > 4;
+              const total_descuentos = aplicar_descuento ? Math.round(total_original * 0.05) : 0;
+              const total = total_original - total_descuentos;
+              
+              // Obtener datos del cliente (usando caché si está disponible)
+              const cliente = clientesResponse.find((c: any) => c.id_cliente === pedido.id_cliente) || {
+                nombre: 'Cliente',
+                apellido: 'Desconocido',
+                correo: '',
+                telefono: '',
+                direccion: ''
+              };
+              
+              return {
+                ...pedido,
+                total,
+                total_original,
+                total_descuentos,
+                aplicar_descuento,
+                productos: productosConDetalles,
+                cliente
+              };
+            } catch (err) {
+              console.error(`Dashboard: Error al procesar pedido ${idPedido}:`, err);
+              // Devolver pedido con datos básicos en caso de error
+              return {
+                ...pedido,
+                total: 0,
+                total_original: 0,
+                total_descuentos: 0,
+                aplicar_descuento: false,
+                productos: [],
+                cliente: {
+                  nombre: 'Cliente',
+                  apellido: 'Desconocido',
+                  correo: '',
+                  telefono: '',
+                  direccion: ''
+                }
+              };
+            }
           })
         );
         
         setPedidos(pedidosConDetalles);
-        console.log('Todos los pedidos procesados:', pedidosConDetalles);
-
-        // Obtener total de clientes
-        const clientesResponse = await apiFast.get('/clientes');
-        const totalClientes = clientesResponse.data.length;
+        console.log('Dashboard: Todos los pedidos procesados:', pedidosConDetalles.length);
 
         // Calcular estadísticas básicas
         const ventasTotales = pedidosConDetalles.reduce((sum, pedido) => sum + (pedido.total || 0), 0);
@@ -234,19 +257,18 @@ export default function AdminDashboard() {
           pedido => pedido.id_estado_envio === 2
         ).length;
 
-        setEstadisticas({
+        const estadisticasCalculadas = {
           ventas_totales: ventasTotales,
-          total_clientes: totalClientes,
+          total_clientes: clientesResponse.length,
           ordenes_pendientes: ordenesPendientes
-        });
+        };
+
+        setEstadisticas(estadisticasCalculadas);
         
-        console.log('Estadísticas calculadas:', {
-          ventas_totales: ventasTotales,
-          total_clientes: totalClientes,
-          ordenes_pendientes: ordenesPendientes
-        });
+        console.log('Dashboard: Estadísticas calculadas:', estadisticasCalculadas);
+        console.log('Dashboard: Datos cargados exitosamente con caché');
       } catch (err) {
-        console.error('Error al cargar datos:', err);
+        console.error('Dashboard: Error al cargar datos:', err);
         setError('Error al cargar los datos del dashboard');
       } finally {
         setLoading(false);
@@ -405,8 +427,12 @@ export default function AdminDashboard() {
         informe_id: 1
       };
 
-      console.log('Datos a enviar a la API:', nuevoEmpleado);
-      await empleadoApiFast.create(nuevoEmpleado);
+      console.log('Dashboard: Datos a enviar a la API:', nuevoEmpleado);
+      
+      // Usar apiCache para crear empleado y invalidar caché automáticamente
+      await apiCache.createEmpleado(nuevoEmpleado);
+      
+      console.log('Dashboard: Empleado creado exitosamente, caché invalidado');
       
       setIsAddModalOpen(false);
       setError(null);
